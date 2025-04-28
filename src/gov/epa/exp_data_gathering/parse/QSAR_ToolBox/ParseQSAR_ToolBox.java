@@ -30,6 +30,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	public static String fileNameBCFCanada="Bioaccumulation Canada.xlsx";
 	public static String fileNameBCFCEFIC="Bioaccumulation Fish CEFIC LRI.xlsx";
 	public static String fileNameBCFNITE="Bioconcentration and LogKow NITE v2.xlsx";
+	public static String fileName96hrAcuteAquatic="96 hour aquatic toxicity.xlsx";
 	
 //	static String fileName=fileNameAcuteToxicityEchaReach;
 //	static String fileName=fileNameAcuteToxicityDB;
@@ -38,7 +39,8 @@ public class ParseQSAR_ToolBox extends Parse {
 //	static String fileName=fileNameBCFCEFIC;
 //	static String fileName=fileNameBCFCEFIC;
 //	static String fileName=fileNameBCFCanada;
-	static String fileName=fileNameBCFNITE;
+//	static String fileName=fileNameBCFNITE;
+	static String fileName=fileName96hrAcuteAquatic;
 	
 	
 	String original_source_name;
@@ -108,6 +110,14 @@ public class ParseQSAR_ToolBox extends Parse {
 			mainFolder+=File.separator+propertyName;//output json/excel in subfolder
 			jsonFolder= mainFolder;
 			new File(mainFolder).mkdirs();
+		} else if (fileName.equals(fileName96hrAcuteAquatic)) {
+			removeDuplicates=true;
+			original_source_name="ECHA REACH";
+			selectedEndpoints = Arrays.asList(propertyName);
+			mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName + File.separator+"Fish tox ECHA";
+			mainFolder+=File.separator+propertyName;//output json/excel in subfolder
+			jsonFolder= mainFolder;
+			new File(mainFolder).mkdirs();
 		}
 		
 	}
@@ -161,6 +171,11 @@ public class ParseQSAR_ToolBox extends Parse {
 					} else if(fileName.equals(fileNameBCFNITE)) {
 						ExperimentalRecord erNITE=recordQSAR_ToolBox.toExperimentalRecordBCFNITE(propertyName, htSpecies);
 						if(erNITE!=null)	recordsExperimental.add(erNITE);
+					
+					} else if(fileName.equals(fileName96hrAcuteAquatic)) {
+						ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordFishTox(propertyName, htSpecies);
+						if(er!=null)	recordsExperimental.add(er);
+						
 					} else {
 						ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecord(original_source_name);
 						if(selectedEndpoints.contains(er.property_name))		
@@ -173,7 +188,8 @@ public class ParseQSAR_ToolBox extends Parse {
 			ex.printStackTrace();
 		}
 
-		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(ExperimentalConstants.str_L_KG,true);
+//		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(ExperimentalConstants.str_L_KG,true);
+		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(ExperimentalConstants.str_g_L,true);
 		boolean convertToLog=true;
 		boolean omitSingleton=false;
 		ExperimentalRecords.calculateAvgStdDevOverAllChemicals(htER, convertToLog,omitSingleton);
@@ -206,9 +222,29 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 	}
 	
+	static void run96hrAcuteFishTox() {
+		
+		String propertyName=ExperimentalConstants.strAcuteAquaticToxicity;
+		
+		fileName=fileName96hrAcuteAquatic;
+		
+		ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(propertyName);
+		
+		p.generateOriginalJSONRecords=false;
+		p.removeDuplicates=true;
+		p.writeJsonExperimentalRecordsFile=true;
+		p.writeExcelExperimentalRecordsFile=true;
+		p.writeExcelFileByProperty=true;		
+		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+		p.createFiles();
+		
+	}
+	
+	
 	public static void main(String[] args) {
 		
-		runBCF();
+//		runBCF();
+		run96hrAcuteFishTox();
 
 //******************************************************************************
 //		fileName=fileNameAcuteToxicityDB;

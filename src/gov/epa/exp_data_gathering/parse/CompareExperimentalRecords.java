@@ -586,6 +586,27 @@ public class CompareExperimentalRecords {
 			
 
 		}
+		
+		private void compareAquaticTox() {
+
+			printChemicalsInCommon=true;
+			
+			List<Source>sources1=new ArrayList<>();
+			List<Source>sources2=new ArrayList<>();
+
+			String propertyName=ExperimentalConstants.strAcuteAquaticToxicity;
+
+//			
+			sources1.add(new Source("ECOTOX_2024_12_12",propertyName));
+			sources2.add(new Source("QSAR_Toolbox","Fish tox ECHA//"+propertyName)); 
+
+			String units="g/L";
+			cm.compare(sources1, sources2, propertyName, units,"cas");
+//			cm.compare(sources1, sources2, propertyName, units,"sid");
+//			cm.compare(sources1, sources2, propertyName, units,"cas","Species supercategory","Fish");
+			
+
+		}
 
 		void compareOralRat() {
 
@@ -1049,7 +1070,8 @@ public class CompareExperimentalRecords {
 //		c.c.lookAtLLNA_MixtureVsNonMixtureNIEHS_ICE();//only 8?
 //		c.c.compareSensitization();
 
-		c.c.compareBCF();
+//		c.c.compareBCF();
+		c.c.compareAquaticTox();
 
 
 	}
