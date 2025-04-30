@@ -1015,8 +1015,14 @@ public class RecordQSAR_ToolBox {
 		} else if (Database.equals("ECHA REACH")) {
 			setObservationDuration(er);
 			
-			if(Test_guideline!=null) {
+			if(Test_guideline!=null && Test_guideline.contains("Other Test Guideline")) {
+				er.experimental_parameters.put("Test guideline", Test_guideline_other);
+			} else if(Test_guideline!=null) {
 				er.experimental_parameters.put("Test guideline", Test_guideline);
+			} else if(Test_guideline_0!=null && Test_guideline_0.contains("Other Test Guideline")) {
+				er.experimental_parameters.put("Test guideline", Test_guideline_other);
+			} else if(Test_guideline_0!=null) {
+				er.experimental_parameters.put("Test guideline", Test_guideline_0);
 			}
 
 			DecimalFormat df=new DecimalFormat("0");
@@ -1235,8 +1241,11 @@ public class RecordQSAR_ToolBox {
 
 //		setSpeciesParameters(htSpecies, limitToFish, er);
 		
-		if(Test_organisms_species!=null) 
+		if(Test_organisms_species!=null && Test_organisms_species.contains("Other Test organisms")) {
+			er.experimental_parameters.put("Species latin", Test_organisms_species_other);
+		} else if(Test_organisms_species!=null) {
 			er.experimental_parameters.put("Species latin", Test_organisms_species);
+		}
 		
 		if(Superclass!=null) {
 			if(Superclass.contains("Actinopterygii")) {
@@ -1248,7 +1257,15 @@ public class RecordQSAR_ToolBox {
 //				System.out.println(Test_organisms_species+"\tNot fish");
 			}
 		} else {
-//			System.out.println(Test_organisms_species+"\tUnknown");
+			String supercategory=getSpeciesSupercategoryFishTox(htSpecies);
+			if(supercategory!=null)	{
+				er.experimental_parameters.put("Species supercategory", supercategory);
+			}
+
+			if(supercategory==null || !supercategory.equals("Fish")) {
+				er.keep=false;
+				er.reason="Not a fish species";
+			}
 		}
 		
 //		if(er.experimental_parameters.get("Species supercategory")==null) {
@@ -1482,7 +1499,92 @@ public class RecordQSAR_ToolBox {
 		return null;
 	}
 
+	private String getSpeciesSupercategoryFishTox(Hashtable<String, List<Species>> htSpecies) {
+		
+		if(Test_organisms_species!=null && Test_organisms_species.contains("Other Test organisms") && htSpecies.containsKey(Test_organisms_species_other.toLowerCase())) {
+			List<Species>speciesList=htSpecies.get(Test_organisms_species_other.toLowerCase());
 
+			for(Species species:speciesList) {
+				if(species.species_supercategory.contains("fish")) {
+					return "Fish";
+				} else if(species.species_supercategory.contains("algae")) {
+					return "Algae";
+				} else if(species.species_supercategory.contains("crustaceans")) {
+					return "Crustaceans";
+				} else if(species.species_supercategory.contains("insects/spiders")) {
+					return "Insects/spiders";
+				} else if(species.species_supercategory.contains("molluscs")) {
+					return "Molluscs";
+				} else if(species.species_supercategory.contains("worms")) {
+					return "Worms";
+				} else if(species.species_supercategory.contains("invertebrates")) {
+					return "Invertebrates";
+				} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+					return "Flowers, trees, shrubs, ferns";
+				} else if(species.species_supercategory.contains("microorganisms")) {
+					return "Microorganisms";
+				} else if(species.species_supercategory.equals("amphibians") || species.species_supercategory.equals("amphibians; standard test species")) {
+					return "Amphibians";
+				} else if(species.species_supercategory.equals("reptiles")) {
+					return "Reptiles";
+				} else if(species.species_supercategory.equals("omit")) {
+					return "Omit";
+				} else {
+					System.out.println("Handle\t"+Test_organisms_species_other+"\t"+species.species_supercategory);	
+				}
+			}
+		} else if(Test_organisms_species!=null && htSpecies.containsKey(Test_organisms_species.toLowerCase())) {
+
+			List<Species>speciesList=htSpecies.get(Test_organisms_species.toLowerCase());
+
+			for(Species species:speciesList) {
+
+
+				//				if(species.species_scientific!=null) {
+				//					if (!species.species_scientific.toLowerCase().equals(this.scientific_name.toLowerCase())) {
+				//						System.out.println(this.scientific_name+"\t"+species.species_scientific+"\tmismatch");
+				//					}
+				//				} else {
+				////					System.out.println(common_name+"\tspecies has null scientific");
+				//				}
+
+				if(species.species_supercategory.contains("fish")) {
+					return "Fish";
+				} else if(species.species_supercategory.contains("algae")) {
+					return "Algae";
+				} else if(species.species_supercategory.contains("crustaceans")) {
+					return "Crustaceans";
+				} else if(species.species_supercategory.contains("insects/spiders")) {
+					return "Insects/spiders";
+				} else if(species.species_supercategory.contains("molluscs")) {
+					return "Molluscs";
+				} else if(species.species_supercategory.contains("worms")) {
+					return "Worms";
+				} else if(species.species_supercategory.contains("invertebrates")) {
+					return "Invertebrates";
+				} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+					return "Flowers, trees, shrubs, ferns";
+				} else if(species.species_supercategory.contains("microorganisms")) {
+					return "Microorganisms";
+				} else if(species.species_supercategory.equals("amphibians") || species.species_supercategory.equals("amphibians; standard test species")) {
+					return "Amphibians";
+				} else if(species.species_supercategory.equals("reptiles")) {
+					return "Reptiles";
+				} else if(species.species_supercategory.equals("omit")) {
+					return "Omit";
+				} else {
+					System.out.println("Handle\t"+Test_organisms_species+"\t"+species.species_supercategory);	
+				}
+			}
+		} else if(Test_organisms_species!=null && !Test_organisms_species.toLowerCase().contains("other")){
+			System.out.println("missing in hashtable:\t"+"*"+Test_organisms_species.toLowerCase()+"*");
+		}
+//		} else if(Test_organisms_species!=null && Test_organisms_species.toLowerCase().contains("other")){
+//			System.out.println("missing in hashtable:\t"+"*"+Test_organisms_species_other.toLowerCase()+"*");
+//		}
+
+		return null;
+	}
 
 	static class Species {
 		Integer id;
