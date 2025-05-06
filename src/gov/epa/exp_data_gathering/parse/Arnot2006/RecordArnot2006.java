@@ -1125,7 +1125,6 @@ public class RecordArnot2006 {
 		putEntryLatin(htSuperCategory, "wallago attu", "fish");
 		putEntryLatin(htSuperCategory, "physa sp.", "omit");
 		putEntryLatin(htSuperCategory, "e. affinis", "omit");
-		putEntryLatin(htSuperCategory, "cirrhina mrigala", "fish");
 		putEntryLatin(htSuperCategory, "topeka shiner (notropis topeka)", "fish");
 		putEntryLatin(htSuperCategory, "cherax quadricarinatus", "invertebrates");
 		putEntryLatin(htSuperCategory, "thymallus arclicus", "fish");

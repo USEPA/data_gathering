@@ -1237,7 +1237,7 @@ public class RecordQSAR_ToolBox {
 		er.property_name=propertyName;
 		er.experimental_parameters=new Hashtable<>();
 
-		boolean limitToFish=true;
+//		boolean limitToFish=true;
 
 //		setSpeciesParameters(htSpecies, limitToFish, er);
 		
@@ -1529,7 +1529,7 @@ public class RecordQSAR_ToolBox {
 					return "Reptiles";
 				} else if(species.species_supercategory.equals("omit")) {
 					return "Omit";
-				} else {
+				} else if(!Test_organisms_species_other.toLowerCase().contains("see below") && !Test_organisms_species_other.contains("see below") && !Test_organisms_species_other.contains("not specified") && !Test_organisms_species_other.equals("Other") && !Test_organisms_species_other.contains("no data")){
 					System.out.println("Handle\t"+Test_organisms_species_other+"\t"+species.species_supercategory);	
 				}
 			}
@@ -1572,7 +1572,7 @@ public class RecordQSAR_ToolBox {
 					return "Reptiles";
 				} else if(species.species_supercategory.equals("omit")) {
 					return "Omit";
-				} else {
+				} else if(!Test_organisms_species.toLowerCase().contains("see below") && !Test_organisms_species.contains("see below") && !Test_organisms_species.contains("not specified") && !Test_organisms_species.equals("Other") && !Test_organisms_species.contains("no data")){
 					System.out.println("Handle\t"+Test_organisms_species+"\t"+species.species_supercategory);	
 				}
 			}
