@@ -23,6 +23,7 @@ public class ExperimentalRecord {
 	public String chemical_name;//	Most systematic name (only if provided in the reference)
 	public String synonyms;//	Pipe deliminated synonyms (only if provided in the reference)
 	public String smiles;//Simplified Molecular Input Line Entry System for molecular structure (only if provided in the reference)
+	public String formula;
 	
 	public Double molecular_weight;//for convenience (not stored in db)
 	
@@ -71,7 +72,8 @@ public class ExperimentalRecord {
 	public String source_name;//use Experimental constants
 	public String original_source_name;//If specific reference/paper provided.  "original_source_name" rather than "source_name_original" to avoid syntactic confusion with "*_original" vs "*_final" fields above
 	public PublicSource publicSourceOriginal;//if have additional info like url or description
-
+	public PublicSource publicSource;
+	
 	public LiteratureSource literatureSource;
 		
 	public String reference; // traceable reference for a given record
@@ -508,18 +510,38 @@ public class ExperimentalRecord {
 		return array;
 	}
 	
-	
+		
 	/**
 	 * Adds a string to the note field of an ExperimentalRecord object
-	 * @param er	The ExperimentalRecord object to be updated
-	 * @param str	The string to be added
-	 * @return		The updated ExperimentalRecord object
+	 * @param str
 	 */
 	public void updateNote(String str) {
 		if(str!=null)
 			note = Objects.isNull(note) ? str : note+"; "+str;
 	}
+
+	/**
+	 * Adds a string to the reason field of an ExperimentalRecord object
+	 * @param str
+	 */
+	public void updateReason(String str) {
+		if(str!=null)
+			reason = Objects.isNull(reason) ? str : reason+"; "+str;
+	}
 	
+	
+	
+	
+//	public <T> T clone(T object) {
+//		
+//		Gson gson=new Gson();
+//		
+//        // Serialize the object to JSON
+//        String json = gson.toJson(object);
+//
+//        // Deserialize the JSON back to a new object
+//        return gson.fromJson(json, (Class<T>) object.getClass());
+//    }
 	
 	/**
 	 * Quick and dirty clone using gson
@@ -580,6 +602,35 @@ public class ExperimentalRecord {
 		} else {
 			return false;
 		}
+	}
+	
+	
+	public ParameterValue getParameterValue(String name) {
+		
+		if(this.parameter_values==null) return null;
+		
+		for (ParameterValue pv:this.parameter_values) {
+			if(pv.parameter.name.equals(name)) {
+				return pv;
+			}
+		}
+		return null;
+		
+	}
+	
+	
+
+	public Object getExperimentalParameter(String name) {
+		
+		if(this.experimental_parameters==null) return null;
+		
+		if(experimental_parameters.containsKey(name)) {
+			return experimental_parameters.get(name);
+		} else {
+			return null;	
+		}
+		
+		
 	}
 	
 	public String getOriginalSourceName() {

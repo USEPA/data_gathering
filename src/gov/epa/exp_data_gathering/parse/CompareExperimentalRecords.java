@@ -14,13 +14,12 @@ import javax.swing.JFrame;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import gov.epa.QSAR.utilities.MatlabChart;
-import gov.epa.api.DsstoxLookup;
 import gov.epa.api.ExperimentalConstants;
-import gov.epa.api.ScoreRecord;
-import gov.epa.api.DsstoxLookup.DsstoxRecord;
+import gov.epa.exp_data_gathering.parse.Koc.RecordKoc;
+import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 
 /**
  * @author TMARTI02
@@ -28,13 +27,16 @@ import gov.epa.api.DsstoxLookup.DsstoxRecord;
 public class CompareExperimentalRecords {
 
 	public static class Source {
-		String sourceName;
-		String subfolder;
-
+		public String sourceName;
+		public String subfolder;
+		public String experimentalRecordsPath;
+		
 		public Source(String sourceName,String subfolder) {
 			this.sourceName=sourceName;
 			this.subfolder=subfolder;
+			
 		}
+		
 	}
 
 	public CompareMethods cm=new CompareMethods();
@@ -158,7 +160,7 @@ public class CompareExperimentalRecords {
 			return recsAll;
 		}
 
-		private void setMedianValue(ExperimentalRecords recs, List<Double> vals) {
+		private static void setMedianValue(ExperimentalRecords recs, List<Double> vals) {
 		
 			//		System.out.println(recs.get(0).casrn+"\t"+vals.size());
 		
@@ -182,7 +184,7 @@ public class CompareExperimentalRecords {
 		
 		}
 
-		private void setBinaryScore(ExperimentalRecords recs, List<Double> vals) {
+		private static void setBinaryScore(ExperimentalRecords recs, List<Double> vals) {
 		
 			if(vals.size()==0) return;
 		
@@ -198,13 +200,21 @@ public class CompareExperimentalRecords {
 		
 		}
 
-		private void setMedianValue(ExperimentalRecords recs,String units) {
+		/**
+		 * TODO This method assumes that property has log units as modelable units
+		 *  
+		 * @param recs
+		 * @param units
+		 */
+		private static void setMedianValue(ExperimentalRecords recs,String units) {
 		
 			List<Double>vals=new ArrayList<>();
+			
+//			System.out.println("recs.size()="+recs.size());
 		
 			for (ExperimentalRecord er:recs) {
 		
-				//			System.out.println(er.property_value_units_final+"\t"+units);
+//				System.out.println(er.property_value_units_final+"\t"+units);
 		
 				if(er.property_value_units_final==null) continue;
 				if(!er.property_value_units_final.equals(units)) continue;
@@ -217,23 +227,39 @@ public class CompareExperimentalRecords {
 				Double val=null;
 		
 				if(er.property_value_max_final!=null && er.property_value_min_final!=null) {
-					val=(er.property_value_max_final+er.property_value_min_final)/2.0;
+					
+					if(Math.abs(Math.log10(er.property_value_min_final/er.property_value_max_final))<1) {
+						val=Math.sqrt(er.property_value_max_final*er.property_value_min_final);						
+					} else {
+						continue;
+					}
+					
 				} else if(er.property_value_point_estimate_final!=null) {
 					val=er.property_value_point_estimate_final;
 				} else continue;
+				
+				
 		
 				if(!units.toLowerCase().contains("log")) {
+					
+					if(val==0.0) continue;
+					
 					val=Math.log10(val);
 				}
 				
 				vals.add(val);
+				
+//				System.out.println(er.casrn+"\t"+val);
+
 		
 				//			System.out.println(er.property_value_string+"\t"+val);
 			}
-		
+			
+//			System.out.println("vals.size()="+vals.size());
+
 			if (vals.size()>0) {
 				Collections.sort(vals);
-		
+				
 				if(units.equals(ExperimentalConstants.str_binary)) {
 					setBinaryScore(recs,vals);
 		
@@ -248,12 +274,14 @@ public class CompareExperimentalRecords {
 			}
 		}
 
-		void setMedianValues(TreeMap<String,ExperimentalRecords> tm, String units) {
+		public static void setMedianValues(TreeMap<String,ExperimentalRecords> tm, String units) {
 			int count=0;
 		
 			for (String key:tm.keySet()) {
 				ExperimentalRecords recs=tm.get(key);
 				setMedianValue(recs,units);
+				
+//				System.out.println(key+"\t"+recs.medianValue);
 				count+=recs.size();
 			}
 		
@@ -283,6 +311,32 @@ public class CompareExperimentalRecords {
 
 			cm.compare(sources1, sources2, ExperimentalConstants.strORAL_RAT_LD50,ExperimentalConstants.str_mg_kg,"cas");
 		}
+		
+		
+		private void compareWS() {
+			List<Source>sources1=new ArrayList<>();
+			sources1.add(new Source("QSAR_Toolbox","Physchem ECHA Reach"));
+
+			List<Source>sources2=new ArrayList<>();
+			sources2.add(new Source("eChemPortal",null));
+
+			cm.compare(sources1, sources2, ExperimentalConstants.strWaterSolubility,ExperimentalConstants.str_g_L,"cas");
+		}
+		
+		private void compareWS2() {
+			List<Source>sources1=new ArrayList<>();
+			sources1.add(new Source("OChem",null));
+			sources1.add(new Source("PubChem",null));
+
+			List<Source>sources2=new ArrayList<>();
+			sources2.add(new Source("OChem_2024_04_03",null));
+			sources2.add(new Source("PubChem_2024_11_27",null));
+
+			printChemicalsInCommon=false;
+			
+			cm.compare(sources1, sources2, ExperimentalConstants.strWaterSolubility,ExperimentalConstants.str_g_L,"cas");
+		}
+
 
 		private void compareSensitization() {
 			List<Source>sources1=new ArrayList<>();
@@ -566,24 +620,46 @@ public class CompareExperimentalRecords {
 //			sources2.add(new Source("ECOTOX_2023_12_14",propertyName));
 
 			sources1.add(new Source("Arnot 2006",propertyName));
-//			sources1.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName));//banding issue, only 37 new chemicals 
+//			sources1.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
 
-//			sources2.add(new Source("Arnot 2006",propertyName));
-//			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
-//			sources2.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName));//banding issue, only 37 new chemicals 
-//			sources2.add(new Source("Burkhard",propertyName));
-			sources2.add(new Source("OPERA2.8",null));
+			sources2.add(new Source("Arnot 2006",propertyName));
+			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
+			sources2.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
+			sources2.add(new Source("Burkhard",propertyName));//only 37 new
+//			sources2.add(new Source("OPERA2.8",null));//only has CAS not SID
 
-//			sources2.add(new Source("QSAR_Toolbox","BCF CEFIC//"+propertyName));//banding issue, only 37 new chemicals
+//			sources2.add(new Source("QSAR_Toolbox","BCF CEFIC//"+propertyName));
 
 			String units="L/kg";
-//			cm.compare(sources1, sources2, propertyName, units,"cas");
-			cm.compare(sources1, sources2, propertyName, units,"sid");
+			cm.compare(sources1, sources2, propertyName, units,"cas");
+//			cm.compare(sources1, sources2, propertyName, units,"sid");
 //			cm.compare(sources1, sources2, propertyName, units,"cas","Species supercategory","Fish");
 			
 			
 			//We get more records if we use both even though they overlap a bit
 			
+
+		}
+		
+		
+		private void compareKoc() {
+
+			printChemicalsInCommon=false;
+
+			String propertyName=ExperimentalConstants.strKOC;
+
+			List<Source>sources1=new ArrayList<>();
+			List<Source>sources2=new ArrayList<>();
+
+//			sources1.add(new Source(RecordKoc.sourceName,null));
+//			sources2.add(new Source("OPERA2.8",null));//only has CAS not SID
+			
+			sources1.add(new Source(RecordKoc.sourceName,null));
+			sources2.add(new Source(RecordQSAR_ToolBox.sourceName,"Koc ECHA Reach"));//only has CAS not SID
+
+			
+			String units="L/kg";
+			cm.compare(sources1, sources2, propertyName, units,"sid");
 
 		}
 		
@@ -626,7 +702,9 @@ public class CompareExperimentalRecords {
 
 	}
 
-	boolean printChemicalsInCommon=true;
+	public static boolean printChemicalsInCommon=false;
+	public static boolean printSourceChemical=false;
+
 
 	
 	public class CompareMethods {
@@ -667,6 +745,153 @@ public class CompareExperimentalRecords {
 			compareChemicalsInCommon(tm1, tm2, units);
 
 		}
+		
+		
+		public void compare(ExperimentalRecords allRecords, String sourceName1, String sourceName2, String propertyName,String units,String idType) {
+
+			ExperimentalRecords recs1=new ExperimentalRecords();
+			ExperimentalRecords recs2=new ExperimentalRecords();
+
+			
+			for (ExperimentalRecord er:allRecords) {
+				if(!er.property_name.equals(propertyName)) continue;
+				
+				if(er.source_name.equals(sourceName1))recs1.add(er);
+				if(er.source_name.equals(sourceName2))recs2.add(er);
+				
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+			
+			JsonObject jo=new JsonObject();
+			jo.addProperty("source1", sourceName1);
+			jo.addProperty("source2", sourceName2);
+			jo.addProperty("countWithMedian1",getCountWithMedian(tm1));
+			jo.addProperty("countWithMedian2",getCountWithMedian(tm2));
+			jo.addProperty("countIn1Not2",getNewChemicalCount(tm1, tm2,false));
+			jo.addProperty("countIn2Not1",getNewChemicalCount(tm2, tm1,false));
+			jo.addProperty("countInEither",getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1,sourceName2,tm1, tm2, units, jo);
+			
+			System.out.println(ParseUtilities.gson.toJson(jo));
+
+
+		}
+		
+		public void compare(Hashtable<String,ExperimentalRecords>htAllRecords, String sourceName1, String sourceName2, String propertyName,String units,String idType) {
+
+			ExperimentalRecords recs1=htAllRecords.get(sourceName1);
+			ExperimentalRecords recs2=htAllRecords.get(sourceName2);
+
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+			
+			JsonObject jo=new JsonObject();
+			jo.addProperty("source1", sourceName1);
+			jo.addProperty("source2", sourceName2);
+			jo.addProperty("countWithMedian1",getCountWithMedian(tm1));
+			jo.addProperty("countWithMedian2",getCountWithMedian(tm2));
+			jo.addProperty("countIn1Not2",getNewChemicalCount(tm1, tm2,false));
+			jo.addProperty("countIn2Not1",getNewChemicalCount(tm2, tm1,false));
+			jo.addProperty("countInEither",getCountInEither(tm2, tm1,false));
+			
+			double MAE= compareChemicalsInCommon(sourceName1,sourceName2,tm1, tm2, units, jo);
+			
+			System.out.println(ParseUtilities.gson.toJson(jo));
+
+
+		}
+		
+		
+		public void compareToOtherSources(Hashtable<String,ExperimentalRecords>htAllRecords, String sourceName, String propertyName,String units,String idType) {
+
+			String source1="All but "+sourceName;
+			String source2=sourceName;
+
+			ExperimentalRecords recs1=new ExperimentalRecords();
+			for (String key:htAllRecords.keySet()) {
+				if(!key.equals(sourceName)) {
+					recs1.addAll(htAllRecords.get(key));
+				}
+			}
+
+			ExperimentalRecords recs2=htAllRecords.get(sourceName);
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			
+			JsonObject jo=new JsonObject();
+			jo.addProperty("source1", source1);
+			jo.addProperty("source2", source2);
+			jo.addProperty("countWithMedian1",getCountWithMedian(tm1));
+			jo.addProperty("countWithMedian2",getCountWithMedian(tm2));
+			jo.addProperty("countIn1Not2",getNewChemicalCount(tm1, tm2,false));
+			jo.addProperty("countIn2Not1",getNewChemicalCount(tm2, tm1,false));
+			jo.addProperty("countInEither",getCountInEither(tm2, tm1,false));
+			
+			double MAE= compareChemicalsInCommon(source1, source2, tm1, tm2, units, jo);
+			System.out.println(ParseUtilities.gson.toJson(jo));
+
+		}
+
+		
+		public void compare(ExperimentalRecords recs1,ExperimentalRecords recs2, String sourceName1, String sourceName2, String propertyName,String units,String idType) {
+
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+			
+			JsonObject jo=new JsonObject();
+			jo.addProperty("source1", sourceName1);
+			jo.addProperty("source2", sourceName2);
+			jo.addProperty("countWithMedian1",getCountWithMedian(tm1));
+			jo.addProperty("countWithMedian2",getCountWithMedian(tm2));
+			jo.addProperty("countIn1Not2",getNewChemicalCount(tm1, tm2,false));
+			jo.addProperty("countIn2Not1",getNewChemicalCount(tm2, tm1,false));
+			jo.addProperty("countInEither",getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1,sourceName2,tm1, tm2, units, jo);
+			
+			System.out.println(ParseUtilities.gson.toJson(jo));
+
+
+		}
+		
 		
 		void compare(List<Source>sources1, List<Source>sources2, String propertyName,String units,String idType,String parameterName,String parameterValue) {
 
@@ -722,11 +947,11 @@ public class CompareExperimentalRecords {
 
 		}
 
-		double compareChemicalsInCommon(TreeMap<String,ExperimentalRecords>tm1,TreeMap<String,ExperimentalRecords>tm2, String units) {
+		public double compareChemicalsInCommon(TreeMap<String,ExperimentalRecords>tm1,TreeMap<String,ExperimentalRecords>tm2, String units) {
 
-			if(!units.toLowerCase().contains("log")) {
-				System.out.println("Need to handle units="+units);
-			}
+//			if(!units.toLowerCase().contains("log")) {
+//				System.out.println("Need to handle units="+units);
+//			}
 
 			int countInCommon=0;
 			double MAE=0;
@@ -755,6 +980,7 @@ public class CompareExperimentalRecords {
 					Double error=Math.abs(recs1.medianValue-recs2.medianValue);
 					vals1.add(recs1.medianValue);
 					vals2.add(recs2.medianValue);
+
 					if(printChemicalsInCommon) {
 						System.out.println("took log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
 					}
@@ -799,6 +1025,119 @@ public class CompareExperimentalRecords {
 			return MAE;
 
 		}
+		
+		class ExperimentalPair implements Comparable<ExperimentalPair> {
+
+		    ExperimentalRecords recs1;
+		    ExperimentalRecords recs2;
+
+		    ExperimentalPair(ExperimentalRecords recs1, ExperimentalRecords recs2) {
+		        this.recs1 = recs1;
+		        this.recs2 = recs2;
+		    }
+
+		    Double getAbsDiff() {
+		        return Math.abs(recs1.medianValue - recs2.medianValue);
+		    }
+
+		    static String getHeader() {
+		        if (printSourceChemical) {
+		            return "id1\tid2\tmedian1\tmedian2\tabsDiff";
+		        } else {
+		            return "id\tabsDiff";
+		        }
+		    }
+
+		    String getId() {
+		        ExperimentalRecord rec1 = recs1.get(0);
+		        ExperimentalRecord rec2 = recs2.get(0);
+
+		        if (printSourceChemical) {
+		            return (rec1.casrn + "; " + rec1.chemical_name + "\t" + rec2.casrn + "; " + rec2.chemical_name);
+		        } else {
+		            return (rec1.dsstox_substance_id);
+		        }
+		    }
+
+		    String getLine() {
+		    	
+		    	DecimalFormat df=new DecimalFormat("0.00");
+		    	
+		        return getId() + "\t" + df.format(recs1.medianValue) + "\t" + df.format(recs2.medianValue) 
+		        + "\t" + df.format(getAbsDiff());
+		    }
+
+		    // Natural ordering: absDiff descending
+		    @Override
+		    public int compareTo(ExperimentalPair other) {
+		        return Double.compare(other.getAbsDiff(), this.getAbsDiff());
+		    }
+
+		}
+		
+		
+		
+		
+		public double compareChemicalsInCommon(String sourceName1,String sourceName2, TreeMap<String,ExperimentalRecords>tm1,TreeMap<String,ExperimentalRecords>tm2, String units,JsonObject jo) {
+
+//			if(!units.toLowerCase().contains("log")) {
+//				System.out.println("Need to handle units="+units);
+//			}
+
+			
+
+			DecimalFormat df=new DecimalFormat("0.00");
+
+//			boolean printValues=false;
+
+			if(printChemicalsInCommon) System.out.println("\n"+ExperimentalPair.getHeader());
+
+			List<Double>vals1=new ArrayList<>();
+			List<Double>vals2=new ArrayList<>();
+			
+
+			List<ExperimentalPair>pairs=new ArrayList<>();
+			
+			for (String key:tm1.keySet()) {
+
+				ExperimentalRecords recs1=tm1.get(key);
+				if(!tm2.containsKey(key))continue;
+				ExperimentalRecords recs2=tm2.get(key);
+				
+				if(recs1.medianValue!=null && recs2.medianValue!=null) {
+					ExperimentalPair pair=new ExperimentalPair(recs1,recs2);
+					pairs.add(pair);
+					vals1.add(recs1.medianValue);
+					vals2.add(recs2.medianValue);
+				} 
+			}
+			
+			Collections.sort(pairs);
+			
+			
+			double MAE=0;
+			for (ExperimentalPair pair:pairs) {
+				MAE+=pair.getAbsDiff();
+				if(printChemicalsInCommon) {
+					System.out.println(pair.getLine());
+				}
+			}
+			MAE/=pairs.size();
+//			
+			
+			if(!units.contains("log"))units="log10("+units+")";
+			
+
+			createPlot(units, vals1, vals2,sourceName1,sourceName2);
+
+			jo.addProperty("countInCommon",pairs.size());
+			jo.addProperty("MAE",MAE);
+
+			return MAE;
+
+		}
+		
+		
 
 		void compareChemicalsInCommonConcordance(List<Source>sources1, List<Source>sources2, String propertyName,String units) {
 
@@ -1042,6 +1381,8 @@ public class CompareExperimentalRecords {
 			jframe.setLocationRelativeTo(null);
 			jframe.setVisible(true);
 		}
+		
+		
 
 		private double[] makeArray(List<Double> vals1) {
 			double[]x=new double[vals1.size()];
@@ -1071,8 +1412,10 @@ public class CompareExperimentalRecords {
 //		c.c.compareSensitization();
 
 //		c.c.compareBCF();
-		c.c.compareAquaticTox();
-
+		c.c.compareKoc();
+//		c.c.compareAquaticTox();
+//		c.c.compareWS();
+//		c.c.compareWS2();
 
 	}
 

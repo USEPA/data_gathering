@@ -290,6 +290,21 @@ public class TextUtilities {
 		return Double.parseDouble(strDouble.replace(" ",""));
 	}
 
+	
+
+	public static String fixName (String name) {
+		
+		if(name==null) return null;
+		
+		String QUOTE_LIKE = "[\u2018\u2019\u02BC\u00B4\u2032]";
+		
+		//TODO do fix symbols like alpha, beta, gamma, etc
+
+		name = name.replaceAll(QUOTE_LIKE, "'");
+		return name;
+		
+	}
+
 	public static String fixChars(String str) {
 		StringBuilder sb = new StringBuilder(str);
 		try {

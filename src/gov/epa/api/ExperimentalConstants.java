@@ -46,7 +46,11 @@ public class ExperimentalConstants {
 	public static final String strFishBAFWholeBody = "Whole body fish bioaccumulation factor";
 	
 	public static final String strLogKOC = "LogKOC";
+	public static final String strLogKoc = "LogKoc";
+	
+	
 	public static final String strKOC = "Soil Adsorption Coefficient (Koc)";
+	public static final String strKd = "Soil Adsorption Coefficient (Kd)";
 	
 	public static final String strLogKmHL = "LogKmHL";
 	public static final String strKmHL = "Fish biotransformation half-life (Km)";//OPERA
@@ -338,7 +342,7 @@ public class ExperimentalConstants {
 	public static final String strSkinSensitizationLLNA_EC3="SkinSensitizationLLNA EC3";
 	public static final String strSkinSensitizationLLNA_SI="SkinSensitizationLLNA SI";
 	
-
+	public static final String strParameterSoilType = "Soil_Type";
 	
 	
 

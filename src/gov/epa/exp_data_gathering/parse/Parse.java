@@ -1,9 +1,16 @@
 package gov.epa.exp_data_gathering.parse;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
@@ -211,6 +218,70 @@ public class Parse {
 		uc = new UnitConverter("Data" + File.separator + "density.txt");
 	}
 	
+	
+
+	public static <T> List<T> getOriginalRecordsFromJsonFiles(String folderPath, Class<T[]> clazz)  {
+		
+		return getOriginalRecordsFromJsonFiles(folderPath, clazz,null);
+		
+	}
+
+	
+	
+	public static <T> List<T> getOriginalRecordsFromJsonFiles(String folderPath, Class<T[]> clazz,String charset)  {
+
+		Gson gson=new Gson();
+		
+		List<T> records = new ArrayList<>();
+
+		
+		File folder=new File(folderPath);
+
+		if (!folder.isDirectory()) {
+			System.out.println("Not a directory:"+folderPath);
+			return null;
+		}
+		
+		File[] files = folder.listFiles();
+        
+		if (files != null) {
+            for (File file : files) {
+            	
+//            	System.out.println(file.getName());
+            	
+    			if(!file.getName().contains(".json")) continue;
+    			if(!file.getName().contains("Original Records")) continue;
+            	
+                try {
+                	
+                	FileReader fileReader=null;
+                	
+                	if(charset==null) {
+                		fileReader = new FileReader(file);	
+                	} else {
+                		fileReader = new FileReader(file,Charset.forName(charset));
+                	}
+                    
+                	T[] tempRecords=gson.fromJson(fileReader, clazz);
+                    
+                    System.out.println(file.getName()+"\t"+tempRecords.length);
+                    
+                    for (T record : tempRecords) {
+                        records.add(record);
+                    }
+                    
+                    fileReader.close();
+                    
+                } catch (Exception ex) {
+                	ex.printStackTrace();
+                }
+            }
+        }
+
+        return records;
+    }
+	
+	
 	/**
 	 * Loads original records from source files and stores as json file in original format
 	 * 
@@ -315,6 +386,30 @@ public class Parse {
 		System.out.println("done\n");
 	}
 
+	
+	public static String setSignificantDigits(double value, int significantDigits) {
+	    if (significantDigits < 0) throw new IllegalArgumentException();
+
+	    // this is more precise than simply doing "new BigDecimal(value);"
+	    BigDecimal bd = new BigDecimal(value, MathContext.DECIMAL64);
+	    bd = bd.round(new MathContext(significantDigits, RoundingMode.HALF_UP));
+	    final int precision = bd.precision();
+	    if (precision < significantDigits)
+	    bd = bd.setScale(bd.scale() + (significantDigits-precision));
+	    return bd.toPlainString();
+	}    
+	
+	public static String formatValue(double dvalue) {
+
+		
+		DecimalFormat dfSci=new DecimalFormat("0.00E00");
+		if(dvalue!=0 && (Math.abs(dvalue)<0.01 || Math.abs(dvalue)>1e3)) {
+			return dfSci.format(dvalue);
+		}
+//		System.out.println(dvalue+"\t"+setSignificantDigits(dvalue, nsig));
+		return setSignificantDigits(dvalue, 3);
+	}
+	
 	private void writeExcelRecordsByProperty(ExperimentalRecords records) {
 		Hashtable<String,ExperimentalRecords>ht=new Hashtable<>();
 		

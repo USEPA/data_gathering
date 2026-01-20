@@ -1,7 +1,6 @@
 package gov.epa.exp_data_gathering.parse.ECOTOX;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -9,25 +8,18 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Vector;
 
-import org.apache.commons.math3.analysis.function.Exp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import gov.epa.api.ExperimentalConstants;
-import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.database.SqlUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.exp_data_gathering.parse.ToxVal.ToxValRecord;
 
 
 /**
@@ -577,8 +569,8 @@ public class RecordEcotox {
 		
 		ParameterValue pv=new ParameterValue();
 		pv.parameter.name=parameterName;
-		pv.valueQualifier=meanOp;
-		pv.valuePointEstimate=mean;
+		pv.value_qualifier=meanOp;
+		pv.value_point_estimate=mean;
 		pv.unit.abbreviation="days";
 
 		int type=-1;
@@ -586,24 +578,24 @@ public class RecordEcotox {
 			type=1;
 			if(meanOp!=null && meanOp.contains("<")) {
 				type=2;
-				pv.valueMax=mean;
-				pv.valuePointEstimate=null;
+				pv.value_max=mean;
+				pv.value_point_estimate=null;
 			} else if(meanOp!=null && meanOp.contains(">")) {
-				pv.valueMin=mean;
-				pv.valuePointEstimate=null;
+				pv.value_min=mean;
+				pv.value_point_estimate=null;
 				type=3;
 			}
 			
 		} else if(min!=null && max!=null) {
 			type=4;
-			pv.valueMin=min;
-			pv.valueMax=max;
+			pv.value_min=min;
+			pv.value_max=max;
 		} else if(min!=null) {//doesnt happen for BCF?
 			type=5;
-			pv.valueMin=min;
+			pv.value_min=min;
 		} else if(max!=null) {//doesnt happen for BCF?
 			type=6;
-			pv.valueMax=max;
+			pv.value_max=max;
 		} else {
 			type=7;
 			return;
@@ -639,8 +631,8 @@ public class RecordEcotox {
 		
 		ParameterValue pv=new ParameterValue();
 		pv.parameter.name=parameterName;
-		pv.valueQualifier=meanOp;
-		pv.valuePointEstimate=mean;
+		pv.value_qualifier=meanOp;
+		pv.value_point_estimate=mean;
 		pv.unit.abbreviation="days";
 
 		int type=-1;
@@ -648,24 +640,24 @@ public class RecordEcotox {
 			type=1;
 			if(meanOp!=null && meanOp.contains("<")) {
 				type=2;
-				pv.valueMax=mean;
-				pv.valuePointEstimate=null;
+				pv.value_max=mean;
+				pv.value_point_estimate=null;
 			} else if(meanOp!=null && meanOp.contains(">")) {
-				pv.valueMin=mean;
-				pv.valuePointEstimate=null;
+				pv.value_min=mean;
+				pv.value_point_estimate=null;
 				type=3;
 			}
 			
 		} else if(min!=null && max!=null) {
 			type=4;
-			pv.valueMin=min;
-			pv.valueMax=max;
+			pv.value_min=min;
+			pv.value_max=max;
 		} else if(min!=null) {//doesnt happen for BCF?
 			type=5;
-			pv.valueMin=min;
+			pv.value_min=min;
 		} else if(max!=null) {//doesnt happen for BCF?
 			type=6;
-			pv.valueMax=max;
+			pv.value_max=max;
 		} else {
 			type=7;
 			return;
@@ -1561,13 +1553,13 @@ public class RecordEcotox {
 		pv.parameter.name="Water concentration";
 		pv.unit.abbreviation=erWC.property_value_units_final;
 		
-		pv.valuePointEstimate=erWC.property_value_point_estimate_final;
-		pv.valueMin=erWC.property_value_min_final;
-		pv.valueMax=erWC.property_value_max_final;
+		pv.value_point_estimate=erWC.property_value_point_estimate_final;
+		pv.value_min=erWC.property_value_min_final;
+		pv.value_max=erWC.property_value_max_final;
 		
 		if(conc1_mean_op!=null) {
 			if(!conc1_mean_op.equals("~")) 			
-				pv.valueQualifier=this.conc1_mean_op;	
+				pv.value_qualifier=this.conc1_mean_op;	
 		}
 				
 		er.parameter_values.add(pv);

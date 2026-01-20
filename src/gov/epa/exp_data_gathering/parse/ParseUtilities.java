@@ -18,6 +18,9 @@ public class ParseUtilities extends Parse {
 	public static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();		
 
 
+	
+	
+	
 
 	/**
 	 * Converts propertyValue string to experimental record
@@ -50,7 +53,7 @@ public class ParseUtilities extends Parse {
 		propertyValue=propertyValue.replace("< ", "<");
 		propertyValue=propertyValue.replace(" to ", "-");
 
-		//		propertyValue=propertyValue.replace("°)", "C°)");
+		//		propertyValue=propertyValue.replace("Â°)", "CÂ°)");
 
 		//		System.out.println(propertyValue);
 
@@ -168,7 +171,7 @@ public class ParseUtilities extends Parse {
 				//				System.out.println("here3\t"+propertyValue);
 				er.updateNote(ExperimentalConstants.str_relative_density);//liquid
 				
-				if((PVLC.contains(" at") || PVLC.contains("(")) && PVLC.contains("°")) {
+				if((PVLC.contains(" at") || PVLC.contains("(")) && PVLC.contains("Â°")) {
 					
 					propertyValue=propertyValue.replace("Relative density (water = 1):", "");
 					if(propertyValue.contains(" at ")) {
@@ -272,7 +275,7 @@ public class ParseUtilities extends Parse {
 			if (er.source_name.equals(ExperimentalConstants.strSourceEChemPortalAPI)) {
 				unitsIndex = propertyValue.length();
 
-			} else if (propertyValue.contains("°F):")) {
+			} else if (propertyValue.contains("Â°F):")) {
 
 				
 				String value=propertyValue.substring(propertyValue.indexOf(":")+1,propertyValue.length());
@@ -362,8 +365,8 @@ public class ParseUtilities extends Parse {
 		//		}
 
 
-		//		if(propertyValue.equals("(77 °F): 1.42")) {
-		//			System.out.println("Found (77 °F): 1.42\t"+unitsIndex+"\t"+foundNumeric+"\n"+gson.toJson(er));
+		//		if(propertyValue.equals("(77 Â°F): 1.42")) {
+		//			System.out.println("Found (77 Â°F): 1.42\t"+unitsIndex+"\t"+foundNumeric+"\n"+gson.toJson(er));
 		//		}
 
 
@@ -466,9 +469,9 @@ public class ParseUtilities extends Parse {
 		boolean badUnits = true;
 		int unitsIndex = -1;
 
-		propertyValue=propertyValue.replace("0.3 mm^2/s at 20-25 °C", "0.3 mm^2/s at 22.5 °C");
+		propertyValue=propertyValue.replace("0.3 mm^2/s at 20-25 Â°C", "0.3 mm^2/s at 22.5 Â°C");
 
-		if(propertyValue.equals("Gas at 101.325 KPa at 25 °C; 0.012 8 m Pa.S; 0.012 8 cP.") || propertyValue.equals("0.012 8 m Pa.S") || propertyValue.equals("0.012 8 cP.")) {
+		if(propertyValue.equals("Gas at 101.325 KPa at 25 Â°C; 0.012 8 m Pa.S; 0.012 8 cP.") || propertyValue.equals("0.012 8 m Pa.S") || propertyValue.equals("0.012 8 cP.")) {
 			er.reason="Gas viscosity";
 			er.keep=false;
 			return false;
@@ -531,7 +534,7 @@ public class ParseUtilities extends Parse {
 		unitsIndex = lookForUnitsInList(er, propertyValue, unitsIndex, pUnits, ExperimentalConstants.str_P);
 
 		List<String> cStUnits = Arrays.asList("centistokes","Centistokes","CENTISTOKE","cSt","cST", 
-				"mm^2/s","sq mm/s","sq mm.s","sq m/sec", "mmÂ^2/s");		
+				"mm^2/s","sq mm/s","sq mm.s","sq m/sec", "mmÃ‚^2/s");		
 		unitsIndex = lookForUnitsInList(er, propertyValue, unitsIndex, cStUnits, ExperimentalConstants.str_cSt);
 
 
@@ -566,10 +569,10 @@ public class ParseUtilities extends Parse {
 	// Applicable for melting point, boiling point, and flash point
 	public static boolean getTemperatureProperty(ExperimentalRecord er,String propertyValue) {
 		boolean badUnits = true;
-		//		propertyValue = propertyValue.replace("±", "-").replace("+/-", "-");
+		//		propertyValue = propertyValue.replace("Â±", "-").replace("+/-", "-");
 
 		//		if(er.property_name.equals(ExperimentalConstants.strBoilingPoint)) {
-		//			if(propertyValue.contains("±")) {
+		//			if(propertyValue.contains("Â±")) {
 		//				System.out.println(propertyValue);
 		//			}
 		//		}
@@ -1304,7 +1307,7 @@ public class ParseUtilities extends Parse {
 		//			er.reason="Approximate value";
 		//			return false;
 		//		}
-		if(propertyValue.equals("Vapor pressure between 511 and 835 °C is given by equation logP(kPa)= 6.7249-(5960.2/K)")) {
+		if(propertyValue.equals("Vapor pressure between 511 and 835 Â°C is given by equation logP(kPa)= 6.7249-(5960.2/K)")) {
 			er.keep=false;
 			er.reason="Antoine equation at high temperature";
 		}
@@ -1329,7 +1332,7 @@ public class ParseUtilities extends Parse {
 			String temp=propertyValue.substring(propertyValue.indexOf("at"), propertyValue.indexOf(":")).trim();
 			propertyValue=propVal+" Pa "+temp;
 			//			System.out.println(propertyValueNonSplit+"\t"+propertyValue);
-			//			Vapor pressure, Pa at 60 °C: 0.013	
+			//			Vapor pressure, Pa at 60 Â°C: 0.013	
 		} else if(propertyValue.contains("Vapor pressure, kPa at ")) {
 			String propVal=propertyValue.substring(propertyValue.indexOf(":")+1, propertyValue.length()).trim();
 			String temp=propertyValue.substring(propertyValue.indexOf("at"), propertyValue.indexOf(":")).trim();
@@ -1428,7 +1431,7 @@ public class ParseUtilities extends Parse {
 			return false;
 		}
 
-		if(propertyValue.contains("the Henry's Law constant of water (4.34X10-7 atm-cu m/mol)") || propertyValue.contains("Henry's law constant: 7.352x10-5 to 3.505x10-4 MPa-cu m/mol at 4-40 °C") || propertyValue.contains("Henry's law constant: 7.352x10-5 to 3.505x10-4 MPa-cu m/mol at 4-40 Â°C")) {
+		if(propertyValue.contains("the Henry's Law constant of water (4.34X10-7 atm-cu m/mol)") || propertyValue.contains("Henry's law constant: 7.352x10-5 to 3.505x10-4 MPa-cu m/mol at 4-40 Â°C") || propertyValue.contains("Henry's law constant: 7.352x10-5 to 3.505x10-4 MPa-cu m/mol at 4-40 Ã‚Â°C")) {
 			//			System.out.println("Found < water HLC");
 			er.keep=false;
 			er.reason="Bad data or units";
@@ -1454,12 +1457,12 @@ public class ParseUtilities extends Parse {
 		}
 
 		List<String> valsATM_M3_MOL = Arrays.asList("amt-cu m/mol", "atm cu m/ mole", "atm-cu m", "atm-cu m /mole", "atm-cu-m/mol", 
-				"atm-m cu/mol", "atm-m3/mol", "atm m³/mol", "atm-cu m/mol", "atm cu m/mol",
+				"atm-m cu/mol", "atm-m3/mol", "atm mÂ³/mol", "atm-cu m/mol", "atm cu m/mol",
 				"atm cu-m/mol",  "atm cu-m\\mol", "atm m^3/mol",
 				"atn-cu m/mol","cu m-atm/mol","cu m atm/mol");
 		unitsIndex = lookForUnitsInList(er, propertyValue, unitsIndex, valsATM_M3_MOL, ExperimentalConstants.str_atm_m3_mol);
 
-		List<String> valsPA_M3_MOL=  Arrays.asList("pa m³/mol","pa m^3/mol","Pa-cu m/mol","Pa-cu m/mol");
+		List<String> valsPA_M3_MOL=  Arrays.asList("pa mÂ³/mol","pa m^3/mol","Pa-cu m/mol","Pa-cu m/mol");
 		unitsIndex = lookForUnitsInList(er, propertyValue, unitsIndex, valsPA_M3_MOL, ExperimentalConstants.str_Pa_m3_mol);
 
 		unitsIndex = lookForUnitsInList(er, propertyValue.toLowerCase(), unitsIndex, Arrays.asList("dimensionless - vol"), ExperimentalConstants.str_dimensionless_H_vol);
@@ -1471,7 +1474,7 @@ public class ParseUtilities extends Parse {
 
 		boolean foundNumeric = TextUtilities.getNumericalValue(er,propertyValue,unitsIndex,badUnits);
 
-		//		if(propertyValue.equals("Henry's Law constant = 1.76X10-5 Pa-cu m/mol /1.74X10-10 atm-cu m/mol/ at 25 °C")) {
+		//		if(propertyValue.equals("Henry's Law constant = 1.76X10-5 Pa-cu m/mol /1.74X10-10 atm-cu m/mol/ at 25 Â°C")) {
 		//			System.out.println("unitsIndex="+unitsIndex);
 		//			System.out.println("propertyValue="+propertyValue);
 		//			System.out.println("unitsOriginal="+er.property_value_units_original);
@@ -1577,7 +1580,7 @@ public class ParseUtilities extends Parse {
 			er.property_value_units_original = ExperimentalConstants.str_mg_m3;
 			r.unitsIndex = pvlc.indexOf("mg/");
 			r.badUnits = false;
-		} else if (pvlc.contains("g/m^3") || pvlc.contains("g/m³") || pvlc.contains("g/m3") ||
+		} else if (pvlc.contains("g/m^3") || pvlc.contains("g/mÂ³") || pvlc.contains("g/m3") ||
 				pvlc.contains("g/cubic meter") || pvlc.contains("gm/m3")) {
 			er.property_value_units_original = ExperimentalConstants.str_g_m3;
 			r.unitsIndex = pvlc.indexOf("g");
@@ -1662,12 +1665,12 @@ public class ParseUtilities extends Parse {
 			propertyValue="LogKow<1";
 		} else if(propertyValue.equals("Kow = 0.13 (pH 7.0) /log Kow = -0.88/")) {
 			propertyValue="log Kow = -0.88 (pH 7.0)";
-		} else if(propertyValue.equals("Kow = 1600 at 24 °C (log Kow = 3.20)")) {
-			propertyValue="log Kow = 3.20 at 24 °C";
+		} else if(propertyValue.equals("Kow = 1600 at 24 Â°C (log Kow = 3.20)")) {
+			propertyValue="log Kow = 3.20 at 24 Â°C";
 		} else if(propertyValue.equals("log Kow = 1.85 (mixture of 70% cis- and 30% trans-2-Butene)")) {
 			propertyValue="log Kow = 1.85";
-		} else if(propertyValue.equals("Kow = 3.2X10-2 at 25 °C.")) {
-			propertyValue="log Kow = -1.49 at 25°C";
+		} else if(propertyValue.equals("Kow = 3.2X10-2 at 25 Â°C.")) {
+			propertyValue="log Kow = -1.49 at 25Â°C";
 		} else if(propertyValue.equals("Kow = 4900")) {
 			propertyValue="log Kow = 3.69";
 		} else if (propertyValue.length()==4 && propertyValue.contains(",")) {
@@ -1685,7 +1688,7 @@ public class ParseUtilities extends Parse {
 		//		log Kow = -2.82 @ pH 7   Need to set unitsIndex to location of @
 		//		log Kow: -0.89 (pH 4); -1.85 (pH 7); -1.89 (pH 9)  Need to split by ; into separate records
 		//		log Kow = 0.74 at pH 5 and -1.34 at pH 7  ==> 0.74   Need to split by and 
-		//		log Kow = -1.5 at pH 5,7, and 9 @ 21 °C
+		//		log Kow = -1.5 at pH 5,7, and 9 @ 21 Â°C
 
 
 		int index_pH=propertyValue.indexOf("pH");
@@ -1725,7 +1728,7 @@ public class ParseUtilities extends Parse {
 		//			unitsIndex = propertyValue.length();
 		//		}
 
-		//		if(propertyValue.equals("log Kow = -1.5 at pH 5,7, and 9 @ 21 °C")) {
+		//		if(propertyValue.equals("log Kow = -1.5 at pH 5,7, and 9 @ 21 Â°C")) {
 		//			System.out.println("Index="+unitsIndex);
 		//		}
 
@@ -1772,6 +1775,7 @@ public class ParseUtilities extends Parse {
 		long t1=System.currentTimeMillis();
 		if(casInput.toUpperCase().contains("CHEMBL")) return false;
 		if(casInput.toUpperCase().contains("SRC")) return false;
+		if(casInput.toUpperCase().contains("NO")) return false;
 
 		String regex = "[0-9\\-]+"; //only has numbers and dashes
 		Pattern p = Pattern.compile(regex); 

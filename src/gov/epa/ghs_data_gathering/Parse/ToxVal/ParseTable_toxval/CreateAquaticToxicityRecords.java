@@ -274,18 +274,18 @@ public class CreateAquaticToxicityRecords {
 				if(pv.parameter.name.equals("Observation duration")) {
 					if(!pv.unit.abbreviation.equals("days")) continue;
 					
-					if(pv.valueQualifier!=null && !pv.valueQualifier.equals("~")) {
+					if(pv.value_qualifier!=null && !pv.value_qualifier.equals("~")) {
 //						System.out.println("VQ="+pv.valueQualifier);
 						continue;
 					}
 					
-					if(pv.valuePointEstimate!=null) {
-						study_dur_in_days=pv.valuePointEstimate;
+					if(pv.value_point_estimate!=null) {
+						study_dur_in_days=pv.value_point_estimate;
 						
 //						System.out.println(pv.valueQualifier+"\t"+pv.valuePointEstimate);
 						
-					} else if (pv.valueMin!=null && pv.valueMax!=null) {
-						study_dur_in_days=(pv.valueMin+pv.valueMax)/2.0;
+					} else if (pv.value_min!=null && pv.value_max!=null) {
+						study_dur_in_days=(pv.value_min+pv.value_max)/2.0;
 //						System.out.println(pv.valueMin+"\t"+pv.valueMax);
 					} else {
 //						System.out.println(ParseUtilities.gson.toJson(pv));

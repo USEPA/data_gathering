@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +19,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 
 import com.google.gson.JsonObject;
+
+
 
 
 /**
@@ -42,6 +46,8 @@ public class ExcelSourceReader {
 
 	boolean omitColNoData=false;
 	
+	public static String encoding=null;
+	
 	public ExcelSourceReader() {}
 
 	/**
@@ -54,6 +60,7 @@ public class ExcelSourceReader {
 	public ExcelSourceReader(String fileName, String sourceName) {
 		this.sourceName = sourceName;
 		this.fileName = fileName;
+		
 		sourceFolderPath = "data" + File.separator + "experimental" + File.separator + sourceName;
 
 		String filePath = sourceFolderPath + File.separator + "excel files" + File.separator + fileName;
@@ -400,6 +407,9 @@ public class ExcelSourceReader {
 					if (k == chemicalNameIndex) {
 						content = StringEscapeUtils.escapeHtml4(
 								row.getCell(k, MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue());
+						
+//						content=new String(cell.getStringCellValue().getBytes(Charset.forName("UTF-8")));
+						
 					} else {
 						content = getContent(setBlankToNull, evaluator, cell);
 					}
@@ -437,14 +447,24 @@ public class ExcelSourceReader {
 		}
 		return records;
 	}
-
-	private String getContent(boolean setBlankToNull, FormulaEvaluator evaluator, Cell cell) {
+	
+	private static String getContent(boolean setBlankToNull, FormulaEvaluator evaluator, Cell cell) {
 
 		CellType type = cell.getCellType();
 		
 		String content=null;
 		if (type == CellType.STRING) {
-			content = cell.getStringCellValue();
+			
+			if(encoding==null) {
+				content = cell.getStringCellValue();				
+			} else {
+				//2025-06-03 to avoid ? characters:
+				content= new String(cell.getStringCellValue().getBytes(Charset.forName(encoding)));
+			}
+			
+//			content = cell.getRichStringCellValue().getString();
+
+			
 		} else if (type == CellType.NUMERIC) {
 			content = cell.getNumericCellValue() + "";
 		} else if (type == CellType.BOOLEAN) {
@@ -536,7 +556,7 @@ public class ExcelSourceReader {
 	 * 
 	 * @return Formatted column headers as a string array
 	 */
-	public List<String> getHeaders( Sheet sheet, int headerRowNum) {
+	public static List<String> getHeaders( Sheet sheet, int headerRowNum) {
 		Row headerRow = sheet.getRow(headerRowNum);
 		int numHeaders = headerRow.getLastCellNum();
 		
@@ -585,6 +605,48 @@ public class ExcelSourceReader {
 			}
 		}
 		return headers;
+	}
+	
+	
+	public static boolean isRowBlank(Row row) {
+		boolean allBlank=true;
+		for (int colNum=0;colNum<row.getLastCellNum();colNum++) {
+			Cell cell=row.getCell(colNum);
+			if(cell==null)continue;
+			
+			if(cell.getCellType()==CellType.STRING) {
+				if(!cell.getStringCellValue().isBlank()) {
+					allBlank=false;
+					break;
+				}
+			}
+		}
+		return allBlank;
+	}
+	
+	
+	public static List<String> getHeaders2(Sheet sheet, int headerRowNum) {
+		List<String>headers=new ArrayList<>();
+		
+		
+		Row headerRow=sheet.getRow(headerRowNum);
+		
+		
+		for (int colNum=0;colNum<headerRow.getLastCellNum();colNum++) {
+			Cell cell=headerRow.getCell(colNum);
+			if(cell==null) {
+				headers.add("");
+				continue;
+			}
+			
+			if(cell.getCellType()==CellType.STRING) {
+				headers.add(cell.getStringCellValue());
+			} else {
+				headers.add("");
+			}
+		}
+		return headers;
+		
 	}
 
 	/**
@@ -660,6 +722,8 @@ public class ExcelSourceReader {
 				
 		System.out.println("getAllHeadersFromExcelFilesInFolder()");
 		
+		IOUtils.setByteArrayMaxOverride(200000000);
+		
 		for (File file:Folder.listFiles()) {
 			if(!file.getName().contains(".xls")) continue;
 			ExcelSourceReader esr=new ExcelSourceReader();
@@ -676,8 +740,10 @@ public class ExcelSourceReader {
 						Sheet sheet = wb.getSheet(sheetName);
 						List<String>headers= esr.getHeaders(sheet,headerRowNum);	
 						for(String header:headers) {
+							
 							if(!allHeaders.contains(header)) {
-								System.out.println(file.getName()+"\t"+header);
+//								System.out.println(file.getName()+"\t"+header);
+								System.out.println("\tpublic String "+header+";");
 								allHeaders.add(header);
 							}
 						}

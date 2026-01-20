@@ -3,6 +3,8 @@ package gov.epa.exp_data_gathering.parse;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +19,7 @@ public class JSONUtilities {
 		return batchAndWriteJSON(records, baseFileName,100000 );
 	}
 	
+	public static Charset charset=StandardCharsets.UTF_8;
 	
 	public static int batchAndWriteJSON(Vector<?> records, String baseFileName, int batchSize) {
 		GsonBuilder builder = new GsonBuilder();
@@ -103,7 +106,7 @@ public class JSONUtilities {
 			FileWriter fw = new FileWriter(filePath);
 			fw.close();
 			
-			BufferedWriter bwAppend = new BufferedWriter(new FileWriter(filePath,true));
+			BufferedWriter bwAppend = new BufferedWriter(new FileWriter(filePath,charset, true));
 		
 			for (String s:strRecords) {
 				s=TextUtilities.fixChars(s);

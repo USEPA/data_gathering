@@ -58,7 +58,45 @@ public class GetCIDsFromProperty {
 		
 		int page=1;
 		
-		String url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading.replace(" ", "+")+"&page="+page+"&heading_type=Compound";
+		String heading2=heading.replace(" / ", "%2F").replace(" ","+");
+		
+		String url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading2+"&page="+page+"&heading_type=Compound";
+		String json=FileUtilities.getText(url);
+		writeFile(folder, heading2, page, json);
+		
+		int totalPages=getNumPages(json);
+		System.out.println("totalPages="+totalPages);
+		
+		for (page=2;page<=totalPages;page++) {
+		
+			System.out.println("getting page "+page);
+			
+			url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading2+"&page="+page+"&heading_type=Compound";
+			json=FileUtilities.getText(url);
+			writeFile(folder, heading2, page, json);
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		
+	}
+
+	
+	void getAnnotationJsons2(String heading,String folder) {
+		
+		//get first page:
+		File Folder=new File(folder);
+		if(!Folder.exists()) {
+			Folder.mkdirs();
+		}
+		
+		int page=1;
+		
+		String url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading+"&page="+page+"&heading_type=Compound";
 		String json=FileUtilities.getText(url);
 		writeFile(folder, heading, page, json);
 		
@@ -69,7 +107,7 @@ public class GetCIDsFromProperty {
 		
 			System.out.println("getting page "+page);
 			
-			url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading.replace(" ", "+")+"&page="+page+"&heading_type=Compound";
+			url="https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/annotations/heading/JSON?heading="+heading+"&page="+page+"&heading_type=Compound";
 			json=FileUtilities.getText(url);
 			writeFile(folder, heading, page, json);
 			try {
@@ -422,7 +460,7 @@ public class GetCIDsFromProperty {
 	public static void main(String[] args) {
 		GetCIDsFromProperty g=new GetCIDsFromProperty();
 		
-//		String folder="data\\experimental\\PubChem_2024_11_27\\json\\physchem\\";
+		String folder="data\\experimental\\PubChem_2024_11_27\\json\\physchem\\";
 		
 //		g.renameFilesFolder(folder);
 //		g.getAnnotationJsons("Henry's Law Constant", folder);
@@ -437,11 +475,12 @@ public class GetCIDsFromProperty {
 //		g.getAnnotationJsons("Flash Point", folder);
 //		g.getAnnotationJsons("Autoignition Temperature", folder);
 //		g.getAnnotationJsons("Vapor Density", folder);
+		g.getAnnotationJsons("Soil Adsorption / Mobility", folder);
 
 //		HashSet<Long>cidsNew=g.getCidsFromFolder(folder);
 //		System.out.println(cidsNew.size());
 
-		String folder="data\\experimental\\PubChem_2024_11_27\\json\\toxicity\\";
+//		String folder="data\\experimental\\PubChem_2024_11_27\\json\\toxicity\\";
 //		g.renameFilesFolder(folder);
 //		g.getAnnotationJsons("Toxicity+Data", folder);//		
 //		g.getAnnotationJsons("Acute+Effects", folder);

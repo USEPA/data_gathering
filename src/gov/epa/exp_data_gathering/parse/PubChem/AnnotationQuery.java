@@ -331,7 +331,7 @@ public class AnnotationQuery {
 	
 	public static void main(String[] args) {
 		AnnotationQuery r = new AnnotationQuery();
-//		r.loadFromAnnotationJsons();
+		r.loadFromAnnotationJsons();
 		r.loadIdentifiersForAnnotation_cids();
 	}
 

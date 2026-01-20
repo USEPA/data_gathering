@@ -654,7 +654,7 @@ public class RecordBurkhard {
 			pv.parameter.name="Exposure duration";
 //			pv.parameter.name="Observation duration";//to be consisent with ecotox
 			pv.unit.abbreviation="days";
-			pv.valuePointEstimate=Double.parseDouble(days_of_uptake);
+			pv.value_point_estimate=Double.parseDouble(days_of_uptake);
 			er.parameter_values.add(pv);
 		}
 		
@@ -684,7 +684,7 @@ public class RecordBurkhard {
 			}
 			
 			if(Concentration_in_Water_mean.contains("<")) {
-				pv.valueQualifier="<";
+				pv.value_qualifier="<";
 				Concentration_in_Water_mean=Concentration_in_Water_mean.replace("<", "");
 			}
 			
@@ -703,27 +703,27 @@ public class RecordBurkhard {
 				}
 
 				if(Concentration_in_Water_units!=null && (Concentration_in_Water_units.equals("ug/L") || Concentration_in_Water_units.equals("ppb") || Concentration_in_Water_units.equals("ng/g") || Concentration_in_Water_units.equals("ng/ml"))) {
-					pv.valuePointEstimate=dConc/1e6;
+					pv.value_point_estimate=dConc/1e6;
 					pv.unit.abbreviation=ExperimentalConstants.str_g_L;			
 				} else if(Concentration_in_Water_units!=null && (Concentration_in_Water_units.equals("mg/L") || Concentration_in_Water_units.equals("ppm"))) {
-					pv.valuePointEstimate=dConc/1000;
+					pv.value_point_estimate=dConc/1000;
 					pv.unit.abbreviation=ExperimentalConstants.str_g_L;	
 				} else if(Concentration_in_Water_units!=null && Concentration_in_Water_units.equals("ng/L")) {
-					pv.valuePointEstimate=dConc/1e9;
+					pv.value_point_estimate=dConc/1e9;
 					pv.unit.abbreviation=ExperimentalConstants.str_g_L;	
 				} else if(Concentration_in_Water_units!=null && Concentration_in_Water_units.equals("pg/L")) {
-					pv.valuePointEstimate=dConc/1e12;
+					pv.value_point_estimate=dConc/1e12;
 					pv.unit.abbreviation=ExperimentalConstants.str_g_L;	
 				} else {
 					System.out.println("Else, units="+Concentration_in_Water_units);
 					pv.unit.abbreviation=Concentration_in_Water_units;
-					pv.valuePointEstimate=dConc;
+					pv.value_point_estimate=dConc;
 				}
 				
-//				System.out.println("Point estimate\t"+pv.valuePointEstimate+"\t"+pv.unit.abbreviation);
+//				System.out.println("Point estimate\t"+pv.value_point_estimate+"\t"+pv.unit.abbreviation);
 				
 			} catch (Exception ex) {
-				pv.valueText=Concentration_in_Water_mean;
+				pv.value_text=Concentration_in_Water_mean;
 				pv.unit.abbreviation=Concentration_in_Water_units;
 //				System.out.println("Cant parse:\t"+Concentration_in_Water_mean+"\t"+pv.valueText+"\t"+pv.unit.abbreviation+"\t"+Concentration_in_Water_MDL);
 				return;//not useful

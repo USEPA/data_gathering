@@ -312,7 +312,7 @@ public class RecordArnot2006 {
 		
 		pv.unit.abbreviation="days";
 		double wc=Double.parseDouble(exposure_duration_days);					
-		pv.valuePointEstimate=wc;
+		pv.value_point_estimate=wc;
 		
 		er.parameter_values.add(pv);
 
@@ -435,12 +435,12 @@ public class RecordArnot2006 {
 					
 					water_concentration_mean_ug_L=water_concentration_mean_ug_L.replace(badUnit,"");
 					if(water_concentration_mean_ug_L.isBlank())return;//no value
-					pv.valuePointEstimate=Double.parseDouble(water_concentration_mean_ug_L);
+					pv.value_point_estimate=Double.parseDouble(water_concentration_mean_ug_L);
 					
 					if(pv.unit.abbreviation.equals("mBq/mL")) {
 //						System.out.println("Converting mBq/mL");
 						pv.unit.abbreviation="Bq/mL";
-						pv.valuePointEstimate/=1000.0;	
+						pv.value_point_estimate/=1000.0;	
 					}
 
 					break;
@@ -450,7 +450,7 @@ public class RecordArnot2006 {
 			if(pv.unit.abbreviation==null) {//the g/L ones
 				pv.unit.abbreviation=ExperimentalConstants.str_g_L;
 				double wc=Double.parseDouble(water_concentration_mean_ug_L);					
-				pv.valuePointEstimate=wc*1e-6;
+				pv.value_point_estimate=wc*1e-6;
 				//	System.out.println(pv.valuePointEstimate+" g/L");
 			}
 			

@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.DsstoxLookup;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.api.DsstoxLookup.DsstoxRecord;
@@ -64,6 +66,9 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 	public Double medianValue=null;
 
 	public ExperimentalRecords() { }
+	
+	transient static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+
 	
 	
 	void addDtxsids() {
@@ -237,7 +242,83 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 			}
 		}
 		
-		System.out.println("Number of kep unique chemicals with CAS="+htER.size());
+		System.out.println("Number of kept unique chemicals with CAS="+htER.size());
+		return htER;
+	}
+	
+public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByName(String desiredUnits,boolean omitbadQualifer) {
+		
+		Hashtable<String,ExperimentalRecords>htER=new Hashtable<>();
+		
+		for (ExperimentalRecord er:this)  {
+			
+			if(!er.keep) continue;
+			
+			if(omitbadQualifer && er.property_value_numeric_qualifier!=null 
+					&& !er.property_value_numeric_qualifier.equals("~")) continue;
+			
+			//Only use the ones with desiredUnits in the stats calcs:
+			if(er.property_value_units_final.equals(desiredUnits) || desiredUnits==null) {
+//				System.out.println(er.casrn+"\t"+er.property_value_point_estimate_final);
+				
+				String key=er.chemical_name;
+//				if(key==null)key=er.chemical_name;
+				if(key==null)continue;
+				
+				if(htER.containsKey(key)) {
+					ExperimentalRecords recs=htER.get(key);
+					recs.add(er);	
+					
+				} else {
+					ExperimentalRecords recs=new ExperimentalRecords();
+					recs.add(er);
+					htER.put(key, recs);
+				}
+				
+			}
+		}
+		
+		System.out.println("Number of kept unique chemicals with name="+htER.size());
+		return htER;
+	}
+	
+	
+public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(String propertyName, String desiredUnits,boolean omitbadQualifer) {
+		
+		Hashtable<String,ExperimentalRecords>htER=new Hashtable<>();
+		
+		for (ExperimentalRecord er:this)  {
+			
+			if(!er.keep) continue;
+			
+			if(!er.property_name.equals(propertyName)) continue;
+			
+			
+			if(omitbadQualifer && er.property_value_numeric_qualifier!=null 
+					&& !er.property_value_numeric_qualifier.equals("~")) continue;
+			
+			//Only use the ones with desiredUnits in the stats calcs:
+			if(er.property_value_units_final.equals(desiredUnits) || desiredUnits==null) {
+//				System.out.println(er.casrn+"\t"+er.property_value_point_estimate_final);
+				
+				String key=er.casrn;
+//				if(key==null)key=er.chemical_name;
+				if(key==null)continue;
+				
+				if(htER.containsKey(key)) {
+					ExperimentalRecords recs=htER.get(key);
+					recs.add(er);	
+					
+				} else {
+					ExperimentalRecords recs=new ExperimentalRecords();
+					recs.add(er);
+					htER.put(key, recs);
+				}
+				
+			}
+		}
+		
+		System.out.println("Number of kept unique chemicals with CAS="+htER.size());
 		return htER;
 	}
 
@@ -351,23 +432,24 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 	
 	public static Hashtable<String,Double> calculateMedian(Hashtable<String, ExperimentalRecords> htER, boolean convertToLog) {
 		Hashtable<String,Double> htMedian=new Hashtable<>();
-		for (String dtxsid:htER.keySet()) {
+		for (String key:htER.keySet()) {
 			
-			if(dtxsid==null || dtxsid.equals("-")) continue;
+			if(key==null || key.equals("-")) continue;
 			
-			Double median=ExperimentalRecords.calculateMedian(htER.get(dtxsid),convertToLog);//TODO need to determine SD when converted to log values			
+			Double median=ExperimentalRecords.calculateMedian(htER.get(key),convertToLog);//TODO need to determine SD when converted to log values			
+
 			if(median==null) continue;
 
 //			System.out.println(dtxsid+"\t"+median);
 			
-			htMedian.put(dtxsid, median);
+			htMedian.put(key, median);
 		}
 		return htMedian;
 	}
 	
 
 	
-	private static Double calculateMedian(List<ExperimentalRecord> records, boolean convertToLog) {
+	public static Double calculateMedian(List<ExperimentalRecord> records, boolean convertToLog) {
 
 		List<Double>values=new ArrayList<>();
 		
@@ -586,7 +668,7 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 	private void writeSheet(List<String> headers, String sheetName, boolean keep, Workbook wb, CellStyle styleURL) {
 		Sheet recSheet = wb.createSheet(sheetName);
 		Row recSubtotalRow = recSheet.createRow(0);
-		Row recHeaderRow = recSheet.createRow(1);
+		Row recHeaderRow = recSheet.createRow(2);
 		CellStyle style = wb.createCellStyle();
 		Font font = wb.createFont();;//Create font
 		font.setBold(true);//Make font bold
@@ -597,8 +679,12 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 			Cell recCell = recHeaderRow.createCell(i);
 			recCell.setCellValue(headers.get(i));
 			recCell.setCellStyle(style);
+			recSheet.autoSizeColumn(i);//set width based on just the header
+			recSheet.setColumnWidth(i, recSheet.getColumnWidth(i)+2*256);
 		}
-		int recCurrentRow = 2;
+		
+		
+		int recCurrentRow = 3;
 		for (ExperimentalRecord er:this) {
 			if (!er.keep==keep) continue;
 
@@ -606,11 +692,14 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 			//			Class htClass = er.experimental_parameters.getClass();
 			//			Class lsClass=  er.literatureSource.getClass();
 
-
-
 			Row row = recSheet.createRow(recCurrentRow);
 			recCurrentRow++;
 
+			
+//			if(er.publicSource!=null && er.publicSource.name.equals("Mackay_2006")) {
+//				System.out.println("\n"+er.chemical_name+"\t"+JsonUtilities.gsonPretty.toJson(er.parameter_values));
+//			}
+			
 			for (int i = 0; i < headers.size(); i++) {
 
 				Object value = null;
@@ -620,9 +709,9 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 
 						String fieldName=headers.get(i).replace("exp_param_","");
 						
-						if(er.experimental_parameters.containsKey(fieldName)) {
+						if(er.experimental_parameters!=null && er.experimental_parameters.containsKey(fieldName)) {
 							value = er.experimental_parameters.get(fieldName);	
-						} else {
+						} else if(er.parameter_values!=null){
 							for (ParameterValue pv:er.parameter_values) {
 								if(pv.parameter.name.equals(fieldName)) {
 									value=pv.toString();
@@ -630,6 +719,10 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 								}
 							}
 						}
+						
+//						if(er.publicSource!=null && er.publicSource.name.equals("Mackay_2006") && er.chemical_name.equals("Benzene")) {
+//							System.out.println("Benzene\t"+fieldName+"\t"+value);
+//						}
 
 					} else if(headers.get(i).contains("literature_source_")) {
 						String fieldName=headers.get(i).replace("literature_source_","");
@@ -647,7 +740,12 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 							Field field = er.publicSourceOriginal.getClass().getDeclaredField(fieldName);
 							value = field.get(er.publicSourceOriginal);
 						}
-
+					} else if(headers.get(i).contains("public_source_")) {
+						String fieldName=headers.get(i).replace("public_source_","");
+						if(er.publicSource!=null) {
+							Field field = er.publicSource.getClass().getDeclaredField(fieldName);
+							value = field.get(er.publicSource);
+						}
 					} else {
 						Field field = er.getClass().getDeclaredField(headers.get(i));
 						value = field.get(er);
@@ -703,12 +801,12 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 		}
 		
 		String lastCol = CellReference.convertNumToColString(headers.size()-1);
-		recSheet.setAutoFilter(CellRangeAddress.valueOf("A2:"+lastCol+recCurrentRow));
-		recSheet.createFreezePane(0, 2);
+		recSheet.setAutoFilter(CellRangeAddress.valueOf("A3:"+lastCol+recCurrentRow));
+		recSheet.createFreezePane(0, 3);
 		
 		for (int i = 0; i < headers.size(); i++) {
 			String col = CellReference.convertNumToColString(i);
-			String recSubtotal = "SUBTOTAL(3,"+col+"$3:"+col+"$"+(recCurrentRow+1)+")";
+			String recSubtotal = "SUBTOTAL(3,"+col+"$4:"+col+"$"+(recCurrentRow)+")";
 			recSubtotalRow.createCell(i).setCellFormula(recSubtotal);
 		}
 	}
@@ -746,20 +844,25 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 //			System.out.println(fieldNames.get(fieldNames.size()-1));
 		}
 		
-		String []ls_fields= {"name","citation","url","doi"};
 		
-		for (String ls_field:ls_fields) {
-			if(!fieldNames.contains("literature_source_"+ls_field))
-				fieldNames.add("literature_source_"+ls_field);			
+		String []ps_fields= {"name","description", "url"};
+		for (String ps_field:ps_fields) {
+			if(!fieldNames.contains("public_source_"+ps_field))
+				fieldNames.add("public_source_"+ps_field);			
 		}
-		
-		String []ps_fields= {"name","url"};
-		
+
 		for (String ps_field:ps_fields) {
 			if(!fieldNames.contains("public_source_original_"+ps_field))
 				fieldNames.add("public_source_original_"+ps_field);			
 		}
+		
+		String []ls_fields= {"name","citation","url","doi"};
+		for (String ls_field:ls_fields) {
+			if(!fieldNames.contains("literature_source_"+ls_field))
+				fieldNames.add("literature_source_"+ls_field);			
+		}
 
+		
 		
 //		fieldNames.add("lit_source_citation");
 		
@@ -923,7 +1026,11 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 		return recordsBad;
 	}
 
+	
 	public static ExperimentalRecords loadFromJSON(String jsonFilePath) {
+		return loadFromJSON(jsonFilePath,"UTF-8");
+	}
+	public static ExperimentalRecords loadFromJSON(String jsonFilePath,String charset) {
 
 		try {
 			Gson gson = new Gson();
@@ -934,7 +1041,7 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 				return null;
 			}
 
-			ExperimentalRecords chemicals = gson.fromJson(new FileReader(jsonFilePath), ExperimentalRecords.class);			
+			ExperimentalRecords chemicals = gson.fromJson(new FileReader(jsonFilePath,Charset.forName(charset)), ExperimentalRecords.class);			
 			return chemicals;
 
 		} catch (Exception ex) {
@@ -1096,12 +1203,19 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 		return records;
 	}
 	
-	
 	public static ExperimentalRecords getExperimentalRecords(String sourceName, String subfolder) {
+		return getExperimentalRecords(sourceName, subfolder,"UTF-8");
+	}
+	
+	public static ExperimentalRecords getExperimentalRecords(String sourceName, String subfolder,String charset) {
 		String folder="data\\experimental\\"+sourceName+"\\";
 		if(subfolder!=null) folder+=subfolder+"\\";
 		
 		File Folder=new File(folder);
+		
+		if(!Folder.exists()) {
+			System.out.println(folder+" doesnt exist");
+		}
 
 		System.out.println(folder);
 		
@@ -1110,12 +1224,16 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 		//TODO need to flag case where we accidentally have both numbered and non numbered jsons due to multiple parse runs with diff code
 		
 		for(File file:Folder.listFiles()) {
+			if(!file.getName().contains("Experimental Records")) continue;
 			if(!file.getName().contains(".json")) continue;
 			if(file.getName().contains("Bad")) continue;
-			if(file.getName().contains("Original Records")) continue;
-			ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(file.getAbsolutePath());
+			if(file.getName().toLowerCase().contains("original records")) continue;
+			
+//			System.out.println(file.getAbsolutePath());
+			
+			ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(file.getAbsolutePath(),charset);
 
-			System.out.println(file.getName()+"\t"+subfolder+"\t"+experimentalRecords.size());
+			System.out.println(sourceName+"\t"+file.getName()+"\t"+subfolder+"\t"+experimentalRecords.size());
 			records.addAll(experimentalRecords);
 		}
 		
@@ -1123,12 +1241,16 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 		return records;
 	}
 	
-	public static ExperimentalRecords getExperimentalRecordsBad(String sourceName, String subfolder) {
+	public static ExperimentalRecords getExperimentalRecordsBad(String sourceName, String subfolder,String charset) {
 		String folder="data\\experimental\\"+sourceName+"\\";
 		if(subfolder!=null) folder+=subfolder+"\\";
 		String filepath1=folder+sourceName+" Experimental Records-Bad.json";
-		ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(filepath1);
+		ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(filepath1,charset);
 		return experimentalRecords;
+	}
+
+	public static ExperimentalRecords getExperimentalRecordsBad(String sourceName, String subfolder) {
+		return getExperimentalRecordsBad(sourceName, subfolder, "UTF-8");
 	}
 
 	

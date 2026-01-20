@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.CDL;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -367,7 +368,8 @@ public class DriverOChem {
 				}
 				JsonObject jo = new JsonObject();
 
-				for (int j = 0; j < row.getLastCellNum(); j++) {
+//				for (int j = 0; j < row.getLastCellNum(); j++) {
+				for (int j = 0; j < headers.size(); j++) {
 					Cell cell = row.getCell(j);
 					
 					if(cell==null) continue;
@@ -552,6 +554,12 @@ public class DriverOChem {
 			propertyNumber = 2;
 			desiredUnits = "Log unit";
 			break;
+
+		case ExperimentalConstants.strLogKoc:
+			propertyNumber = 583;
+			desiredUnits = "Log unit";
+			break;
+
 		case ExperimentalConstants.strHenrysLawConstant:
 			propertyNumber = 257;
 			desiredUnits = "m^(3)*Pa/mol";
@@ -574,30 +582,100 @@ public class DriverOChem {
 		String [] results= {propertyNumber+"",desiredUnits};
 		return results;
 	}
+	
+	
+	void getKocArticles() {
+		
+		String folderPath="data\\experimental\\OChem_2024_04_03\\excel files";
+		File file=new File(folderPath+"\\LogKoc.xls");
+		String filePathArticleJson=folderPath+"\\LogKoc references.json";
+		
+		
+		List<String>articleIds=getArticleIdsFromOchemFile(file.getAbsolutePath());
+		
+		System.out.println(articleIds);
+		
+//		String chromeDriverPath = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\driver latest\\chromedriver.exe";
+//		JsonArray ja=getReferences(articleIds, chromeDriverPath);		
+//		saveReferencesArray(filePathArticleJson, ja);
+
+		JsonArray ja=loadReferencesArray(filePathArticleJson);	
+		
+        String excelFilePath = folderPath+"\\LogKoc references.xlsx"; // Path to save the Excel file
+
+	        try {
+
+	            // Create Excel workbook and sheet
+	            Workbook workbook = new XSSFWorkbook();
+	            Sheet sheet = workbook.createSheet("Articles");
+
+	            // Create header row
+	            Row headerRow = sheet.createRow(0);
+	            headerRow.createCell(0).setCellValue("Title");
+	            headerRow.createCell(1).setCellValue("Authors");
+	            headerRow.createCell(2).setCellValue("Journal reference");
+	            headerRow.createCell(3).setCellValue("PubMed reference");
+	            headerRow.createCell(4).setCellValue("Internal identifier");
+
+	            // Populate rows with data
+	            int rowIndex = 1;
+	            
+	            for(JsonElement je:ja) {
+	                
+	            	JsonObject article=je.getAsJsonObject();
+	                Row row = sheet.createRow(rowIndex++);
+	                row.createCell(0).setCellValue(article.get("Title").getAsString());
+	                row.createCell(1).setCellValue(article.get("Authors").getAsString());
+	                row.createCell(2).setCellValue(article.get("Journal reference").getAsString());
+	                
+	                if(article.get("PubMed reference")!=null)	                
+	                	row.createCell(3).setCellValue(article.get("PubMed reference").getAsString());
+	                
+	                row.createCell(4).setCellValue(article.get("Internal identifier").getAsString());
+	            }
+
+	            // Write to Excel file
+	            try (FileOutputStream fileOut = new FileOutputStream(excelFilePath)) {
+	                workbook.write(fileOut);
+	            }
+
+	            System.out.println("Excel file created successfully: " + excelFilePath);
+
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+		
+	}
+	
 	public static void main(String[] args) {
 		DriverOChem d=new DriverOChem();
 		
-		String chromeDriverPath = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\driver\\chromedriver.exe";
-		System.out.println(new File(chromeDriverPath).exists());
+//		String chromeDriverPath = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\driver latest\\chromedriver.exe";
+//		System.out.println(new File(chromeDriverPath).exists());
 		
 //		d.scrapeOChem(ExperimentalConstants.strDMSOSolubility,1,2,chromeDriverPath); 
 //		d.scrapeOChem(ExperimentalConstants.strMeltingPoint, 1, 350, chromeDriverPath);//
 //		d.scrapeOChem(ExperimentalConstants.strDensity, 351, 675, chromeDriverPath);//675
 		
 		
+//		d.scrapeOChem("LogKoc",1,53,chromeDriverPath); 
+		
 //		if(true)return;
 		
-		String folderPath="data\\experimental\\OChem_2024_04_03\\excel files";
-		String filePathArticleJson=folderPath+File.separator+"article_lookup.json";
-		List<String>articleIds=d.getArticleIdsFromFolder(folderPath);
-//		List<String> articleIds = Arrays.asList("68601");
-		JsonArray ja=d.getReferences(articleIds, chromeDriverPath);		
-		d.saveReferencesArray(filePathArticleJson, ja);
+//		String folderPath="data\\experimental\\OChem_2024_04_03\\excel files";
+//		String filePathArticleJson=folderPath+File.separator+"article_lookup.json";
+//		List<String>articleIds=d.getArticleIdsFromFolder(folderPath);
+////		List<String> articleIds = Arrays.asList("68601");
+//		JsonArray ja=d.getReferences(articleIds, chromeDriverPath);		
+//		d.saveReferencesArray(filePathArticleJson, ja);
 		
 //		JsonArray ja=d.loadReferencesArray(filePathArticleJson);		
-		List<ReferenceOChem>refs=d.getReferenceList(ja);
+//		List<ReferenceOChem>refs=d.getReferenceList(ja);
 //		System.out.println(gson.toJson(refs));
 //		System.out.println(ja.size());
+		
+		d.getKocArticles();
+		
 		
 	}
 

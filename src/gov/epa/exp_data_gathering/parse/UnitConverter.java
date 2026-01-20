@@ -149,7 +149,8 @@ public class UnitConverter {
 				|| er.property_name.equals(ExperimentalConstants.strBIODEG_HL_HC)) {
 			convertKm(er);
 		} else if (er.property_name.equals(ExperimentalConstants.strKOC)
-//				|| er.property_name.equals(ExperimentalConstants.strBCF)
+				|| er.property_name.equals(ExperimentalConstants.strKd)
+				//				|| er.property_name.equals(ExperimentalConstants.strBCF)
 //				|| er.property_name.equals(ExperimentalConstants.strBAF)) {
 				|| er.property_name.toLowerCase().contains("bioconcentration factor")
 				|| er.property_name.toLowerCase().contains("bioaccumulation factor")) {
@@ -489,13 +490,15 @@ public class UnitConverter {
 	 * 
 	 * @param er
 	 */
-	private void convertBCF(ExperimentalRecord er) {
+	public void convertBCF(ExperimentalRecord er) {
 		
 //		System.out.println("enter convert bcf");
 		
 		if (er.property_value_units_original.equals(ExperimentalConstants.str_L_KG)) {
+		
 			assignFinalFieldsWithoutConverting(er);
 			er.property_value_units_final = ExperimentalConstants.str_L_KG;
+			
 		
 //		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_L_g)) {
 			//TODO TMM: Some of these L_g values are way off if we convert them- perhaps a typo?
@@ -938,6 +941,26 @@ public class UnitConverter {
 				er.property_value_units_final = ExperimentalConstants.str_g_L;
 				er.updateNote("Converted using density: " + density + " g/mL");
 			}
+//		} else if (er.property_value_units_original.equals("mL/100mL")) {
+//			if (er.casrn == null || htDensity.get(er.casrn) == null) {
+//				er.flag = true;
+//				er.updateNote("Conversion to g/L not possible (missing density)");
+//
+//				missingDensityCasrns.add(er.casrn);
+//				
+//				if(printMissingDensityCas)
+//					System.out.println(er.casrn + "\tConversion to g/L not possible (missing density)");
+//
+//				assignFinalFieldsWithoutConverting(er);
+//				er.property_value_units_final = er.property_value_units_original;
+//				return false;
+//			} else {
+//				double density = htDensity.get(er.casrn);
+////					System.out.println(er.casrn+"\tConversion to mg/L using density="+density);
+//				convertAndAssignFinalFields(er, density*10.0);
+//				er.property_value_units_final = ExperimentalConstants.str_g_L;
+//				er.updateNote("Converted using density: " + density + " g/mL");
+//			}
 		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_mL_L)
 				||er.property_value_units_original.equals("ul/ml")
 				||er.property_value_units_original.equals("AI ml/L")) {

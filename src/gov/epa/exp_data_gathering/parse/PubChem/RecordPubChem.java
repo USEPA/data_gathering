@@ -427,6 +427,8 @@ public class RecordPubChem {
 				return ExperimentalConstants.strVaporDensity;
 			} else if (propertyName.equals("Viscosity")) {
 				return ExperimentalConstants.strViscosity;
+			} else if (propertyName.equals("Soil Adsorption/Mobility")) {
+				return ExperimentalConstants.strKOC;
 			} else if (propertyName.equals("LogP")) {
 				return ExperimentalConstants.strLogKOW;
 			} else if (propertyName.equals(ExperimentalConstants.str_pKA)) {

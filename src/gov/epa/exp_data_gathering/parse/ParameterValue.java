@@ -13,12 +13,13 @@ public class ParameterValue {//Simplified version of hibernate class
 	public Parameter parameter=new Parameter();
 	public ExpPropUnit unit=new ExpPropUnit();
 
-	public String valueQualifier;
-	public Double valuePointEstimate;
-	public Double valueMin;
-	public Double valueMax;
-	public String valueText;
-	public Double valueError;
+	public String value_qualifier;
+	public Double value_point_estimate;
+	public Double value_min;
+	public Double value_max;
+	public String value_text;
+	public Double value_error;
+	
 	
 	public class Parameter {
 		public String name;
@@ -68,22 +69,24 @@ public class ParameterValue {//Simplified version of hibernate class
 	public String toString() {
 		
 		int n=3;
-		String pointEstimate=getFormattedValue(valuePointEstimate,n);
-		String strValMin=getFormattedValue(valueMin,n);
-		String strValMax=getFormattedValue(valueMax,n);
+		String pointEstimate=getFormattedValue(value_point_estimate,n);
+		String strValMin=getFormattedValue(value_min,n);
+		String strValMax=getFormattedValue(value_max,n);
 
-		if(valuePointEstimate!=null) {
-			if(valueQualifier!=null) {
-				return valueQualifier+" "+pointEstimate+" "+unit.abbreviation;
+		if(value_point_estimate!=null) {
+			if(value_qualifier!=null) {
+				return value_qualifier+" "+pointEstimate+" "+unit.abbreviation;
 			} else {
 				return pointEstimate+" "+unit.abbreviation;
 			}
-		} else if (valueMin!=null && valueMax!=null) {
+		} else if (value_min!=null && value_max!=null) {
 			return strValMin+ " "+unit.abbreviation+" < value < " +strValMax+ " "+unit.abbreviation;
-		} else if (valueMin!=null) {
+		} else if (value_min!=null) {
 			return " > "+strValMin+" "+unit.abbreviation;
-		} else if (valueMax!=null) {
+		} else if (value_max!=null) {
 			return " < "+strValMax+" "+unit.abbreviation;	
+		} else if (value_text!=null) {
+			return value_text;
 		} else {
 			return null;
 		}
@@ -93,21 +96,21 @@ public class ParameterValue {//Simplified version of hibernate class
 	public String toStringNoUnits() {
 		
 		int n=3;
-		String pointEstimate=getFormattedValue(valuePointEstimate,n);
-		String strValMin=getFormattedValue(valueMin,n);
-		String strValMax=getFormattedValue(valueMax,n);
+		String pointEstimate=getFormattedValue(value_point_estimate,n);
+		String strValMin=getFormattedValue(value_min,n);
+		String strValMax=getFormattedValue(value_max,n);
 
-		if(valuePointEstimate!=null) {
-			if(valueQualifier!=null) {
-				return valueQualifier+" "+pointEstimate;
+		if(value_point_estimate!=null) {
+			if(value_qualifier!=null) {
+				return value_qualifier+" "+pointEstimate;
 			} else {
 				return pointEstimate;
 			}
-		} else if (valueMin!=null && valueMax!=null) {
+		} else if (value_min!=null && value_max!=null) {
 			return strValMin+ " - " +strValMax;
-		} else if (valueMin!=null) {
+		} else if (value_min!=null) {
 			return " > "+strValMin;
-		} else if (valueMax!=null) {
+		} else if (value_max!=null) {
 			return " < "+strValMax;	
 		} else {
 			return null;
