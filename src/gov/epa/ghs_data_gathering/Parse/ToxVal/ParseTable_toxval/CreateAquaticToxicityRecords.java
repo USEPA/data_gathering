@@ -546,10 +546,10 @@ public class CreateAquaticToxicityRecords {
 				sr.rationale = sr.testType + " < 1 mg/L";
 			} else if (dose >= 1 && dose <= 10) {
 				sr.score = ScoreRecord.scoreH;
-				sr.rationale = "1 mg/kg <= "+sr.testType+" <=10 mg/L";
+				sr.rationale = "1 mg/L <= "+sr.testType+" <=10 mg/L";
 			} else if (dose > 10 && dose <= 100) {
 				sr.score = ScoreRecord.scoreM;
-				sr.rationale = "10 mg/kg < "+sr.testType+" <=100 mg/L";
+				sr.rationale = "10 mg/L < "+sr.testType+" <=100 mg/L";
 			} else if (dose > 100) {
 				sr.score = ScoreRecord.scoreL;
 				sr.rationale = sr.testType+" > 100 mg/L";
