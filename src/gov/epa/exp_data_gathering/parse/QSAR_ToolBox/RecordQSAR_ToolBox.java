@@ -1112,7 +1112,7 @@ public class RecordQSAR_ToolBox {
 		//		}
 
 		if(strGuidelinesQualifiers!=null && strGuidelinesQualifiers.length()>0) {
-			er.experimental_parameters.put("Guideline", strGuidelinesQualifiers);
+			er.experimental_parameters.put("Test guideline", strGuidelinesQualifiers);
 		}
 
 

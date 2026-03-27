@@ -433,6 +433,11 @@ public class RecordKoc {
 
 			try {
 				
+				if(soilPercentOrganicCarbon.equals("0.8;0.9;1.8;3.9")) {
+					soilPercentOrganicCarbon="0.8-3.9";
+				}
+ 				
+				
 				if (soilPercentOrganicCarbon.contains("-")) {
 					String []vals=soilPercentOrganicCarbon.split("-");
 					pv.value_min=Double.parseDouble(vals[0]);

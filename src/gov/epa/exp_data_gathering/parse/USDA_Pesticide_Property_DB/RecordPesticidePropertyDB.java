@@ -22,8 +22,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
+import gov.epa.exp_data_gathering.parse.JSONUtilities;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.ParameterValue.ExpPropUnit;
 import gov.epa.exp_data_gathering.parse.ParameterValue.Parameter;
@@ -643,6 +645,11 @@ public class RecordPesticidePropertyDB {
 	ExperimentalRecord toExperimentalRecord() {
 
 		ExperimentalRecord er = new ExperimentalRecord();
+
+		er.source_name = RecordPesticidePropertyDB.sourceName;
+		er.property_value_string = koc;
+		er.property_name = ExperimentalConstants.strKOC;
+
 		er.date_accessed = "10/3/2025";
 		er.keep = true;
 		er.casrn = casrn;
@@ -660,18 +667,43 @@ public class RecordPesticidePropertyDB {
 			System.out.println(er.casrn+"\t"+er.chemical_name+"\tinvalid cas");
 		}
 		
-
 		PublicSource ps=new PublicSource();
 		ps.url="https://www.ars.usda.gov/northeast-area/beltsville-md-barc/beltsville-agricultural-research-center/adaptive-cropping-systems-laboratory/docs/ppd/pesticide-properties-database/";
 		ps.name="The ARS Pesticide Properties Database";
 		er.publicSource=ps;
 
+		addLiteratureSource(er);
+		
+		addParameters(er);
 
-		er.property_value_string = koc;
-		er.property_name = ExperimentalConstants.strKOC;
+		//		er.temperature_C=rs.temperature;
+		// er.original_source_name = rs.referenceAbbreviated.get(i);
 		
 		handleKoc(er);
+		uc.convertRecord(er);
+
+		if(source!=null && source.equals("Calculated")) {
+			er.keep=false;
+			er.updateReason("calculated");
+		}
 		
+		if(er.property_value_point_estimate_final==null &&  er.property_value_min_final==null && er.property_value_max_final==null) {
+			er.keep=false;
+			er.updateReason("No property value");
+		}
+
+		if(er.chemical_name.equals("AMITRAZ") && er.property_value_point_estimate_original==4.1) {
+			er.keep=false;
+			er.updateReason("Can't find in the cited article");
+		}
+		
+
+		return er;
+	}
+
+
+
+	private void addParameters(ExperimentalRecord er) {
 		er.pH=pH;
 			
 		er.experimental_parameters=new TreeMap<>();
@@ -682,11 +714,8 @@ public class RecordPesticidePropertyDB {
 		if(percentageOrganicMatter!=null && !percentageOrganicMatter.isBlank()) {
 			try {
 				double POM=Double.parseDouble(percentageOrganicMatter);
-				
 				if(POM>0)				
 					er.experimental_parameters.put("Percentage_Organic_Matter",POM);
-				
-				
 			} catch (Exception ex) {
 				System.out.println(er.chemical_name+"\t"+percentageOrganicMatter+"\tparseError");
 			}
@@ -716,7 +745,7 @@ public class RecordPesticidePropertyDB {
 					
 					if(valuePointEstimate<20 || valuePointEstimate>30) {
 						er.keep=false;
-						er.reason="Invalid temperature";
+						er.updateReason("Invalid temperature");
 					}
 					er.temperature_C=valuePointEstimate;		
 //					er.parameter_values.add(pv);
@@ -735,55 +764,44 @@ public class RecordPesticidePropertyDB {
 				System.out.println("Couldnt parse temperature="+temperature);
 			}
 		}
-		
-		
-		
-		uc.convertRecord(er);
-		
-
-		//		er.temperature_C=rs.temperature;
-
-		er.source_name = RecordPesticidePropertyDB.sourceName;
-		// er.original_source_name = rs.referenceAbbreviated.get(i);
-
-		addLiteratureSource(er);
-		
-		if(source!=null && source.equals("Calculated")) {
-			er.keep=false;
-			er.reason="calculated";
-		}
-		
-		
-
-
-		if(er.keep&& er.property_value_point_estimate_final==null &&  er.property_value_min_final==null && er.property_value_max_final==null) {
-			er.keep=false;
-			er.reason="No property value";
-		}
-
-
-		return er;
 	}
 
 
 
 	private void handleKoc(ExperimentalRecord er) {
 
-		 
-		if(koc==null) {
-			//do nothing
-
-		} else if(koc.contains("SALT")) {
-			er.keep=false;
-			er.reason="Unspecified salt";
+		if (koc == null)
+			return;		
 		
-		} else if(koc.contains("*") && !koc.contains("**")) {
-			er.keep=false;
-			er.reason="Selected value";
 		
-		} else if(koc.contains("est")) {
+		if(koc.contains("**")) {
+			er.updateNote("calculated using a conversion factor of 1.9(%OM=1.9%OC) rather than 1.72");
+		} if(koc.contains("*")) {
+			er.updateNote("selected value where multiple values of a property are listed");
+		}
+		
+		koc=koc.replace("*", "");
+		
+		
+		if(koc.contains("SALT")) {
 			er.keep=false;
-			er.reason="Estimated";
+			er.updateReason("Unspecified salt");
+		
+//			System.out.println(JsonUtilities.gsonPretty.toJson(er));
+		
+		} else if(koc.toLowerCase().contains("est")) {
+			er.keep=false;
+			er.updateReason("Estimated");
+			
+			try {
+//			System.out.println(koc);
+				er.property_value_point_estimate_original=Double.parseDouble(koc.substring(0,koc.indexOf("(")));					
+			} catch (Exception ex) {
+				System.out.println("Here 2, Error parsing Koc="+koc);
+//				ex.printStackTrace();
+			}
+			
+			
 		} else if(koc.contains("(")) {
 			
 			String val=koc.substring(0,koc.indexOf("("));
@@ -845,11 +863,11 @@ public class RecordPesticidePropertyDB {
 		} else if(koc.contains("PARENT")) {
 			er.property_value_point_estimate_original=Double.parseDouble(koc.replace("PARENT", ""));
 			er.keep=false;
-			er.reason="Value is for parent compound";
+			er.updateReason("Value is for parent compound");
 
 		} else if(koc.contains("EST")) {
 			er.keep=false;
-			er.reason="Estimated";
+			er.updateReason("Estimated");
 		
 		} else if(koc.contains(">=")) {
 			er.property_value_point_estimate_original=Double.parseDouble(koc.replace(">=", ""));
@@ -893,18 +911,15 @@ public class RecordPesticidePropertyDB {
 //				System.out.println(val1+"\t"+val2);
 			}
 			
-		} else if(koc.contains("**")) {
-			
-			String value=koc.replace("*", "");
-			try {
-				er.property_value_point_estimate_original=Double.parseDouble(value);					
-			} catch (Exception ex) {
-				System.out.println("Error parsing Koc="+koc);
-//				ex.printStackTrace();
-			}
-
-
-				
+//		} else if(koc.contains("**")) {
+//			
+//			String value=koc.replace("*", "");
+//			try {
+//				er.property_value_point_estimate_original=Double.parseDouble(value);					
+//			} catch (Exception ex) {
+//				System.out.println("Error parsing Koc="+koc);
+////				ex.printStackTrace();
+//			}
 		} else {
 
 			try {
@@ -919,7 +934,7 @@ public class RecordPesticidePropertyDB {
 		
 		if(er.property_value_string!=null && er.property_value_string.equals("222,500")) {
 			er.keep=false;
-			er.reason="Value is ambiguous";
+			er.updateReason("Value is ambiguous");
 		}
 		
 		
@@ -927,17 +942,8 @@ public class RecordPesticidePropertyDB {
 		
 		if(er.property_value_point_estimate_original!=null && er.property_value_point_estimate_original==0.0) {
 			er.keep=false;
-			er.reason="Koc=0";
+			er.updateReason("Koc=0");
 		}
-		
-		
-		if(references.size()==0 && er.keep) {
-			er.keep=false;
-			er.reason="No reference";//does this happen?
-		} else {
-//			System.out.println(er.casrn+"\t"+koc+"\t"+reference);				
-		}
-
 		
 		
 	}
@@ -946,18 +952,22 @@ public class RecordPesticidePropertyDB {
 
 		er.reference= String.join("; ", references);
 		
+		if(er.reference.isBlank()) er.reference=null;
+		
+		er.document_name = er.reference;
+		
 		if(er.reference!=null) {
 			if(er.reference.equals("ENT") || er.reference.equals("RENT")) {
 				er.keep=false;
-				er.reason="Parent compound";
+				er.updateReason("Parent compound");
 			} else if(er.reference.equals("Wauchope")) {
 				er.keep=false;
-				er.reason="Duplicative of Wauchope 1992?";
+				er.updateReason("Duplicative of Wauchope 1992?");
 			} 
 				
-		} else if (er.keep && references.size()==0) {
+		} else if (references.size()==0) {
 			er.keep=false;
-			er.reason="Missing reference";
+			er.updateReason("Missing reference");
 		}
 		
 	}
