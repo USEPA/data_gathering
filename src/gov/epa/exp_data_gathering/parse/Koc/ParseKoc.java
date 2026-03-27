@@ -1,11 +1,6 @@
 package gov.epa.exp_data_gathering.parse.Koc;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -16,17 +11,12 @@ import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.Source;
 import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
-import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
 import gov.epa.exp_data_gathering.parse.ITRC.RecordITRC;
 import gov.epa.exp_data_gathering.parse.Mackay_2006.RecordMackay_2006;
 import gov.epa.exp_data_gathering.parse.Montgomery.RecordMontgomery;
-import gov.epa.exp_data_gathering.parse.OPERA.RecordOPERA;
-import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 import gov.epa.exp_data_gathering.parse.USDA_Pesticide_Property_DB.RecordPesticidePropertyDB;
-import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.ParseREACH_JSON_Files.RecordSorter;
 
 /**
  * 
@@ -77,7 +67,6 @@ public class ParseKoc extends Parse {
 			htRecsAll.put(RecordKoc.sourceName, recordsExperimental);
 
 			getExperimentalRecordsOtherSources(htRecsAll);
-//			runComparison(htRecsAll);
 
 			ExperimentalRecords allRecords = new ExperimentalRecords();// from all sources not just the one spreadsheet
 			String filepathChemreg = strFolder + "/excel files/Koc ChemReg curation.xlsx";
@@ -101,11 +90,18 @@ public class ParseKoc extends Parse {
 						er.updateReason("Could not map identifiers to DSSTox record");
 					}
 					
+					if(er.url!=null && er.url.contains("rushim.ru/books")) {
+						System.out.println(er.url);
+						er.url = null;
+					}
 					allRecords.add(er);
 				}
 			}
 
+			runComparison(htRecsAll);
+			
 			dm.saveMissingChemregToTextFiles(RecordKoc.sourceName);
+			dm.printMissingChemreg();
 
 			Hashtable<String, ExperimentalRecords> htER = allRecords
 					.createExpRecordHashtableBySID(ExperimentalConstants.str_L_KG);
@@ -143,7 +139,7 @@ public class ParseKoc extends Parse {
 				er.casrn="61949-77-7";
 			}
 			
-			System.out.println("Updated name from chemical form:"+er.chemical_name);
+//			System.out.println("Updated name from chemical form:"+er.chemical_name);
 		}
 	}
 
@@ -183,7 +179,7 @@ public class ParseKoc extends Parse {
 
 //			sources.add(new Source(RecordMackay_2006.sourceName,null));
 		Source sourceMackay = new Source(RecordMackay_2006.sourceName, null);
-		String erPathMackay = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 python\\model_management\\pf_data_gathering\\data\\experimental\\Mackay_2006\\Mackay_2006 Experimental Records.json";
+		String erPathMackay = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 python\\model_management\\pf_data_gathering\\data\\Mackay_2006\\Mackay_2006 Experimental Records.json";
 		sourceMackay.experimentalRecordsPath = erPathMackay;
 		sources.add(sourceMackay);
 
@@ -208,6 +204,9 @@ public class ParseKoc extends Parse {
 
 			if (source.experimentalRecordsPath != null) {
 				recsOther = ExperimentalRecords.loadFromJSON(source.experimentalRecordsPath);
+				
+				System.out.println("\n"+source.experimentalRecordsPath);
+				System.out.println(source.sourceName+"\t"+recsOther.size());
 			} else {
 				recsOther = ExperimentalRecords.getExperimentalRecords(source.sourceName, source.subfolder, "UTF-8");
 			}

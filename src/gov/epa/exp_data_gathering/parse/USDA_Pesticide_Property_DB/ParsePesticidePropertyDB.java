@@ -16,6 +16,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.Chemical;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
@@ -55,7 +56,15 @@ public class ParsePesticidePropertyDB extends Parse {
 			Iterator<RecordPesticidePropertyDB> it = recordsDB.iterator();
 			while (it.hasNext()) {
 				RecordPesticidePropertyDB r = it.next();
+				
 				ExperimentalRecord er = r.toExperimentalRecord();
+
+//				if(r.koc!=null && r.koc.contains("*")) {
+//					System.out.println(JsonUtilities.gsonPretty.toJson(r));
+//					System.out.println(JsonUtilities.gsonPretty.toJson(er)+"\n\n*****\n");
+//				}
+
+				
 				recordsExperimental.add(er);
 			}
 			
