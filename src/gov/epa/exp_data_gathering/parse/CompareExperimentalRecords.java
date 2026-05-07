@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 
 import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
 import gov.epa.exp_data_gathering.parse.Koc.RecordKoc;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 
@@ -644,7 +645,7 @@ public class CompareExperimentalRecords {
 		
 		private void compareKoc() {
 
-			printChemicalsInCommon=false;
+			printChemicalsInCommon=true;
 
 			String propertyName=ExperimentalConstants.strKOC;
 
@@ -654,12 +655,16 @@ public class CompareExperimentalRecords {
 //			sources1.add(new Source(RecordKoc.sourceName,null));
 //			sources2.add(new Source("OPERA2.8",null));//only has CAS not SID
 			
-			sources1.add(new Source(RecordKoc.sourceName,null));
-			sources2.add(new Source(RecordQSAR_ToolBox.sourceName,"Koc ECHA Reach"));//only has CAS not SID
+//			sources1.add(new Source(RecordKoc.sourceName,null));
+//			sources2.add(new Source(RecordQSAR_ToolBox.sourceName,"Koc ECHA Reach"));//only has CAS not SID
+			
+			sources1.add(new Source(RecordQSAR_ToolBox.sourceName,"Koc ECHA Reach"));//only has CAS not SID
+			sources2.add(new Source(RecordEChemPortal.sourceName,"Koc ECHA Reach"));//only has CAS not SID
 
 			
 			String units="L/kg";
-			cm.compare(sources1, sources2, propertyName, units,"sid");
+//			cm.compare(sources1, sources2, propertyName, units,"sid");
+			cm.compare(sources1, sources2, propertyName, units,"cas");
 
 		}
 		

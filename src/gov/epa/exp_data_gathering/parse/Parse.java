@@ -454,7 +454,7 @@ public class Parse {
 		try {
 			String jsonPath = jsonFolder + File.separator + fileNameJSON_Records;
 			
-//			System.out.println(records.size());
+			System.out.println(jsonPath+"\t"+records.size());
 			
 			howManyOriginalRecordsFiles = JSONUtilities.batchAndWriteJSON(records,jsonPath);
 		} catch (Exception ex) {
@@ -511,7 +511,7 @@ public class Parse {
 			break;
 		case ExperimentalConstants.strSourceEChemPortal:
 			System.out.println("Warning: Parsing eChemPortal Excel download results. Did you want eChemPortal API results instead?");
-			p = new ParseEChemPortal();
+			p = new ParseEChemPortal(null);
 			break;
 		case ExperimentalConstants.strSourceEChemPortalAPI:
 			if (recordTypeToParse.toLowerCase().contains("tox")) {

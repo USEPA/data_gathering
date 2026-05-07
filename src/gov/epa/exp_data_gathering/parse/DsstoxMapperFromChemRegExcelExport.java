@@ -146,42 +146,16 @@ public class DsstoxMapperFromChemRegExcelExport {
 			System.out.println(name);
 		}
 		
-		System.out.println("\nMissing chemReg names:");
+		System.out.println("\nMissing chemReg casrns:");
 		for(String casrn:missingChemregCASRNs) {
 			System.out.println(casrn);
 		} 
 	}
 
 	
-	private boolean hasBadName(ExperimentalRecord er) {
-				
-		
-		List<String> badNames = Arrays.asList("C16", "C12", "poly", "salt", "polymer", "nitrates", "alcohols",
-				"compounds", "similar", "terpenes", "reaction", "alkenes", "product", "esters", "generated", "branched",
-				"concentration", "copper", "available", "plastic", "ions", "acids", "potassium", "sodium", "donor",
-				"unnamed", "not applicable", "not reported", "sample");
-		
-		
-		String nameLC = er.chemical_name.toLowerCase();
-		for (String badName : badNames) {
-
-			if (nameLC.contains(badName)) {
-//					System.out.println("Has bad name: "+nameLC);
-				return true;
-			}
-		}
-		
-		return false;
-
-
-	}
-	
-	
 	private RecordChemReg getChemRegRecordForName(ExperimentalRecord er) {
 
 		if (er.chemical_name == null) return null;
-		if (hasBadName(er)) return null;;
-		
 		if (!htCR_Name.containsKey(er.chemical_name.toLowerCase())) {
 			if(er.keep) {
 				missingChemregNames.add(er.chemical_name.toLowerCase());	
@@ -225,13 +199,23 @@ public class DsstoxMapperFromChemRegExcelExport {
 		RecordChemReg recCR_name=getChemRegRecordForName(er);
 		RecordChemReg recCR_casrn=getChemRegRecordForCAS(er);
 
-		
+//		if(er.chemical_name!=null && er.chemical_name.equals("TCA-SODIUM")) {
+//			if(recCR_name!=null) {
+//				System.out.println("TCA-SODIUM"+"\t"+recCR_name.Found_By+"\t"+recCR_name.DSSTox_Substance_Id);
+//			}
+//			if(recCR_casrn!=null) {
+//				System.out.println("TCA-SODIUM"+"\t"+recCR_casrn.Found_By+"\t"+recCR_casrn.DSSTox_Substance_Id);
+//			}
+//		}
 		
 		if (recCR_name != null && recCR_casrn != null) {
-			if(er.casrn.equals("67-72-1")) System.out.println("Found 67-72-1 in name+cas");
+//			if(er.casrn.equals("67-72-1")) System.out.println("Found 67-72-1 in name+cas");
+			
 			handleCAS_and_name_match(er, recCR_name, recCR_casrn);
+			
+			
 		} else if (recCR_casrn != null) {
-			if(er.casrn.equals("67-72-1")) System.out.println("Found 67-72-1 in cas");
+//			if(er.casrn.equals("67-72-1")) System.out.println("Found 67-72-1 in cas");
 			er.dsstox_substance_id=recCR_casrn.DSSTox_Substance_Id;
 //			System.out.println("CAS match "+er.casrn+" by "+recCR_casrn.Found_By);			
 		} else if (recCR_name != null) {
@@ -270,7 +254,7 @@ public class DsstoxMapperFromChemRegExcelExport {
 		
 //		System.out.println(dtxsidName+"\t"+dtxsidCAS);
 		
-		boolean printMismatch=false;
+		boolean printMismatch=true;
 		
 		if (!dtxsidName.equals(dtxsidCAS)) {
 			
@@ -278,7 +262,7 @@ public class DsstoxMapperFromChemRegExcelExport {
 					
 				if(printMismatch && er.keep)
 					System.out.println("Has a null inchi:" + er.chemical_name + "\t" + er.casrn + "\t" + dtxsidName
-								+ "\t" + dtxsidCAS);
+								+ "\t" + dtxsidCAS+"\t"+recCR_name.Structure_InChIKey+"\t"+recCR_casrn.Structure_InChIKey+"\t"+er.smiles);
 				return;
 			}
 			
@@ -288,7 +272,7 @@ public class DsstoxMapperFromChemRegExcelExport {
 			if (inchiKeyCAS != inchiKeyName) {
 				if(printMismatch  && er.keep)
 					System.out.println("Mismatch:" + er.chemical_name + "\t" + er.casrn + "\t" + dtxsidName
-							+ "\t" + dtxsidCAS+"\t"+inchiKeyCAS+"\t"+inchiKeyName);
+							+ "\t" + dtxsidCAS+"\t"+inchiKeyCAS+"\t"+inchiKeyName+"\t"+er.smiles);
 				
 //				if(er.casrn.equals("67-72-1")) {
 //					System.out.println("Mismatch:" + er.chemical_name + "\t" + er.casrn + "\t" + dtxsidName
@@ -321,7 +305,7 @@ public class DsstoxMapperFromChemRegExcelExport {
 			if (recCR2.DTXSID_Curators != null) {
 //				System.out.println("*Curated dtxsid:"+recCR2.DTXSID_Curators+"\tfrom: "+allIds);
 				er.dsstox_substance_id = recCR2.DTXSID_Curators;
-				er.updateNote("Manually dtxsid");
+				er.updateNote("Curated dtxsid");
 			}
 
 			if (recCR2.Source_Name_Fixed != null) {

@@ -28,6 +28,7 @@ import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
+import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.Species;
 
 public class ParseQSAR_ToolBox extends Parse {
@@ -45,6 +46,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	public static String fileNamePhyschem="echa reach physchem properties.xlsx";
 	
 	public static String fileNameKoc="echa reach koc with name UTF-8.tsv";
+	public static String fileNameBiodegWaterScreening="biodegradation in water screening tests 2026-04-013.tsv";
 	
 //	static String fileName=fileNameAcuteToxicityEchaReach;
 //	static String fileName=fileNameAcuteToxicityDB;
@@ -111,6 +113,11 @@ public class ParseQSAR_ToolBox extends Parse {
 			original_source_name="ECHA Reach";
 			selectedEndpoints = Arrays.asList(ExperimentalConstants.strKOC);
 			init("Koc ECHA Reach");
+		} else if (fileName.equals(fileNameBiodegWaterScreening)) {
+			removeDuplicates=false;
+			original_source_name="ECHA Reach";
+			selectedEndpoints = Arrays.asList(ExperimentalConstants.strRBIODEG);
+			init("RBiodeg 301F ECHA Reach");
 			
 		} else if (fileName.equals(fileNameSensitization)) {
 			removeDuplicates=false;
@@ -202,29 +209,32 @@ public class ParseQSAR_ToolBox extends Parse {
 				} else if(fileName.equals(fileNameBCFNITE)) {
 					ExperimentalRecord erNITE=recordQSAR_ToolBox.toExperimentalRecordBCFNITE(propertyName, htSpecies);
 					if(erNITE!=null)	recordsExperimental.add(erNITE);
-				
 				} else if(fileName.equals(fileName96hrAcuteAquatic)) {
 					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordFishTox(propertyName, htSpecies);
 					if(er!=null)	recordsExperimental.add(er);
-
+				} else if(fileName.equals(fileNameBiodegWaterScreening)) {
+					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecord(original_source_name);					
+					if(er!=null) recordsExperimental.add(er);
 				} else if(fileName.equals(fileNameKoc)) {
 					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecord(original_source_name);
 
-					er.experimental_parameters.put("Chemical_Number", recordQSAR_ToolBox.Chemical_Number);
-					
-					
 					if(er!=null)	{
+						
 						recordsExperimental.add(er);
 						
-						if(er.keep && er.property_name.equals(ExperimentalConstants.strKd)) {
-							Double OC=recordQSAR_ToolBox.getMeanOrganicCarbonValue();
-
-							if(OC!=null && OC>0) {					
-								ExperimentalRecord erKoc=createKocRecordFromKd(er, OC);
-//								System.out.println(gson.toJson(erKoc));
-								recordsExperimental.add(erKoc);
-							}
+						if(er.property_name!=null) {
+//							System.out.println(JsonUtilities.gsonPretty.toJson(er));
 						}
+						
+						
+//						if(er.keep && er.property_name.equals(ExperimentalConstants.strKd)) {
+//							Double OC=recordQSAR_ToolBox.getMeanOrganicCarbonValue();
+//							if(OC!=null && OC>0) {					
+//								ExperimentalRecord erKoc=createKocRecordFromKd(er, OC);
+////								System.out.println(gson.toJson(erKoc));
+//								recordsExperimental.add(erKoc);
+//							}
+//						}
 						
 //						String json=gson.toJson(recordQSAR_ToolBox).toLowerCase();
 //						if(er.keep && (json.contains("estimat") || json.contains("calculat") || 
@@ -246,7 +256,7 @@ public class ParseQSAR_ToolBox extends Parse {
 			
 //			addMissingDensities(true);//uses API to add extra entries to data/density.txt
 
-
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -258,9 +268,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		ExperimentalRecords.calculateAvgStdDevOverAllChemicals(htER, convertToLog,omitSingleton);
 		
 		
-		compareKoc(recordsExperimental);
-		
-		
+//		compareKoc(recordsExperimental);
 		
 //		System.out.println(gson.toJson(tm.get("soil")));
 		
@@ -465,6 +473,39 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 	}
 	
+
+	static void runBiodegWaterScreening() {
+		
+		IOUtils.setByteArrayMaxOverride(200000000);
+		
+		fileName=fileNameBiodegWaterScreening;
+
+		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null);
+		
+//		ExcelSourceReader.encoding="ISO-8859-1";//gets degrees but not <=
+		ExcelSourceReader.encoding="UTF-16";//no
+//		ExcelSourceReader.encoding="UTF-8";
+//		ExcelSourceReader.encoding="ASCII";//no
+		
+
+//		System.out.println("5 ≤ 10");
+//		JsonObject jsonObject = new JsonObject();
+//        jsonObject.addProperty("qualifier", "≤");
+//        System.out.println(RecordQSAR_ToolBox.gson.toJson(jsonObject));
+		
+		p.maxExcelRows=100000;
+		p.generateOriginalJSONRecords=false;
+		p.removeDuplicates=false;
+		p.writeJsonExperimentalRecordsFile=true;
+		p.writeExcelExperimentalRecordsFile=true;
+		p.writeExcelFileByProperty=false;		
+		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+		p.createFiles();
+		
+		
+		
+	}
+	
 	static void run96hrAcuteFishTox() {
 		
 		String propertyName=ExperimentalConstants.strAcuteAquaticToxicity;
@@ -491,7 +532,8 @@ public class ParseQSAR_ToolBox extends Parse {
 //		runBCF();
 //		run96hrAcuteFishTox();
 //		runPhyschem();
-		runKoc();
+//		runKoc();
+		runBiodegWaterScreening();
 
 //******************************************************************************
 //		fileName=fileNameAcuteToxicityDB;

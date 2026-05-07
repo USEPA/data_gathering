@@ -498,7 +498,10 @@ public class UnitConverter {
 		
 			assignFinalFieldsWithoutConverting(er);
 			er.property_value_units_final = ExperimentalConstants.str_L_KG;
+		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_mL_kg)) {
 			
+			convertAndAssignFinalFields(er, 0.001);
+			er.property_value_units_final = ExperimentalConstants.str_L_KG;
 		
 //		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_L_g)) {
 			//TODO TMM: Some of these L_g values are way off if we convert them- perhaps a typo?

@@ -190,6 +190,12 @@ public class ExperimentalRecords extends ArrayList<ExperimentalRecord> {
 			if(!er.keep) continue;
 			
 			//Only use the ones with g/L in the stats calcs:
+			
+			if (er.property_value_units_final==null) {
+				System.out.println("Missing er.property_value_units_final:"+gson.toJson(er));
+				continue;
+			}
+			
 			if(er.property_value_units_final.equals(desiredUnits) || desiredUnits==null) {
 //				System.out.println(er.casrn+"\t"+er.property_value_point_estimate_final);
 				
@@ -290,14 +296,15 @@ public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(Stri
 		for (ExperimentalRecord er:this)  {
 			
 			if(!er.keep) continue;
-			
 			if(!er.property_name.equals(propertyName)) continue;
-			
+			if(er.property_value_units_final==null) continue;
 			
 			if(omitbadQualifer && er.property_value_numeric_qualifier!=null 
 					&& !er.property_value_numeric_qualifier.equals("~")) continue;
 			
 			//Only use the ones with desiredUnits in the stats calcs:
+			
+			
 			if(er.property_value_units_final.equals(desiredUnits) || desiredUnits==null) {
 //				System.out.println(er.casrn+"\t"+er.property_value_point_estimate_final);
 				
@@ -667,150 +674,150 @@ public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(Stri
 
 	private void writeSheet(List<String> headers, String sheetName, boolean keep, Workbook wb, CellStyle styleURL) {
 		Sheet recSheet = wb.createSheet(sheetName);
-		Row recSubtotalRow = recSheet.createRow(0);
-		Row recHeaderRow = recSheet.createRow(2);
-		CellStyle style = wb.createCellStyle();
-		Font font = wb.createFont();;//Create font
-		font.setBold(true);//Make font bold
-		style.setFont(font);
-		
-		
+
+		// Row indexes (0-based)
+		final int SUBTOTAL_ROW_IDX = 0; // Excel row 1
+		final int BLANK_ROW_IDX = 1; // Excel row 2
+		final int HEADER_ROW_IDX = 2; // Excel row 3
+		final int DATA_START_ROW_IDX = HEADER_ROW_IDX + 1; // Excel row 4
+
+		// Create rows
+		Row recSubtotalRow = recSheet.createRow(SUBTOTAL_ROW_IDX);
+		recSheet.createRow(BLANK_ROW_IDX); // explicit blank row (optional)
+		Row recHeaderRow = recSheet.createRow(HEADER_ROW_IDX);
+
+		// Header style
+		CellStyle headerStyle = wb.createCellStyle();
+		Font headerFont = wb.createFont();
+		headerFont.setBold(true);
+		headerStyle.setFont(headerFont);
+
+		// Write header row
 		for (int i = 0; i < headers.size(); i++) {
 			Cell recCell = recHeaderRow.createCell(i);
 			recCell.setCellValue(headers.get(i));
-			recCell.setCellStyle(style);
-			recSheet.autoSizeColumn(i);//set width based on just the header
-			recSheet.setColumnWidth(i, recSheet.getColumnWidth(i)+2*256);
+			recCell.setCellStyle(headerStyle);
+			recSheet.autoSizeColumn(i);
+			// Add a little padding, clip to Excel max width
+			recSheet.setColumnWidth(i, Math.min(255 * 256, recSheet.getColumnWidth(i) + 2 * 256));
 		}
-		
-		
-		int recCurrentRow = 3;
-		for (ExperimentalRecord er:this) {
-			if (!er.keep==keep) continue;
 
-			//			Class erClass = er.getClass();			
-			//			Class htClass = er.experimental_parameters.getClass();
-			//			Class lsClass=  er.literatureSource.getClass();
+		// Write data rows
+		int recCurrentRowIdx = DATA_START_ROW_IDX; // next row to write (0-based)
+		for (ExperimentalRecord er : this) {
+			if (er.keep != keep)
+				continue; // clearer than (!er.keep == keep)
 
-			Row row = recSheet.createRow(recCurrentRow);
-			recCurrentRow++;
-
-			
-//			if(er.publicSource!=null && er.publicSource.name.equals("Mackay_2006")) {
-//				System.out.println("\n"+er.chemical_name+"\t"+JsonUtilities.gsonPretty.toJson(er.parameter_values));
-//			}
-			
+			Row row = recSheet.createRow(recCurrentRowIdx++);
 			for (int i = 0; i < headers.size(); i++) {
-
 				Object value = null;
-
 				try {
-					if(headers.get(i).contains("exp_param_")) {
-
-						String fieldName=headers.get(i).replace("exp_param_","");
-						
-						if(er.experimental_parameters!=null && er.experimental_parameters.containsKey(fieldName)) {
-							value = er.experimental_parameters.get(fieldName);	
-						} else if(er.parameter_values!=null){
-							for (ParameterValue pv:er.parameter_values) {
-								if(pv.parameter.name.equals(fieldName)) {
-									value=pv.toString();
+					if (headers.get(i).contains("exp_param_")) {
+						String fieldName = headers.get(i).replace("exp_param_", "");
+						if (er.experimental_parameters != null && er.experimental_parameters.containsKey(fieldName)) {
+							value = er.experimental_parameters.get(fieldName);
+						} else if (er.parameter_values != null) {
+							for (ParameterValue pv : er.parameter_values) {
+								if (pv.parameter.name.equals(fieldName)) {
+									value = pv.toString();
 									break;
 								}
 							}
 						}
-						
-//						if(er.publicSource!=null && er.publicSource.name.equals("Mackay_2006") && er.chemical_name.equals("Benzene")) {
-//							System.out.println("Benzene\t"+fieldName+"\t"+value);
-//						}
-
-					} else if(headers.get(i).contains("literature_source_")) {
-						String fieldName=headers.get(i).replace("literature_source_","");
-
-						if(er.literatureSource!=null) {
+					} else if (headers.get(i).contains("literature_source_")) {
+						String fieldName = headers.get(i).replace("literature_source_", "");
+						if (er.literatureSource != null) {
 							Field field = er.literatureSource.getClass().getDeclaredField(fieldName);
+							field.setAccessible(true);
 							value = field.get(er.literatureSource);
-
-//							System.out.println("ls: "+fieldName+"\t"+value);
-
 						}
-					} else if(headers.get(i).contains("public_source_original_")) {
-						String fieldName=headers.get(i).replace("public_source_original_","");
-						if(er.publicSourceOriginal!=null) {
+					} else if (headers.get(i).contains("public_source_original_")) {
+						String fieldName = headers.get(i).replace("public_source_original_", "");
+						if (er.publicSourceOriginal != null) {
 							Field field = er.publicSourceOriginal.getClass().getDeclaredField(fieldName);
+							field.setAccessible(true);
 							value = field.get(er.publicSourceOriginal);
 						}
-					} else if(headers.get(i).contains("public_source_")) {
-						String fieldName=headers.get(i).replace("public_source_","");
-						if(er.publicSource!=null) {
+					} else if (headers.get(i).contains("public_source_")) {
+						String fieldName = headers.get(i).replace("public_source_", "");
+						if (er.publicSource != null) {
 							Field field = er.publicSource.getClass().getDeclaredField(fieldName);
+							field.setAccessible(true);
 							value = field.get(er.publicSource);
 						}
 					} else {
 						Field field = er.getClass().getDeclaredField(headers.get(i));
+						field.setAccessible(true);
 						value = field.get(er);
 					}
 
-					if (value==null) continue;
-					
-					
-					if (headers.get(i).contains("url") || headers.get(i).contains("doi")) {
-						String strValue = (String) value;
-						if (strValue.length() > 32767) { strValue = strValue.substring(0,32767); }
+					if (value == null)
+						continue;
 
+					if (headers.get(i).toLowerCase().contains("url") || headers.get(i).toLowerCase().contains("doi")) {
+						String strValue = String.valueOf(value);
+						if (strValue.length() > 32767)
+							strValue = strValue.substring(0, 32767);
 
-						Cell cell = row.createCell(i);     						
-						Hyperlink href = wb.getCreationHelper().createHyperlink(HyperlinkType.URL);
-						//						System.out.println(strValue);
+						Cell cell = row.createCell(i);
 						cell.setCellValue(strValue);
 
 						try {
+							Hyperlink href = wb.getCreationHelper().createHyperlink(HyperlinkType.URL);
 							href.setAddress(strValue);
 							cell.setHyperlink(href);
 							cell.setCellStyle(styleURL);
-//							System.out.println(href);
-							
 						} catch (Exception ex) {
-//							System.out.println("Invalid url:\t"+strValue);
+							// ignore invalid URLs
 						}
-
-
-					} else if (!(value instanceof Double)) { 
-
-						String strValue=null;
-
-						if(headers.get(i).equals("chemical_name")) {//TODO is this the only one?
-							strValue= TextUtilities.reverseFixChars(StringEscapeUtils.unescapeHtml4(value.toString()));
+					} else if (!(value instanceof Double)) {
+						String strValue;
+						if ("chemical_name".equals(headers.get(i))) {
+							strValue = TextUtilities.reverseFixChars(StringEscapeUtils.unescapeHtml4(value.toString()));
 						} else {
-							strValue= StringEscapeUtils.unescapeHtml4(value.toString());
+							strValue = StringEscapeUtils.unescapeHtml4(value.toString());
 						}
-
-						if (strValue.length() > 32767) { strValue = strValue.substring(0,32767); }
+						if (strValue.length() > 32767)
+							strValue = strValue.substring(0, 32767);
 						row.createCell(i).setCellValue(strValue);
-					} else { 
-						row.createCell(i).setCellValue((double) value); 
+					} else {
+						// Ensure proper unboxing
+						row.createCell(i).setCellValue(((Double) value).doubleValue());
 					}
-
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					System.out.println(value.toString());
+					if (value != null)
+						System.out.println(value.toString());
 				}
 			}
-
 		}
-		
-		String lastCol = CellReference.convertNumToColString(headers.size()-1);
-		recSheet.setAutoFilter(CellRangeAddress.valueOf("A3:"+lastCol+recCurrentRow));
-		recSheet.createFreezePane(0, 3);
-		
+
+		// Build filter and subtotal ranges (Excel is 1-based for rows)
+		String lastCol = CellReference.convertNumToColString(headers.size() - 1);
+		int headerRowNumber = HEADER_ROW_IDX + 1; // 3
+		int firstDataRowNumber = DATA_START_ROW_IDX + 1; // 4
+		int lastDataRowNumber = Math.max(firstDataRowNumber, (recCurrentRowIdx - 1) + 1);
+
+		// AutoFilter over header + data
+		recSheet.setAutoFilter(CellRangeAddress.valueOf("A" + headerRowNumber + ":" + lastCol + lastDataRowNumber));
+
+		// Freeze panes through the header row (subtotal + blank + header)
+		recSheet.createFreezePane(0, HEADER_ROW_IDX + 1);
+
+		// SUBTOTAL(3, ...) counts visible (filtered) non-empty cells in each column
+		// over data rows
 		for (int i = 0; i < headers.size(); i++) {
 			String col = CellReference.convertNumToColString(i);
-			String recSubtotal = "SUBTOTAL(3,"+col+"$4:"+col+"$"+(recCurrentRow)+")";
+			String recSubtotal = "SUBTOTAL(3," + col + "$" + firstDataRowNumber + ":" + col + "$" + lastDataRowNumber
+					+ ")";
+			// If you want to ignore manually hidden rows as well, use 103 instead of 3:
+			// String recSubtotal = "SUBTOTAL(103," + col + "$" + firstDataRowNumber + ":" +
+			// col + "$" + lastDataRowNumber + ")";
 			recSubtotalRow.createCell(i).setCellFormula(recSubtotal);
 		}
 	}
-		
+
 	public void toExcel_File(String filePath) {
 		toExcel_File(filePath,ExperimentalRecord.outputFieldNames);
 	}
@@ -1217,7 +1224,7 @@ public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(Stri
 			System.out.println(folder+" doesnt exist");
 		}
 
-		System.out.println(folder);
+		System.out.println("\n"+folder);
 		
 		ExperimentalRecords records=new ExperimentalRecords();
 		
@@ -1233,7 +1240,7 @@ public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(Stri
 			
 			ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(file.getAbsolutePath(),charset);
 
-			System.out.println(sourceName+"\t"+file.getName()+"\t"+subfolder+"\t"+experimentalRecords.size());
+			System.out.println("\t"+sourceName+"\t"+file.getName()+"\t"+subfolder+"\t"+experimentalRecords.size());
 			records.addAll(experimentalRecords);
 		}
 		

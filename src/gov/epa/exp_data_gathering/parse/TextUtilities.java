@@ -229,7 +229,7 @@ public class TextUtilities {
 	 * @throws IllegalStateException	If no number range is found in the given range
 	 */
 	public static double[] extractFirstDoubleRangeFromString(String str,int end) throws IllegalStateException {
-		Matcher anyRangeMatcher = Pattern.compile("([-]?[ ]?[0-9]*\\.?[0-9]+)[ ]*([â€”]|[-]{1}|to|ca\\.||/||±|[\\?])[ ]*([-]?[ ]?[0-9]*\\.?[0-9]+)").matcher(str.substring(0,end));
+		Matcher anyRangeMatcher = Pattern.compile("([-]?[ ]?[0-9]*\\.?[0-9]+)[ ]*([â€”]|[-]{1}|to|ca\\.||/||ï¿½|[\\?])[ ]*([-]?[ ]?[0-9]*\\.?[0-9]+)").matcher(str.substring(0,end));
 		if (anyRangeMatcher.find()) {
 			//			System.out.println("extractFirstDoubleRangeFromString: Group2="+anyRangeMatcher.group(2));
 			String strMin = anyRangeMatcher.group(1).replace(" ","");
@@ -292,19 +292,7 @@ public class TextUtilities {
 
 	
 
-	public static String fixName (String name) {
-		
-		if(name==null) return null;
-		
-		String QUOTE_LIKE = "[\u2018\u2019\u02BC\u00B4\u2032]";
-		
-		//TODO do fix symbols like alpha, beta, gamma, etc
-
-		name = name.replaceAll(QUOTE_LIKE, "'");
-		return name;
-		
-	}
-
+	
 	public static String fixChars(String str) {
 		StringBuilder sb = new StringBuilder(str);
 		try {
@@ -469,14 +457,14 @@ public class TextUtilities {
 			unitsIndex = Math.min(propertyValue.indexOf("Â±"),unitsIndex);
 		}
 
-		if (propertyValue.contains("±")) {//TMM added 10/9/24- ideally this should be done with regex but this is quick way to preserve +/- number
+		if (propertyValue.contains("ï¿½")) {//TMM added 10/9/24- ideally this should be done with regex but this is quick way to preserve +/- number
 			try {
-				plusMinus=Double.parseDouble(propertyValue.substring(propertyValue.indexOf("±")+1,unitsIndex));
+				plusMinus=Double.parseDouble(propertyValue.substring(propertyValue.indexOf("ï¿½")+1,unitsIndex));
 			} catch (Exception ex) {
 				//				ex.printStackTrace();
 			}
 			//			System.out.println(propertyValue+"\t"+strPlusMinus);
-			unitsIndex = Math.min(propertyValue.indexOf("±"),unitsIndex);//make it so that +/- value isnt selected as the value 
+			unitsIndex = Math.min(propertyValue.indexOf("ï¿½"),unitsIndex);//make it so that +/- value isnt selected as the value 
 		}
 		
 		if (propertyValue.contains("+/-")) {//TMM added 10/9/24- ideally this should be done with regex but this is quick way to preserve +/- number
@@ -638,7 +626,7 @@ public class TextUtilities {
 		//			System.out.println("unitsIndex changed:"+unitsIndexOriginal+"\t"+unitsIndex+"\t"+er.property_value_point_estimate_original+"\t"+er.property_value_units_original+"\t"+ propertyValue);
 		//		}
 
-		//		if(propertyValue.contains("<0.01mPa (20 °C)")) {
+		//		if(propertyValue.contains("<0.01mPa (20 ï¿½C)")) {
 		//			System.out.println(unitsIndexOriginal+"\t"+unitsIndex+"\t"+er.property_value_point_estimate_original+"\t"+er.property_value_units_original+"\t"+ propertyValue);
 		//		}
 		

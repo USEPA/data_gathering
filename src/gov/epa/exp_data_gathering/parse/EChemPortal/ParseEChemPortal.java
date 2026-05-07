@@ -2,7 +2,10 @@ package gov.epa.exp_data_gathering.parse.EChemPortal;
 
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -10,8 +13,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.poi.util.IOUtils;
 
+import com.google.gson.JsonObject;
+
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
@@ -19,23 +27,174 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PressureCondition;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
+import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.ParseQSAR_ToolBox;
+import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
+
+import java.nio.file.Path;
 
 /**
  * Parses data from echemportal.org
+ * 
  * @author GSINCL01
+ * @author tmarti02
+ * 
  *
  */
 public class ParseEChemPortal extends Parse {
+	
+	
+	String fileName="todo";
+	static final String filename301F = "biodegradation in water screening tests 2026-04-15.xlsx";
+	static final String filenameKoc = "Koc 2026-04-16.xls";
 
-	public ParseEChemPortal() {
+
+	public ParseEChemPortal(String fileName) {
 		sourceName = ExperimentalConstants.strSourceEChemPortal;
-		this.init();
+		this.fileName = fileName;
+		
+		if(fileName.equals(filename301F)) {
+			init("RBiodeg 301 F ECHA Reach");
+		} else if(fileName.equals(filenameKoc)) {
+			init("Koc ECHA Reach");
+		}
+		
 	}
+	
+//	@Override
+//	protected void createRecords() {
+////		Vector<RecordEChemPortal> records = RecordEChemPortal.parseEChemPortalQueriesFromExcel();
+//
+//		Vector<RecordEChemPortal> records = createBiodegradationRecords();
+//        
+//		writeOriginalRecordsToFile(records);
+//	}
+	
 	
 	@Override
 	protected void createRecords() {
-		Vector<RecordEChemPortal> records = RecordEChemPortal.parseEChemPortalQueriesFromExcel();
-		writeOriginalRecordsToFile(records);
+		if(generateOriginalJSONRecords) {
+			
+			Vector<RecordEChemPortal> records=null;
+			
+			if (fileName.equals(filename301F)) {
+				records = createBiodegradationRecords();
+			} else if (fileName.equals(filenameKoc)) {
+				records = createKocRecords();
+			}
+			
+			if(records!=null)			
+				writeOriginalRecordsToFile(records);
+			
+		}
+	}
+	
+	Hashtable<String, Integer> flattenBiodegRecords(List<RecordEChemPortal> recs) {
+		
+		Hashtable<String,List<RecordEChemPortal>>htRecsByCAS=new Hashtable<>();
+		
+		
+		for (RecordEChemPortal rec:recs) {
+			
+			if(rec.derivedbinaryBiodegradation==null)continue;
+			
+			if(htRecsByCAS.containsKey(rec.number)) {
+				List<RecordEChemPortal>recs2=htRecsByCAS.get(rec.number);
+				recs2.add(rec);
+			} else {
+				List<RecordEChemPortal>recs2=new ArrayList<>();
+				recs2.add(rec);
+				htRecsByCAS.put(rec.number, recs2);
+			}
+		}
+		
+		Hashtable<String,Integer>htScoresByCAS=new Hashtable<>();
+		
+		for(String CAS:htRecsByCAS.keySet()) {
+			List<RecordEChemPortal>recs2=htRecsByCAS.get(CAS);
+
+			List<Integer>vals=new ArrayList<>();
+			for (RecordEChemPortal rec2:recs2) {
+				vals.add(rec2.derivedbinaryBiodegradation);
+			}
+			
+			double avg=0;
+			for (Integer val:vals) {
+				avg+=val;
+			}
+			avg/=vals.size();
+			
+//			System.out.println(CAS+"\t"+vals+"\t"+avg);
+			
+			if(avg<=0.2) {
+				htScoresByCAS.put(CAS, 0);
+			} else if(avg>=0.8) {
+				htScoresByCAS.put(CAS, 1);
+			}
+			
+		}
+		
+		System.out.println("htRecsByCAS.size()="+htRecsByCAS.size());
+		System.out.println("htScoresByCAS.size()="+htScoresByCAS.size());
+		return htScoresByCAS;
+	}
+	
+
+	/**
+	 * The OECD 301F (Manometric Respirometry) 10% rule dictates that the 10-day
+	 * window for "ready biodegradability" (60% ThOD or ) begins immediately once
+	 * 10% biodegradation is reached. The compound must hit 60% degradation within
+	 * 10 days after crossing the 10% threshold, with the entire 28-day test period
+	 * in mind.
+	 * 
+	 * @return
+	 */
+	private Vector<RecordEChemPortal> createBiodegradationRecords() {
+		
+		Vector<RecordEChemPortal> records = RecordEChemPortal.parseEChemPortalExcelFile301F(fileName);
+
+//		Hashtable<String,Integer>htScoresByCAS=flattenBiodegRecords(records);
+//		// Start from default columns, then remove any you don’t want:
+//        List<EChemPortalExcelExporter.ColumnSpec> cols = EChemPortalExcelExporter.defaultColumns();
+//
+//        // Drop pH and Values, for example:
+//        cols.removeIf(c ->  c.header.equals("Values") 
+//        		|| c.header.equals("Participant") || c.header.equals("Section")
+//        		|| c.header.equals("Method") || c.header.equals("Pressure")
+//        		|| c.header.equals("Temperature") || c.header.equals("pH"));
+//                
+//        try {
+//        	EChemPortalExcelExporter.writeExcel(records, Path.of(jsonFolder+File.separator+"eChemPortal Original Records.xlsx"), cols,htScoresByCAS);
+//        } catch (Exception ex) {
+//        	ex.printStackTrace();
+//        }
+		
+		
+		return records;
+	}
+	
+
+	private Vector<RecordEChemPortal> createKocRecords() {
+		
+		Vector<RecordEChemPortal> records = RecordEChemPortal.parseEChemPortalExcelFileKoc(fileName);
+
+//		Hashtable<String,Integer>htScoresByCAS=flattenBiodegRecords(records);
+//
+//		
+//		// Start from default columns, then remove any you don’t want:
+//        List<EChemPortalExcelExporter.ColumnSpec> cols = EChemPortalExcelExporter.defaultColumns();
+//
+//        // Drop pH and Values, for example:
+//        cols.removeIf(c ->  c.header.equals("Values") 
+//        		|| c.header.equals("Participant") || c.header.equals("Section")
+//        		|| c.header.equals("Method") || c.header.equals("Pressure")
+//        		|| c.header.equals("Temperature") || c.header.equals("pH"));
+//                
+//        try {
+//        	EChemPortalExcelExporter.writeExcel(records, Path.of(jsonFolder+File.separator+"eChemPortal Original Records.xlsx"), cols,htScoresByCAS);
+//        } catch (Exception ex) {
+//        	ex.printStackTrace();
+//        }
+		return records;
 	}
 	
 	@Override
@@ -64,11 +223,24 @@ public class ParseEChemPortal extends Parse {
 				}
 			}
 			
-			Iterator<RecordEChemPortal> it = recordsEChemPortal.iterator();
-			while (it.hasNext()) {
-				RecordEChemPortal r = it.next();
-				addExperimentalRecords(r,recordsExperimental);
+			for (RecordEChemPortal r:recordsEChemPortal) {
+				
+				if (fileName.equals(filename301F)) {
+					ExperimentalRecord er=r.toExperimentalRecordWaterBiodegration();
+					recordsExperimental.add(er);
+				} else if (fileName.equals(filenameKoc)) {
+					List<ExperimentalRecord>ers=r.toExperimentalRecordsKoc();
+					recordsExperimental.addAll(ers);
+				} else {
+//					System.out.println("Not biodeg record");
+					addExperimentalRecords(r,recordsExperimental);
+				}
+				
+//				break;
 			}
+			
+//			System.out.println("Other endpoints="+JsonUtilities.gsonPretty.toJson(RecordEChemPortal.endpoints));
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -77,11 +249,17 @@ public class ParseEChemPortal extends Parse {
 	}
 	
 	private void addExperimentalRecords(RecordEChemPortal ecpr,ExperimentalRecords records) {
+		
 		if (!ecpr.values.isEmpty()) {
 			String cas = "";
 			String einecs = "";
-			if (ecpr.numberType.equals("CAS Number")) { cas = ecpr.number;
-			} else if (ecpr.numberType.equals("EC Number")) { einecs = ecpr.number; }
+			
+			if (ecpr.numberType.equals("CAS Number")) { 
+				cas = ecpr.number;
+			} else if (ecpr.numberType.equals("EC Number")) {
+				einecs = ecpr.number; 
+			}
+			
 			for (int i = 0; i < ecpr.values.size(); i++) {
 				ExperimentalRecord er = new ExperimentalRecord();
 				er.date_accessed = RecordEChemPortal.lastUpdated;
@@ -96,20 +274,22 @@ public class ParseEChemPortal extends Parse {
 				if (ecpr.method!=null && !ecpr.method.isBlank()) {
 					er.measurement_method = ecpr.method;
 				}
-				er.property_value_string = ecpr.values.get(i).replaceAll("—", "-");
+				
+				er.property_value_string = ecpr.values.get(i).replaceAll("â", "-");
+				
 				String propertyValue = er.property_value_string;
 				if (!ecpr.temperature.isEmpty() && ecpr.temperature.get(i)!=null) { 
-					String temp = ecpr.temperature.get(i).replaceAll("—", "-");
+					String temp = ecpr.temperature.get(i).replaceAll("â", "-");
 					TemperatureCondition.getTemperatureCondition(er,temp);
 					er.property_value_string = er.property_value_string + ";" + temp;
 				}
 				if (!ecpr.pressure.isEmpty() && ecpr.pressure.get(i)!=null) {
-					String pressure = ecpr.pressure.get(i).replaceAll("—", "-");
+					String pressure = ecpr.pressure.get(i).replaceAll("â", "-");
 					PressureCondition.getPressureCondition(er,pressure,sourceName);
 					er.property_value_string = er.property_value_string + ";" + pressure;
 				}
 				if (!ecpr.pH.isEmpty() && ecpr.pH.get(i)!=null) { 
-					String pHStr = ecpr.pH.get(i).replaceAll("—", "-");
+					String pHStr = ecpr.pH.get(i).replaceAll("â", "-");
 					er.property_value_string = er.property_value_string + ";" + pHStr;
 					boolean foundpH = false;
 					try {
@@ -183,20 +363,48 @@ public class ParseEChemPortal extends Parse {
 				}
 
 				uc.convertRecord(er);
-				
+
 				if (!ParseUtilities.hasIdentifiers(er)) {
 					er.keep = false;
 					er.reason = "No identifiers";
 				}
-				
+
 				er.reliability = ecpr.reliability;
 				records.add(er);
 			}
 		}
 	}
 	
-	public static void main(String[] args) {
-		ParseEChemPortal p = new ParseEChemPortal();
+
+	static void runBiodegWaterScreening() {
+		ParseEChemPortal p=new ParseEChemPortal(filename301F);
+		p.generateOriginalJSONRecords=false;		
+		p.removeDuplicates=false;
+		p.writeJsonExperimentalRecordsFile=true;
+		p.writeExcelExperimentalRecordsFile=true;
+		p.writeExcelFileByProperty=false;		
+		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 		p.createFiles();
+	}
+	
+
+	static void runKoc() {
+		ParseEChemPortal p=new ParseEChemPortal(filenameKoc);
+		p.generateOriginalJSONRecords=true;		
+		p.removeDuplicates=false;
+		p.writeJsonExperimentalRecordsFile=true;
+		p.writeExcelExperimentalRecordsFile=true;
+		p.writeExcelFileByProperty=false;		
+		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+		p.createFiles();
+	}
+	
+	public static void main(String[] args) {
+		
+		IOUtils.setByteArrayMaxOverride(200000000);
+
+		
+		runBiodegWaterScreening();
+//		runKoc();
 	}
 }
