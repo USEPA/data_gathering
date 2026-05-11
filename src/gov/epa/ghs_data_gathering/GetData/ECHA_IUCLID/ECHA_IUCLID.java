@@ -33,7 +33,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 
-import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part1;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.AdministrativeData;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.DataSource;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.MaterialsAndMethods;

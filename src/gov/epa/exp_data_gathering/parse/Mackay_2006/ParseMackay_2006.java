@@ -1,17 +1,9 @@
 package gov.epa.exp_data_gathering.parse.Mackay_2006;
 
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-import com.google.gson.JsonObject;
-import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.Koc.RecordKoc;
 
 /**
  * This class uses Weston Murdock's parsing of the mackay pdfs. 

@@ -6,7 +6,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
 import gov.epa.api.Chemical;
-import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 
 public class CodeDictionary {

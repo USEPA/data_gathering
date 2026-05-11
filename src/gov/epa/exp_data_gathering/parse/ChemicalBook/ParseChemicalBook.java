@@ -1,7 +1,6 @@
 package gov.epa.exp_data_gathering.parse.ChemicalBook;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -17,8 +16,6 @@ import java.util.regex.Pattern;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
-import com.google.gson.GsonBuilder;
 
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.api.RawDataRecord;
@@ -142,7 +139,7 @@ public class ParseChemicalBook extends Parse {
 			foundNumeric = ParseUtilities.getDensity(er, propertyValue);
 			PressureCondition.getPressureCondition(er,propertyValue,sourceName);
 			TemperatureCondition.getTemperatureCondition(er,propertyValue);
-			if (propertyValue.contains("±")) {
+			if (propertyValue.contains("ï¿½")) {
 				getUncertaintyRange(er,propertyValue);
 			}
 		} else if (propertyName==ExperimentalConstants.strMeltingPoint || propertyName==ExperimentalConstants.strBoilingPoint ) {

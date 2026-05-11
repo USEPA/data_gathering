@@ -1,7 +1,5 @@
 package gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID;
 
-import java.util.Hashtable;
-
 /**
  * Class that simulates the class structure in IUCLID json files. It makes it easier to visualize what data we have access to
  * 

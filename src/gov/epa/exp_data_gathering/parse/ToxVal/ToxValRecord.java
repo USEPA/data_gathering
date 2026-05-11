@@ -3,17 +3,10 @@ package gov.epa.exp_data_gathering.parse.ToxVal;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.poi.ss.formula.functions.T;
-
-import com.google.gson.Gson;
-
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;

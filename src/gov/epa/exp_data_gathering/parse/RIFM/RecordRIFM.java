@@ -2,7 +2,6 @@ package gov.epa.exp_data_gathering.parse.RIFM;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 
@@ -11,7 +10,6 @@ import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.MaterialsAndMethods.Guideline;
 
 public class RecordRIFM {
 	public String SMILES;

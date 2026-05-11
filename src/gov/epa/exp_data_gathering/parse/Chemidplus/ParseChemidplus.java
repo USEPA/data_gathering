@@ -7,9 +7,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
@@ -368,10 +365,10 @@ public class ParseChemidplus extends Parse {
 //				er.property_value_units_final = "mg/L";
 //
 //			} else if (er.property_value_units_final.equals("ppm")) {
-//				// To convert concentrations in air (at 25 °C) from ppm to mg/m3:
-//				// mg/m3 = (ppm) × (molecular weight of the compound)/(24.45).
+//				// To convert concentrations in air (at 25 ï¿½C) from ppm to mg/m3:
+//				// mg/m3 = (ppm) ï¿½ (molecular weight of the compound)/(24.45).
 //				// 1 milligram per cubic meter ( mg/m3 ) = 0.0010 milligrams per liter ( mg/l ).
-//				// So mg/L = ((ppm) × (molecular weight of the compound)/(24.45))*0.001
+//				// So mg/L = ((ppm) ï¿½ (molecular weight of the compound)/(24.45))*0.001
 //
 //					
 //				if (MW==0) {

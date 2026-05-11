@@ -1,7 +1,6 @@
 package gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import gov.epa.api.Chemical;

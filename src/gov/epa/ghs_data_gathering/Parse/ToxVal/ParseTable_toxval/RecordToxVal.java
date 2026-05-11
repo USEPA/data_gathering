@@ -1,8 +1,6 @@
 package gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval;
 
 import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**

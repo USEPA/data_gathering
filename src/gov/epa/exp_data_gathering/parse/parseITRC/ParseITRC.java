@@ -2,19 +2,15 @@ package gov.epa.exp_data_gathering.parse.parseITRC;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
-
-import com.google.gson.JsonObject;
 
 
 
@@ -47,7 +43,7 @@ public class ParseITRC {
 			for (int i=8;i<=87;i++) {
 				Row row = sheet.getRow(i);
 				if (row==null) continue;
-				int colName=htCols.get("PFAS Name (§)");
+				int colName=htCols.get("PFAS Name (ï¿½)");
 				int colCAS=htCols.get("CAS");
 				int col_logM=htCols.get("log  (mol/L)");
 				String content = row.getCell(colName,MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue();				
@@ -109,7 +105,7 @@ public class ParseITRC {
 			for (int i=8;i<=264;i++) {
 				Row row = sheet.getRow(i);
 				if (row==null) continue;
-				int colName=htCols.get("PFAS Name (§)");
+				int colName=htCols.get("PFAS Name (ï¿½)");
 				int colCAS=htCols.get("CAS");
 				int col_logM=htCols.get("log  (mol/L)");
 				String content = row.getCell(colName,MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue();				

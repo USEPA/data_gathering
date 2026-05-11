@@ -15,7 +15,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import gov.epa.ghs_data_gathering.Parse.Parse;
-import gov.epa.api.Score;
 
 /**
  * Class to store hazard profile for a chemical

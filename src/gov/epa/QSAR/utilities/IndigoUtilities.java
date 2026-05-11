@@ -1,11 +1,6 @@
 package gov.epa.QSAR.utilities;
 
-import java.io.IOException;
 import java.io.StringWriter;
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
-import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV2000Writer;
 import com.epam.indigo.Indigo;

@@ -6,12 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -43,7 +38,6 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import gov.epa.exp_data_gathering.parse.OECD_Toolbox.RecordOECD_Toolbox;
 import gov.epa.ghs_data_gathering.Database.MySQL_DB;
 import gov.epa.ghs_data_gathering.Utilities.MolFileUtilities;
-import gov.epa.ghs_data_gathering.Utilities.TESTConstants;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class Scifinder {

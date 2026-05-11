@@ -2,18 +2,12 @@ package gov.epa.ghs_data_gathering.Parse;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-import com.google.gson.stream.JsonWriter;
-
 import gov.epa.ghs_data_gathering.Utilities.DoubleTypeAdapter;
 
 public class NITERecordWehage {

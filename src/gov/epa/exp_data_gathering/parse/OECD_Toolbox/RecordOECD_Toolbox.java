@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -15,8 +14,6 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openscience.cdk.AtomContainer;
-
 import gov.epa.ghs_data_gathering.GetData.Scifinder;
 import gov.epa.ghs_data_gathering.GetData.ScifinderRecord;
 import gov.epa.ghs_data_gathering.Utilities.ExcelUtilities;

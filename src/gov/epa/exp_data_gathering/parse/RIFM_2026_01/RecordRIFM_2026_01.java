@@ -2,11 +2,9 @@ package gov.epa.exp_data_gathering.parse.RIFM_2026_01;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 
-import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
@@ -92,9 +90,9 @@ public class RecordRIFM_2026_01 {
 				er.property_value_point_estimate_original=Double.parseDouble(Reviewed_Data_Results.replace("<", "").trim());
 				er.property_value_point_estimate_final=0.0;
 
-			}else if (Reviewed_Data_Results.contains("±")) {
+			}else if (Reviewed_Data_Results.contains("ï¿½")) {
 				
-				String [] vals = Reviewed_Data_Results.split("±");
+				String [] vals = Reviewed_Data_Results.split("ï¿½");
 
 				double mean = Double.parseDouble(vals[0].trim());
 				double plusminus = Double.parseDouble(vals[1].trim());

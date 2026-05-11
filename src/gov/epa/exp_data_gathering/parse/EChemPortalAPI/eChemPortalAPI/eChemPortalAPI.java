@@ -1,8 +1,6 @@
 package gov.epa.exp_data_gathering.parse.EChemPortalAPI.eChemPortalAPI;
 
 import java.io.File;
-import java.io.FileWriter;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

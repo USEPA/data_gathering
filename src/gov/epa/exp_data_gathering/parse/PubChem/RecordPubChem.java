@@ -24,7 +24,6 @@ import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.IdentifierData;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Information;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Property;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Reference;
-import gov.epa.exp_data_gathering.parse.PubChem.ParseDatabaseAnnotation.DB_Identifier;
 
 /**
  * Contact at PubChem: Evan (NIH/NLM/NCBI) Bolton: bolton@ncbi.nlm.nih.gov
@@ -712,93 +711,93 @@ public class RecordPubChem {
 
 		
 		propertyValue = propertyValue.replace("log Kow = 6.67 /Fullerene C60/","log Kow = 6.67");			
-		propertyValue = propertyValue.replace("2.73 (Z)-isomer (both 20 Â°C)","2.73 @ 20°C)");
-		propertyValue = propertyValue.replace("log Kow = 4.05 (unbuffered, 20 Â°C)","log Kow = 4.05 @ 20°C");
-		propertyValue = propertyValue.replace("3.24 (20 Â°C)","3.24 @ 20°C");
-		propertyValue = propertyValue.replace("6.12 (20 Â°C)","6.12 @ 20°C)");
+		propertyValue = propertyValue.replace("2.73 (Z)-isomer (both 20 Â°C)","2.73 @ 20ï¿½C)");
+		propertyValue = propertyValue.replace("log Kow = 4.05 (unbuffered, 20 Â°C)","log Kow = 4.05 @ 20ï¿½C");
+		propertyValue = propertyValue.replace("3.24 (20 Â°C)","3.24 @ 20ï¿½C");
+		propertyValue = propertyValue.replace("6.12 (20 Â°C)","6.12 @ 20ï¿½C)");
 
 		
-		propertyValue = propertyValue.replace("70-80 °C at 2-5X10-5 mm Hg","70-80 °C at 3.5e-5 mm Hg");
-		propertyValue = propertyValue.replace("175-177 °C/0.85 mm Hg","175-177 °C @ 0.85 mm Hg");
-		propertyValue = propertyValue.replace("boiling point: 61-63 °c (51 mm hg)","61-63 °c @ 51 mm hg");
-		propertyValue = propertyValue.replace("Distills above 360 °C with partial anhydride formation. BP: 286.5 °C at 100 mm Hg","BP: 286.5 °C at 100 mm Hg");
+		propertyValue = propertyValue.replace("70-80 ï¿½C at 2-5X10-5 mm Hg","70-80 ï¿½C at 3.5e-5 mm Hg");
+		propertyValue = propertyValue.replace("175-177 ï¿½C/0.85 mm Hg","175-177 ï¿½C @ 0.85 mm Hg");
+		propertyValue = propertyValue.replace("boiling point: 61-63 ï¿½c (51 mm hg)","61-63 ï¿½c @ 51 mm hg");
+		propertyValue = propertyValue.replace("Distills above 360 ï¿½C with partial anhydride formation. BP: 286.5 ï¿½C at 100 mm Hg","BP: 286.5 ï¿½C at 100 mm Hg");
 		//Need programatic way of identifying and removing commas
-		propertyValue = propertyValue.replace("2,927 °C","2927 °C");
-		propertyValue = propertyValue.replace("3,600 °C","3600 °C");
-		propertyValue = propertyValue.replace("10,701 °F","10701 °F");
-		propertyValue = propertyValue.replace("2,861 °C","2861 °C");
-		propertyValue = propertyValue.replace("1,184 °C","1184 °C");
-		propertyValue = propertyValue.replace("2,550 °C","2550 °C");
-		propertyValue = propertyValue.replace("2,075 °C","2075 °C");
-		propertyValue = propertyValue.replace("/Melting point is/ 197 °C (metastable phase). High melting form sublimes at 190-200 °C (0.2 mm pressure at 2 mm distance).","/melting point is/ 197 °c");
-		//		List <String>CommaNumbers=Arrays.asList("2,927 °C", "3,600 °C", "10,701 °F", "2,861 °C", "1,184 °C", "2,550 °C", "2,075 °C");
-		propertyValue = propertyValue.replace("0.799 at 140 °F (70% sol), 0.933 at 20 °C", "0.933 at 20 °C");
-		propertyValue = propertyValue.replace("151,5-154,0 °C","151.5-154.0 °C");
-		propertyValue = propertyValue.replace("-15..2 °C, 258 K, 5 °F"," -15.2°C, 258 K, 5 °F");
-		propertyValue = propertyValue.replace("185,0-190,0 °C","185.0-190.0 °C");
-		propertyValue = propertyValue.replace("1,184 °C","1184 °C");
-		propertyValue = propertyValue.replace("-42,5 °C","-42.5 °C");
-		propertyValue = propertyValue.replace("strong at 3-10 ppm. [ACGIH] 10 °F","10 °F");
+		propertyValue = propertyValue.replace("2,927 ï¿½C","2927 ï¿½C");
+		propertyValue = propertyValue.replace("3,600 ï¿½C","3600 ï¿½C");
+		propertyValue = propertyValue.replace("10,701 ï¿½F","10701 ï¿½F");
+		propertyValue = propertyValue.replace("2,861 ï¿½C","2861 ï¿½C");
+		propertyValue = propertyValue.replace("1,184 ï¿½C","1184 ï¿½C");
+		propertyValue = propertyValue.replace("2,550 ï¿½C","2550 ï¿½C");
+		propertyValue = propertyValue.replace("2,075 ï¿½C","2075 ï¿½C");
+		propertyValue = propertyValue.replace("/Melting point is/ 197 ï¿½C (metastable phase). High melting form sublimes at 190-200 ï¿½C (0.2 mm pressure at 2 mm distance).","/melting point is/ 197 ï¿½c");
+		//		List <String>CommaNumbers=Arrays.asList("2,927 ï¿½C", "3,600 ï¿½C", "10,701 ï¿½F", "2,861 ï¿½C", "1,184 ï¿½C", "2,550 ï¿½C", "2,075 ï¿½C");
+		propertyValue = propertyValue.replace("0.799 at 140 ï¿½F (70% sol), 0.933 at 20 ï¿½C", "0.933 at 20 ï¿½C");
+		propertyValue = propertyValue.replace("151,5-154,0 ï¿½C","151.5-154.0 ï¿½C");
+		propertyValue = propertyValue.replace("-15..2 ï¿½C, 258 K, 5 ï¿½F"," -15.2ï¿½C, 258 K, 5 ï¿½F");
+		propertyValue = propertyValue.replace("185,0-190,0 ï¿½C","185.0-190.0 ï¿½C");
+		propertyValue = propertyValue.replace("1,184 ï¿½C","1184 ï¿½C");
+		propertyValue = propertyValue.replace("-42,5 ï¿½C","-42.5 ï¿½C");
+		propertyValue = propertyValue.replace("strong at 3-10 ppm. [ACGIH] 10 ï¿½F","10 ï¿½F");
 		propertyValue = propertyValue.replace("... by the capillary rise method, range from 36.75 dynes/cm (10% soln) to 22.08 dynes/cm (0.1% soln).","... by the capillary rise method, range from (10% soln) 36.75 to 22.08 dynes/cm (0.1% soln).");
-		propertyValue = propertyValue.replace("1.1416 at 20 °C g/cu cm" , "1.1416 at 20 °C");
-		propertyValue = propertyValue.replace("Sp Gr: 1.63 at 61/4 °C", "Sp Gr: 1.63 at 4 °C");
-		propertyValue = propertyValue.replace("0.916@76 °F", "0.916 @ 76 °F");
-		propertyValue = propertyValue.replace("Density  (at 0-4 °C): 0.6 g/cm^3", "0.6 g/cm^3 at 0-4 °C");
-		propertyValue = propertyValue.replace("0.8789(20Â°)", "0.8789 (20°C)");
-		propertyValue = propertyValue.replace("0.870(15.5Â°)", "0.870 (15.5°C)");
-		propertyValue = propertyValue.replace("0.87505(15Â°)", "0.87505 (15°C)");
-		propertyValue = propertyValue.replace("log Kow > 5 (pH 4-5, 20-25 °C)", "log Kow > 5 (20-25 °C, pH 4-5)");
-		propertyValue = propertyValue.replace("log Kow = 3.8-4.1 (pH 6-7, 20-25 °C)", "log Kow = 3.8-4.1 (20-25 °C, pH 6-7)");
-		propertyValue = propertyValue.replace("log Kow = 2.5-3.2 (pH 9-10, 20-25 °C)", "log Kow = 2.5-3.2 (20-25 °C, pH 9-10)");
-		propertyValue = propertyValue.replace("24X10-5 to 30X10-5 (5.8X10-6 to 7.3X10-6 atm-cu m/mol) at 37 °C", "6.55X10-6 atm-cu m/mol at 37 °C");
-		propertyValue = propertyValue.replace("Henry's Law constant = 24X10-5 to 30X10-5 (5.8X10-6 to 7.3X10-6 atm-cu m/mol) at 37 Â°C", "6.55X10-6 atm-cu m/mol at 37 °C");
+		propertyValue = propertyValue.replace("1.1416 at 20 ï¿½C g/cu cm" , "1.1416 at 20 ï¿½C");
+		propertyValue = propertyValue.replace("Sp Gr: 1.63 at 61/4 ï¿½C", "Sp Gr: 1.63 at 4 ï¿½C");
+		propertyValue = propertyValue.replace("0.916@76 ï¿½F", "0.916 @ 76 ï¿½F");
+		propertyValue = propertyValue.replace("Density  (at 0-4 ï¿½C): 0.6 g/cm^3", "0.6 g/cm^3 at 0-4 ï¿½C");
+		propertyValue = propertyValue.replace("0.8789(20Â°)", "0.8789 (20ï¿½C)");
+		propertyValue = propertyValue.replace("0.870(15.5Â°)", "0.870 (15.5ï¿½C)");
+		propertyValue = propertyValue.replace("0.87505(15Â°)", "0.87505 (15ï¿½C)");
+		propertyValue = propertyValue.replace("log Kow > 5 (pH 4-5, 20-25 ï¿½C)", "log Kow > 5 (20-25 ï¿½C, pH 4-5)");
+		propertyValue = propertyValue.replace("log Kow = 3.8-4.1 (pH 6-7, 20-25 ï¿½C)", "log Kow = 3.8-4.1 (20-25 ï¿½C, pH 6-7)");
+		propertyValue = propertyValue.replace("log Kow = 2.5-3.2 (pH 9-10, 20-25 ï¿½C)", "log Kow = 2.5-3.2 (20-25 ï¿½C, pH 9-10)");
+		propertyValue = propertyValue.replace("24X10-5 to 30X10-5 (5.8X10-6 to 7.3X10-6 atm-cu m/mol) at 37 ï¿½C", "6.55X10-6 atm-cu m/mol at 37 ï¿½C");
+		propertyValue = propertyValue.replace("Henry's Law constant = 24X10-5 to 30X10-5 (5.8X10-6 to 7.3X10-6 atm-cu m/mol) at 37 Â°C", "6.55X10-6 atm-cu m/mol at 37 ï¿½C");
 		propertyValue = propertyValue.replace("Henry's Law constant = 6.00X10-6  to 9.96X10-12 atm-cu m/mol at 25 Â°C /individual isomers/", "3.00X10-6 atm-cu m/mol at 25 Â°C /individual isomers/");
 		propertyValue = propertyValue.replace("8.5X10-12 to 4.1X10-8 Pa-cu m/mol (Aminoglycosides) (etc)", "2.05X10-8 Pa-cu m/mol (Aminoglycosides) (etc)");
 		propertyValue = propertyValue.replace("The relative density will be between the bulk density and its density in molten form: 600 < D < 960 kg/cu m", "960 kg/cu m");
 		//Vapor Pressure
-		propertyValue = propertyValue.replace("3.0X01-2 mm Hg at 25 °C (extrapolated)", "3.0X10-2 mm Hg at 25 °C (extrapolated)");
+		propertyValue = propertyValue.replace("3.0X01-2 mm Hg at 25 ï¿½C (extrapolated)", "3.0X10-2 mm Hg at 25 ï¿½C (extrapolated)");
 		propertyValue = propertyValue.replace("Vapor pressure: 74-76 deg/40 mm 85% technical grade mixture", "Vapor pressure: 40 mm at 74-76 deg/ 85% technical grade mixture");
-		propertyValue = propertyValue.replace("1.7X10+6 Pa at 21 °C (12.8 mm Hg at 21.1 °C)", "1.7X10+6 Pa at 21 °C");
-		propertyValue = propertyValue.replace("% in saturated air at 25 °C: 0.0026. 1 ppm = 7.29 mg/cu m; 1 mg/L = 137.2 ppm at 25 °C 760 mm Hg. VP: less than 0.01 mm Hg at 25 °C", "VP: less than 0.01 mm Hg at 25 °C");
-		propertyValue = propertyValue.replace("Yellow to tan crystalline solid with characteristic vegetable odor. MP 189-191 °C. Insoluble in water, slightly soluble in alcohols, and soluble in acetone, chorobenzene, and 1,2-dichloroethane. VP: 2X10-8 mm Hg at 25 °C. /Technical/", "VP: 2X10-8 mm Hg at 25 °C");
+		propertyValue = propertyValue.replace("1.7X10+6 Pa at 21 ï¿½C (12.8 mm Hg at 21.1 ï¿½C)", "1.7X10+6 Pa at 21 ï¿½C");
+		propertyValue = propertyValue.replace("% in saturated air at 25 ï¿½C: 0.0026. 1 ppm = 7.29 mg/cu m; 1 mg/L = 137.2 ppm at 25 ï¿½C 760 mm Hg. VP: less than 0.01 mm Hg at 25 ï¿½C", "VP: less than 0.01 mm Hg at 25 ï¿½C");
+		propertyValue = propertyValue.replace("Yellow to tan crystalline solid with characteristic vegetable odor. MP 189-191 ï¿½C. Insoluble in water, slightly soluble in alcohols, and soluble in acetone, chorobenzene, and 1,2-dichloroethane. VP: 2X10-8 mm Hg at 25 ï¿½C. /Technical/", "VP: 2X10-8 mm Hg at 25 ï¿½C");
 		propertyValue = propertyValue.replace("1.6X10-9 mm Hg at 25 (extrapolated)", "VP = 1.6X10-9 mm Hg at 25 (extrapolated)");
 		//Water Solubility
-		propertyValue = propertyValue.replace("White crystals, mp 262-263 °C. Solubility in water: 20 g/100mL. Freely soluble in methanol", "Solubility in water: 20 g/100mL. Freely soluble in methanol");
-		propertyValue = propertyValue.replace("White to off-white powder. MP 120-122 °C. Solubility in water: 792 mg/mL /Lisdexamfetamine dimethanesulfonate/", "Solubility in water: 792 mg/mL /Lisdexamfetamine dimethanesulfonate/");
-		propertyValue = propertyValue.replace("Crystals. Six-sided plates, monoclinic or triclinic, mp 153-156 °C. One gram dissolves in 1 ml water and in 30 ml alcohol. Slightly sol in chloroform. Almost insoluble in ether. The pH of a 0.1 M aqueous solution is 6.0. /Hydrochloride/", "One gram dissolves in 1 ml water");
-		propertyValue = propertyValue.replace("mp 78-81 °C. Solubility (room temperature): 918 mg/l water", "Solubility (room temperature): 918 mg/l water");
-		propertyValue = propertyValue.replace("Exists as a dihydrate at room temperature, crystals, mp 156-163 °C. Anhydrous form mp approximately 190 °C. Slightly bitter taste. Freely soluble in water (~1 g/1 ml water). Solubility in 95% ethanol: 0.42 g/ 100 ml. Sparingly soluble in benzene, chloroform. Practically insoluble in ether. The pH of a 2-5% aqueous solution may vary from 4.5 to 3.0. /Chloride/", "Exists as a dihydrate at room temperature, crystals. Slightly bitter taste. Freely soluble in water (~1 g/1 ml water). Solubility in 95% ethanol: 0.42 g/ 100 ml. Sparingly soluble in benzene, chloroform. Practically insoluble in ether. The pH of a 2-5% aqueous solution may vary from 4.5 to 3.0. /Chloride/");
-		propertyValue = propertyValue.replace("Amorphous, hygroscopic, white powder. Mp 169.0-171.2 °C. Solubility in water: approx 500 mg/mL. Similarly soluble in methanol, ethanol,; sparingly soluble in chloroform. /21-Sodium succinate/", "Amorphous, hygroscopic, white powder. Solubility in water: approx 500 mg/mL. Similarly soluble in methanol, ethanol,; sparingly soluble in chloroform. /21-Sodium succinate/");
+		propertyValue = propertyValue.replace("White crystals, mp 262-263 ï¿½C. Solubility in water: 20 g/100mL. Freely soluble in methanol", "Solubility in water: 20 g/100mL. Freely soluble in methanol");
+		propertyValue = propertyValue.replace("White to off-white powder. MP 120-122 ï¿½C. Solubility in water: 792 mg/mL /Lisdexamfetamine dimethanesulfonate/", "Solubility in water: 792 mg/mL /Lisdexamfetamine dimethanesulfonate/");
+		propertyValue = propertyValue.replace("Crystals. Six-sided plates, monoclinic or triclinic, mp 153-156 ï¿½C. One gram dissolves in 1 ml water and in 30 ml alcohol. Slightly sol in chloroform. Almost insoluble in ether. The pH of a 0.1 M aqueous solution is 6.0. /Hydrochloride/", "One gram dissolves in 1 ml water");
+		propertyValue = propertyValue.replace("mp 78-81 ï¿½C. Solubility (room temperature): 918 mg/l water", "Solubility (room temperature): 918 mg/l water");
+		propertyValue = propertyValue.replace("Exists as a dihydrate at room temperature, crystals, mp 156-163 ï¿½C. Anhydrous form mp approximately 190 ï¿½C. Slightly bitter taste. Freely soluble in water (~1 g/1 ml water). Solubility in 95% ethanol: 0.42 g/ 100 ml. Sparingly soluble in benzene, chloroform. Practically insoluble in ether. The pH of a 2-5% aqueous solution may vary from 4.5 to 3.0. /Chloride/", "Exists as a dihydrate at room temperature, crystals. Slightly bitter taste. Freely soluble in water (~1 g/1 ml water). Solubility in 95% ethanol: 0.42 g/ 100 ml. Sparingly soluble in benzene, chloroform. Practically insoluble in ether. The pH of a 2-5% aqueous solution may vary from 4.5 to 3.0. /Chloride/");
+		propertyValue = propertyValue.replace("Amorphous, hygroscopic, white powder. Mp 169.0-171.2 ï¿½C. Solubility in water: approx 500 mg/mL. Similarly soluble in methanol, ethanol,; sparingly soluble in chloroform. /21-Sodium succinate/", "Amorphous, hygroscopic, white powder. Solubility in water: approx 500 mg/mL. Similarly soluble in methanol, ethanol,; sparingly soluble in chloroform. /21-Sodium succinate/");
 		propertyValue = propertyValue.replace("Soluble in ethanol and oils, insoluble in water", "insoluble in water");
 		propertyValue = propertyValue.replace("Miscible with many lacquer solvents, diluents, oils, slightly soluble in water", "slightly soluble in water");
 		propertyValue = propertyValue.replace("Freely soluble in glacial acetic acid, slightly soluble in methanol, very slightly soluble in water, and practically insoluble in ethanol.", "very slightly soluble in water");
 		propertyValue = propertyValue.replace("FREELY SOL IN WATER, LESS SOL IN ALCOHOL, SPARINGLY SOL IN ACETONE /HYDROCHLORIDE/", "FREELY SOL IN WATER");
-		propertyValue = propertyValue.replace("Mol wt 296.84. Crystals, dec 300-303 °C. Freely sol in water, alcohol. Practically insol in ether, chloroform, benzene /Hydrochloride/", "Freely sol in water");
+		propertyValue = propertyValue.replace("Mol wt 296.84. Crystals, dec 300-303 ï¿½C. Freely sol in water, alcohol. Practically insol in ether, chloroform, benzene /Hydrochloride/", "Freely sol in water");
 		propertyValue = propertyValue.replace("It is freely soluble in ethanol, soluble in hydrochloric acid, slightly soluble in water, and very slightly soluble in sodium hydroxide.", "slightly soluble in water");
 		propertyValue = propertyValue.replace("Practically insoluble in water. One gram dissolves in about 16 ml 95% ethanol", "Practically insoluble in water");
-		propertyValue = propertyValue.replace("In water, 4.2X10+5 to 5.95X10+5 mg/L at 20 °C", "In water, 5.08X10+5 mg/L at 20 °C");
-		propertyValue = propertyValue.replace("Crystals. Bitter taste. mp 194-198 °C. Sol in water. Sparingly sol in methanol. Practically insol in benzene, ether. pH (2% aq soln): 4.5. /Phosphate/","Crystals. Bitter taste. Sol in water. Sparingly sol in methanol. Practically insol in benzene, ether. pH (2% aq soln): 4.5. /Phosphate/");
-		propertyValue = propertyValue.replace("Mol wt 301.82. Bitter crystals producing temporary numbness of the tongue. mp 237-241 °C. UV max: 242 nm (E 1% 1cm = 495 to 515); min 222 nm. One gram dissolves in 40 ml water, in 25 ml alc. Practically insol in ether, benzene, chloroform. pH (1% aq soln): 6.3. /Hydrochloride/","Mol wt 301.82. Bitter crystals producing temporary numbness of the tongue. UV max: 242 nm (E 1% 1cm = 495 to 515); min 222 nm. One gram dissolves in 40 ml water, in 25 ml alc. Practically insol in ether, benzene, chloroform. pH (1% aq soln): 6.3. /Hydrochloride/");
+		propertyValue = propertyValue.replace("In water, 4.2X10+5 to 5.95X10+5 mg/L at 20 ï¿½C", "In water, 5.08X10+5 mg/L at 20 ï¿½C");
+		propertyValue = propertyValue.replace("Crystals. Bitter taste. mp 194-198 ï¿½C. Sol in water. Sparingly sol in methanol. Practically insol in benzene, ether. pH (2% aq soln): 4.5. /Phosphate/","Crystals. Bitter taste. Sol in water. Sparingly sol in methanol. Practically insol in benzene, ether. pH (2% aq soln): 4.5. /Phosphate/");
+		propertyValue = propertyValue.replace("Mol wt 301.82. Bitter crystals producing temporary numbness of the tongue. mp 237-241 ï¿½C. UV max: 242 nm (E 1% 1cm = 495 to 515); min 222 nm. One gram dissolves in 40 ml water, in 25 ml alc. Practically insol in ether, benzene, chloroform. pH (1% aq soln): 6.3. /Hydrochloride/","Mol wt 301.82. Bitter crystals producing temporary numbness of the tongue. UV max: 242 nm (E 1% 1cm = 495 to 515); min 222 nm. One gram dissolves in 40 ml water, in 25 ml alc. Practically insol in ether, benzene, chloroform. pH (1% aq soln): 6.3. /Hydrochloride/");
 		propertyValue = propertyValue.replace("Soluble in ethanol and most fixed oils, insoluble in glycerol, propylene glycol and water","insoluble in glycerol, propylene glycol and water");
 		propertyValue = propertyValue.replace("Soluble in ethanol and fixed oils, insoluble in glycerol, propylene glycol and water","insoluble in glycerol, propylene glycol and water");
 		propertyValue = propertyValue.replace("Soluble in ether, insoluble in water","insoluble in water");
 		propertyValue = propertyValue.replace("Slightly soluble in propylene glycol, insoluble in glycerol and water","insoluble in glycerol and water");
-		propertyValue = propertyValue.replace("Dark bluish-green powder. Solubility in water, 30 mg/mL at 25 °C; solubility in ethylene glycol monomethyl ether 30 mg/mL; in ethanol 7 mg/mL. UV max 635 nm in water /Acid Blue 1/","Dark bluish-green powder. Solubility in water, 30 mg/mL at 25 °C;");
+		propertyValue = propertyValue.replace("Dark bluish-green powder. Solubility in water, 30 mg/mL at 25 ï¿½C; solubility in ethylene glycol monomethyl ether 30 mg/mL; in ethanol 7 mg/mL. UV max 635 nm in water /Acid Blue 1/","Dark bluish-green powder. Solubility in water, 30 mg/mL at 25 ï¿½C;");
 		propertyValue = propertyValue.replace("In aqueous media with a pH 1.1-7.8, axitinib has a solubility of over 0.2 ?g/mL.","In aqueous media with a pH between 1.1 to 7.8, axitinib has a solubility of over 0.2 g/mL.");
-		propertyValue = propertyValue.replace("Toluene - 4.0X10+3. Water - 2.5 ppm at 22 °C","Water - 2.5 ppm at 22 °C");
+		propertyValue = propertyValue.replace("Toluene - 4.0X10+3. Water - 2.5 ppm at 22 ï¿½C","Water - 2.5 ppm at 22 ï¿½C");
 		propertyValue = propertyValue.replace("Water pH 9 2-3 (mg/mL)","Water 2-3 (mg/mL) at pH 9");
 
 
-		propertyValue = propertyValue.replace("PPM @ 25 °C: ACETONE 16,800, BENZENE 500, XYLENE 400, DIMETHYLFORMAMIDE 50,300, WATER 230,800, ISOPROPANOL 20,900, METHYLETHYL KETONE 5,900","230800 ppm @ 25 °C");
+		propertyValue = propertyValue.replace("PPM @ 25 ï¿½C: ACETONE 16,800, BENZENE 500, XYLENE 400, DIMETHYLFORMAMIDE 50,300, WATER 230,800, ISOPROPANOL 20,900, METHYLETHYL KETONE 5,900","230800 ppm @ 25 ï¿½C");
 		propertyValue = propertyValue.replace("Solubility (mg/ml): propylene glycol 75, methanol 44, ethanol 29, 2-propanol 6.7, dimethylsulfoxide 6.5, water 2.2, chloroform 0.5, acetone <0.5, ethyl acetate <0.5, diethyl ether <0.5, benzene <0.5, acetonitrile <0.5.","2.2 mg/mL");
 		propertyValue = propertyValue.replace("Solubility (mg/mL): water 83, ethanol (200 proof) 26, propylene glycol 93, ethanol (190 proof) >100, methanol >100, 2-propanol 4.6, ethyl acetate 1.0, DMF >100, methylene chloride >100, hexane 0.001; Freely soluble in chloroform, practically insoluble in ether /Verapamil hydrochloride/", "83 mg/mL");
 
 		propertyValue = propertyValue.replace("In an experiment performed under inert gas atmosphere, the solubility /in water/ of freshly precipitated chromium(III) hydroxide was determined from under-saturation and from over-saturation at different pH. As an amphoteric hydroxide, the solubility curve of chromium(III) hydroxide is parabolic, depending on pH. The solubility is as follows: >pH 4: moderately soluble; pH 6.8 - 11.5: insoluble; > pH 11.5 - 14 slightly soluble ... at pH 4, the solubility was about 520 mg/L; at pH 6.8 to 11.8, the solubility was about 0.005 mg/L","The solubility is as follows: >pH 4: moderately soluble; insoluble at pH 6.8 - 11.5; slightly soluble at pH 11.5 - 14; at pH 4, the solubility was about 520 mg/L; the solubility was about 0.005 mg/L at pH 6.8 to 11.8");
 
 
-		propertyValue = propertyValue.replace("log Kow > 5 (pH 4-5, 20-25 °C)","log Kow > 5 @ pH 4.5 and 22.5°C");
-		propertyValue = propertyValue.replace("log Kow = 3.8-4.1 (pH 6-7, 20-25 °C)","log Kow = 3.8-4.1 @ pH 6.5 and 22.5°C)");
-		propertyValue = propertyValue.replace("log Kow = 2.5-3.2 (pH 9-10, 20-25 °C)","");
+		propertyValue = propertyValue.replace("log Kow > 5 (pH 4-5, 20-25 ï¿½C)","log Kow > 5 @ pH 4.5 and 22.5ï¿½C");
+		propertyValue = propertyValue.replace("log Kow = 3.8-4.1 (pH 6-7, 20-25 ï¿½C)","log Kow = 3.8-4.1 @ pH 6.5 and 22.5ï¿½C)");
+		propertyValue = propertyValue.replace("log Kow = 2.5-3.2 (pH 9-10, 20-25 ï¿½C)","");
 		//Melting Point
 		propertyValue = propertyValue.replace("-77 - (-)14 Â°F","-77 - -14 Â°F");
 		propertyValue = propertyValue.replace("-22-(-)13 Â°F","-22- -13 Â°F");
@@ -847,10 +846,10 @@ public class RecordPubChem {
 		propertyValue = propertyValue.replace("Cf2O3: pale green, hexagonal, density = 12.69 g/mL", "pale green, hexagonal, density = 12.69 g/mL");
 		propertyValue = propertyValue.replace("CfBr2: amber, tetragonal, density = 7.22 g/mL", "amber, tetragonal, density = 7.22 g/mL");
 		propertyValue = propertyValue.replace("density: 1.73 20 Â°C/4 Â°C", "density: 1.73 at 20 Â°C/4 Â°C");
-		propertyValue = propertyValue.replace("Density  (at 0-4 Â°C): 0.6 g/cmÂ^3", "Density: 0.6 g/cmÂ^3 at 0-4 Â°C");
+		propertyValue = propertyValue.replace("Density  (at 0-4 Â°C): 0.6 g/cmï¿½^3", "Density: 0.6 g/cmï¿½^3 at 0-4 Â°C");
 		propertyValue = propertyValue.replace("Sp gr: 1.04 (water= 1)", "Sp gr: 1.04");
 		propertyValue = propertyValue.replace("Sp gr: 1.1122 20 Â°C/20 Â°C", "Sp gr: 1.1122 at 20 Â°C/20 Â°C");
-		propertyValue = propertyValue.replace("1.1270 (Milbemycin A3) at 25 °C; 1.1265 (Milbemycin A4) at 25 °C", "1.1270 at 25 °C; 1.1265 at 25 °C");
+		propertyValue = propertyValue.replace("1.1270 (Milbemycin A3) at 25 ï¿½C; 1.1265 (Milbemycin A4) at 25 ï¿½C", "1.1270 at 25 ï¿½C; 1.1265 at 25 ï¿½C");
 		propertyValue = propertyValue.replace("1.1416 at 20 Â°C g/cu cm", "1.1416 g/cu cm at 20 Â°C");
 		propertyValue = propertyValue.replace("1.66 @ 25 Â°C referred to water at 4 Â°C", "1.66 @ 25 Â°C");
 		propertyValue = propertyValue.replace("1.507 (99.2%) at 20 Â°C", " 1.507 at 20 Â°C");
@@ -891,7 +890,7 @@ public class RecordPubChem {
 		propertyValue = propertyValue.replace("SOLUBILITY IN WATER @ 20-25 Â°C: 22% /LITHIUM SALT/; 14% /SODIUM SALT/; 10.7% /POTASSIUM SALT/","SOLUBILITY IN WATER: 22% @ 20-25 Â°C /LITHIUM SALT/; 14% @ 20-25 Â°C /SODIUM SALT/; 10.7% @ 20-25 Â°C /POTASSIUM SALT/");
 		propertyValue = propertyValue.replace("In aqueous media with a pH between 1.1 to 7.8, axitinib has a solubility of over 0.2 Î¼g/mL.","axitinib has a solubility of over 0.2 ug/mL in aqueous media with a pH 1.1-7.8");
 		propertyValue = propertyValue.replace("Freely soluble at neutral pH (350 mg/mL at 37 Â°C, pH 7.0).","Freely soluble (350 mg/mL at 37 Â°C, pH 7.0).");
-		propertyValue = propertyValue.replace("Maximum water solubility of 16â  €“18 g/L at 24Â°", "Maximum water solubility of 16-€“18 g/L at 24Â°");
+		propertyValue = propertyValue.replace("Maximum water solubility of 16ï¿½  ï¿½ï¿½18 g/L at 24Â°", "Maximum water solubility of 16-ï¿½ï¿½18 g/L at 24Â°");
 		propertyValue = propertyValue.replace("â‰¥ 10g/100g", ">= 10g/100g");
 		propertyValue = propertyValue.replace("soluble in water at 50 g/l at 20Ã¯Â¿Â½C and white petrolatum at <100 g/kg at 20Ã¯Â¿Â½C", "soluble in water at 50 g/l at 20Â°C");
 		propertyValue = propertyValue.replace("100 g in 100 ml water at 23Ã¯Â¿Â½C", "100 g in 100 ml water at 23 Â°C");

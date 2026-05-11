@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,23 +36,18 @@ import gov.epa.api.Chemical;
 import gov.epa.api.DsstoxLookup;
 import gov.epa.api.DsstoxLookup.DsstoxRecord;
 import gov.epa.api.ExperimentalConstants;
-import gov.epa.api.FlatFileRecord2;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
-import gov.epa.exp_data_gathering.parse.ParseUtilities;
-import gov.epa.exp_data_gathering.parse.UnitConverter;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords;
-import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.ExperimentalRecordManipulator;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.Source;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.ghs_data_gathering.Parse.OPERA.ParseOPERA;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.MySQL_DB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.SqlUtilities;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.Utilities;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_bcfbaf.ParseToxValBCFBAF;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_bcfbaf.RecordToxValBCFBAF;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_cancer_summary.ParseToxValCancer;
@@ -66,7 +59,6 @@ import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_models.RecordToxValMod
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval.CreateAquaticToxicityRecords;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval.ParseToxVal;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval.RecordToxVal;
-import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.Source;
 
 /**
  * @author TMARTI02

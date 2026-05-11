@@ -1,14 +1,5 @@
 package hazard;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.TreeMap;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
 /**
 * @author TMARTI02
 */

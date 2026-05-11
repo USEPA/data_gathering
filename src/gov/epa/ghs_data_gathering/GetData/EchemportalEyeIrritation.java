@@ -1,28 +1,6 @@
 package gov.epa.ghs_data_gathering.GetData;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-
-
-import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 /**
  * @author Todd Martin
@@ -80,7 +58,7 @@ public class EchemportalEyeIrritation {
 		ht.put("expected as not or weak irritating",strA);
 		ht.put("ghs criteria not met a positive irritant to the eye",strA);
 		ht.put("low irritation potential",strA);
-		ht.put("not clasified under clp  the test item produced a maximum group mean score of 12.0 out of a possible maximum of 110 and was considered to be a mild irritant (class 4 on a 1 to 8 scale) to the rabbit eye",strA);
+		ht.put("not clasified under clp ï¿½the test item produced a maximum group mean score of 12.0 out of a possible maximum of 110 and was considered to be a mild irritant (class 4 on a 1 to 8 scale) to the rabbit eye",strA);
 		ht.put("not classified",strA);
 		ht.put("not classified classified",strA);
 		ht.put("not irritating in the opinion of the study director",strA);

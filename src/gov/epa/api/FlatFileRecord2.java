@@ -3,12 +3,10 @@ package gov.epa.api;
 import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.Field;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
 
-import gov.epa.ghs_data_gathering.GetData.SkinSensitization.RecordChembench;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 

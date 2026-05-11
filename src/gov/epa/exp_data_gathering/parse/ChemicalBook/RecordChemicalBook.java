@@ -1,29 +1,19 @@
 package gov.epa.exp_data_gathering.parse.ChemicalBook;
 
-import gov.epa.api.RawDataRecord;
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.RecordDashboard;
-import gov.epa.ghs_data_gathering.Utilities.FileUtilities;
-
 import java.io.File;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
 import java.util.Vector;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * @author CRAMSLAN

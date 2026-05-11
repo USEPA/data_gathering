@@ -1,11 +1,7 @@
 package gov.epa.exp_data_gathering.parse.AADashboard;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.io.File;
 import java.sql.Connection;  
-import java.sql.DriverManager;  
-import java.sql.SQLException;  
-import gov.epa.api.ExperimentalConstants;
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import java.sql.Statement;

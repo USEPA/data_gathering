@@ -12,11 +12,11 @@ import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.TextUtilities;
 import gov.epa.exp_data_gathering.parse.ITRC.RecordITRC;
 import gov.epa.exp_data_gathering.parse.Mackay_2006.RecordMackay_2006;
 import gov.epa.exp_data_gathering.parse.Montgomery.RecordMontgomery;
 import gov.epa.exp_data_gathering.parse.USDA_Pesticide_Property_DB.RecordPesticidePropertyDB;
+import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 
 /**
  * 
@@ -81,7 +81,8 @@ public class ParseKoc extends Parse {
 					if (er.publicSource != null && er.publicSource.name.equals("Yaws, 1999"))
 						continue;
 
-					er.chemical_name = TextUtilities.fixName(er.chemical_name);
+					// er.chemical_name = TextUtilities.fixName(er.chemical_name);
+					er.chemical_name = ChemicalNameFixer.fixName(er.chemical_name);
 					fixPermethrins(er);
 					dm.getCuratedIdentifiers(er);
 					dm.getDtxsid(er);

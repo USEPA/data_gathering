@@ -3,7 +3,6 @@ package gov.epa.ghs_data_gathering.Parse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.LinkedList;
 import java.util.Vector;
 
@@ -17,12 +16,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import gov.epa.api.AADashboard;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
-import gov.epa.ghs_data_gathering.Parse.ParseHealth_Canada_Priority_Substances_Carcinogenicity_2006.CarcinogenicityRecords;
 import gov.epa.ghs_data_gathering.Utilities.DoubleTypeAdapter;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 

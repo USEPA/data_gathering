@@ -99,7 +99,7 @@ public class BiodegradabilityClassifier {
 
     private static String norm(String x) {
         String t = x.trim().toLowerCase(Locale.ROOT);
-        t = t.replace('–', '-').replace('—', '-');
+        t = t.replace('\u2013', '-').replace('\u2014', '-');
         t = t.replaceAll("\\s+", " ");
         if (t.startsWith("\"") && t.endsWith("\"") && t.length() > 1) {
             t = t.substring(1, t.length() - 1).trim();

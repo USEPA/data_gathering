@@ -17,7 +17,6 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -40,7 +39,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import gov.epa.ghs_data_gathering.Database.MySQL_DB;
 
-import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part1;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.AdministrativeData;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.DataSource;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.MaterialsAndMethods;

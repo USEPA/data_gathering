@@ -1,9 +1,7 @@
 package gov.epa.exp_data_gathering.parse.NICEATM;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 

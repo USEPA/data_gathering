@@ -27,8 +27,6 @@ import gov.epa.exp_data_gathering.parse.LiteratureSource;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
 import gov.epa.exp_data_gathering.parse.ToxVal.ParseToxVal;
-import gov.epa.exp_data_gathering.parse.ToxVal.ToxValQuery;
-import gov.epa.exp_data_gathering.parse.ToxVal.ToxValRecord;
 
 /**
  * @author TMARTI02
@@ -972,7 +970,7 @@ public class RecordArnot2006 {
 		putEntryLatin(htSuperCategory, "pleurogrammus monopterygius", "fish");
 		putEntryLatin(htSuperCategory, "sebastodes fuscescens", "fish");
 		putEntryLatin(htSuperCategory, "tridentiger barbatus", "fish");
-		putEntryLatin(htSuperCategory, "lepidotrigla microptera günther", "fish");
+		putEntryLatin(htSuperCategory, "lepidotrigla microptera gï¿½nther", "fish");
 		putEntryLatin(htSuperCategory, "cynoglossus robustus", "fish");
 		putEntryLatin(htSuperCategory, "lophius litulon", "fish");
 		putEntryLatin(htSuperCategory, "platycephalus indicus", "fish");
@@ -1049,11 +1047,11 @@ public class RecordArnot2006 {
 		putEntryLatin(htSuperCategory, "barbus graellsii", "fish");
 		putEntryLatin(htSuperCategory, "barbus guiraonis", "fish");
 		putEntryLatin(htSuperCategory, "stuckenia pectinata", "flowers, trees, shrubs, ferns");
-		putEntryLatin(htSuperCategory, "ceratophyllum demersum l.", "flowers, trees, shrubs, ferns");
-		putEntryLatin(htSuperCategory, "juncellus serotinus", "flowers, trees, shrubs, ferns");
-		putEntryLatin(htSuperCategory, "typha angustifolia l.", "flowers, trees, shrubs, ferns");
-		putEntryLatin(htSuperCategory, "nelumbo nucifera gaertn.", "flowers, trees, shrubs, ferns");
-		putEntryLatin(htSuperCategory, "scirpus validus vahl ", "flowers, trees, shrubs, ferns");
+		putEntryLatin(htSuperCategory, "ceratophyllum demersumï¿½l.", "flowers, trees, shrubs, ferns");
+		putEntryLatin(htSuperCategory, "juncellusï¿½serotinus", "flowers, trees, shrubs, ferns");
+		putEntryLatin(htSuperCategory, "typha angustifoliaï¿½l.", "flowers, trees, shrubs, ferns");
+		putEntryLatin(htSuperCategory, "nelumbo nuciferaï¿½gaertn.", "flowers, trees, shrubs, ferns");
+		putEntryLatin(htSuperCategory, "scirpus validusï¿½vahlï¿½", "flowers, trees, shrubs, ferns");
 		putEntryLatin(htSuperCategory, "ceratophyllum demersum", "flowers, trees, shrubs, ferns");
 		putEntryLatin(htSuperCategory, "plankton", "microorganisms");
 		

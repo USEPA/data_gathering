@@ -8,7 +8,6 @@ import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
-import gov.epa.exp_data_gathering.parse.ParseUtilities;
 
 public class ParseToxValBCFBAF {
 

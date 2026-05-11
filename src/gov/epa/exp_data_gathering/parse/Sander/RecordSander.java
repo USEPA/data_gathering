@@ -1,6 +1,5 @@
 package gov.epa.exp_data_gathering.parse.Sander;
 import java.io.File;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
@@ -19,8 +18,6 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
-import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
-import gov.epa.exp_data_gathering.parse.LiteratureSource;
 
 
 public class RecordSander {

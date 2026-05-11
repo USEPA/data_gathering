@@ -19,7 +19,6 @@ import com.google.gson.JsonObject;
 import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
-import gov.epa.exp_data_gathering.parse.Koc.RecordKoc;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 
 /**

@@ -20,7 +20,6 @@ import java.util.Vector;
 
 import java.util.Locale;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
@@ -651,7 +649,7 @@ public class RecordQSAR_ToolBox {
         	
         	boolean badQualifier=false;
         	
-        	if(Org_carbon_Qualifier!=null && (Org_carbon_Qualifier.equals("<") || Org_carbon_Qualifier.equals("≥"))) {
+        	if(Org_carbon_Qualifier!=null && (Org_carbon_Qualifier.equals("<") || Org_carbon_Qualifier.equals("\u2265"))) { // ≥
         		badQualifier=true;
         	}
         	
@@ -890,9 +888,9 @@ public class RecordQSAR_ToolBox {
 		if(Value_MeanValue !=null) {
 			if(Value_Qualifier==null || Value_Qualifier.equals("ca.")) {
 				estimate.point=Double.parseDouble(Value_MeanValue);	
-			} else if(Value_Qualifier.equals("<") || Value_Qualifier.equals("≤")){
+			} else if(Value_Qualifier.equals("<") || Value_Qualifier.equals("\u2264")){ // ≤
 				estimate.max=Double.parseDouble(Value_MeanValue);				
-			} else if(Value_Qualifier.equals(">") || Value_Qualifier.equals("≥")){
+			} else if(Value_Qualifier.equals(">") || Value_Qualifier.equals("\u2265")){ // ≥
 				estimate.min=Double.parseDouble(Value_MeanValue);
 			} else {
 				System.out.println(this.CAS_Number+"\t"+ Value_Qualifier+"\t"+Value_MinValue+"\t"+Value_MaxValue);
@@ -1801,10 +1799,10 @@ public class RecordQSAR_ToolBox {
 					er.property_value_numeric_qualifier="<=";
 				} else if (Qualifier.contentEquals("<")) {
 					er.property_value_numeric_qualifier="<";
-				} else if (Qualifier.contentEquals("≤")) {
-					er.property_value_numeric_qualifier="≤";
-				} else if (Qualifier.contentEquals("≥")) {
-					er.property_value_numeric_qualifier="≥";
+				} else if (Qualifier.contentEquals("\u2264")) { // ≤
+					er.property_value_numeric_qualifier="\u2264"; // ≤
+				} else if (Qualifier.contentEquals("\u2265")) { // ≥
+					er.property_value_numeric_qualifier="\u2265"; // ≥
 
 				} else {
 					System.out.println("Unhandled qualifier:\t"+this.Qualifier);	

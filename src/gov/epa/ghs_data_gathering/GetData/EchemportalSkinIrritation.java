@@ -1,7 +1,6 @@
 package gov.epa.ghs_data_gathering.GetData;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Class to parse skin irr data from echemportal spreadsheet
