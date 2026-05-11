@@ -19,3 +19,4 @@ debug.log
 *.rtf
 *.pdf
 driver/
+.vscode/
