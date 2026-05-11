@@ -20,3 +20,4 @@ debug.log
 *.pdf
 driver/
 .vscode/
+.github/
