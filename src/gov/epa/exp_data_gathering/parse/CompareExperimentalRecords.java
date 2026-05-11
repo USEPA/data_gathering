@@ -85,6 +85,7 @@ public class CompareExperimentalRecords {
 			setMedianValues(ht,units);
 			return ht;
 		}
+		
 
 		private TreeMap<String, ExperimentalRecords> getTreeMapByDTXSID(String propertyName, String units,
 				ExperimentalRecords experimentalRecords) {
@@ -194,7 +195,10 @@ public class CompareExperimentalRecords {
 		
 			if(avg<=0.2) recs.medianValue=0.0;
 			else if (avg>=0.8) recs.medianValue=1.0;
-			else return;
+			else {
+//				System.out.println(recs.get(0).casrn+"\t"+JsonUtilities.gsonPretty.toJson(recs)+"\n");
+				return;
+			}
 		
 			//		System.out.println(recs.get(0).casrn+"\t"+avg);
 		
@@ -213,45 +217,38 @@ public class CompareExperimentalRecords {
 //			System.out.println("recs.size()="+recs.size());
 		
 			for (ExperimentalRecord er:recs) {
-		
-//				System.out.println(er.property_value_units_final+"\t"+units);
-		
+				
 				if(er.property_value_units_final==null) continue;
 				if(!er.property_value_units_final.equals(units)) continue;
-		
-				if(er.property_value_numeric_qualifier!=null) {
-//					if (er.property_value_numeric_qualifier.contains("<") || er.property_value_numeric_qualifier.contains(">")) continue;
-					if (!er.property_value_numeric_qualifier.equals("~")) continue;
-				}
-		
 				Double val=null;
-		
-				if(er.property_value_max_final!=null && er.property_value_min_final!=null) {
-					
-					if(Math.abs(Math.log10(er.property_value_min_final/er.property_value_max_final))<1) {
-						val=Math.sqrt(er.property_value_max_final*er.property_value_min_final);						
-					} else {
-						continue;
-					}
-					
-				} else if(er.property_value_point_estimate_final!=null) {
+				
+				if(units.equals(ExperimentalConstants.str_binary)) {
 					val=er.property_value_point_estimate_final;
-				} else continue;
-				
-				
-		
-				if(!units.toLowerCase().contains("log")) {
-					
-					if(val==0.0) continue;
-					
-					val=Math.log10(val);
-				}
-				
-				vals.add(val);
-				
-//				System.out.println(er.casrn+"\t"+val);
+				} else {
+					if(er.property_value_numeric_qualifier!=null) {
+//						if (er.property_value_numeric_qualifier.contains("<") || er.property_value_numeric_qualifier.contains(">")) continue;
+						if (!er.property_value_numeric_qualifier.equals("~")) continue;
+					}
+					if(er.property_value_max_final!=null && er.property_value_min_final!=null) {
+						if(Math.abs(Math.log10(er.property_value_min_final/er.property_value_max_final))<1) {
+							val=Math.sqrt(er.property_value_max_final*er.property_value_min_final);						
+						} else {
+							continue;
+						}
+					} else if(er.property_value_point_estimate_final!=null) {
+						val=er.property_value_point_estimate_final;
+					} else continue;
 
+					//TODO Following needs to work for any units we give it
+					if(!units.toLowerCase().contains("log") && !units.equals(ExperimentalConstants.str_C)) {
+						if(val==0.0) continue;
+						val=Math.log10(val);
+					}					
+				}
 		
+//				System.out.println(er.property_value_units_final+"\t"+units);
+				vals.add(val);
+//				System.out.println(er.casrn+"\t"+val);
 				//			System.out.println(er.property_value_string+"\t"+val);
 			}
 			
@@ -262,11 +259,6 @@ public class CompareExperimentalRecords {
 				
 				if(units.equals(ExperimentalConstants.str_binary)) {
 					setBinaryScore(recs,vals);
-		
-					if(recs.medianValue!=null) {
-						//					System.out.println("\t"+recs.get(0).casrn+"\t"+recs.medianValue);
-					}
-		
 				} else {
 					setMedianValue(recs,vals);	
 				}
@@ -280,11 +272,10 @@ public class CompareExperimentalRecords {
 			for (String key:tm.keySet()) {
 				ExperimentalRecords recs=tm.get(key);
 				setMedianValue(recs,units);
-				
+								
 //				System.out.println(key+"\t"+recs.medianValue);
 				count+=recs.size();
 			}
-		
 		}
 
 		private void removeByParameter(String parameterName, String parameterValue, ExperimentalRecords recs1) {
@@ -641,6 +632,24 @@ public class CompareExperimentalRecords {
 
 		}
 		
+		
+		private void compareRBiodeg() {
+			
+			String propertyName=ExperimentalConstants.strRBIODEG;
+			
+			List<Source>sources1=new ArrayList<>();
+			List<Source>sources2=new ArrayList<>();
+
+			sources1.add(new Source(RecordQSAR_ToolBox.sourceName,"RBiodeg 301F ECHA Reach"));
+			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
+
+//			sources1.add(new Source("RIFM_2026_01",null));//fragrance data
+//			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
+
+			cm.compareChemicalsInCommonConcordance(sources1, sources2, propertyName,
+					ExperimentalConstants.str_binary);
+
+		}
 		
 		private void compareKoc() {
 
@@ -1415,8 +1424,9 @@ public class CompareExperimentalRecords {
 //		c.c.lookAtLLNA_MixtureVsNonMixtureNIEHS_ICE();//only 8?
 //		c.c.compareSensitization();
 
-//		c.c.compareBCF();
-		c.c.compareKoc();
+		c.c.compareRBiodeg();
+		//		c.c.compareBCF();
+//		c.c.compareKoc();
 //		c.c.compareAquaticTox();
 //		c.c.compareWS();
 //		c.c.compareWS2();
