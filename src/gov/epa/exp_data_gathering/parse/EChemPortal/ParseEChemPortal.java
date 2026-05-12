@@ -33,7 +33,7 @@ public class ParseEChemPortal extends Parse {
 	
 	
 	String fileName="todo";
-	static final String filename301F = "biodegradation in water screening tests 2026-04-15.xlsx";
+	static final String filename301F = "biodegradation in water screening tests 2026-05-12.xlsx";
 	static final String filenameKoc = "Koc 2026-04-16.xls";
 
 

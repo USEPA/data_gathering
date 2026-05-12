@@ -32,6 +32,7 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
+import gov.epa.exp_data_gathering.parse.JSONUtilities;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
@@ -74,7 +75,7 @@ public class RecordEChemPortal {
 	public List<RecordDegradation> recordsDegradation;
 	public List<RecordKoc> recordsKoc;
 	
-	public String interpretationOfResults;
+	// public String interpretationOfResults;
 	public Integer derivedbinaryBiodegradation;
 	private String decisionDegradationRecord;
 	public Double percentDegradation28days;
@@ -213,11 +214,11 @@ public class RecordEChemPortal {
 				RecordDegradation recordDegradation = null;
 
 				for (String value : values) {
-					if (value.isBlank())
+					if (value == null || value.isBlank())
 						continue;
-					String[] vals = value.split(":");
-					String parameterName = vals[0].trim();
-					String parameterValue = vals[1].trim();
+					String[] vals = value.split(":"); // TODO work on handling cases where there are colons in the line (Test guideline)
+					String parameterName = value.substring(0, value.indexOf(":")).trim();
+					String parameterValue = value.substring(value.indexOf(":") + 1).trim();
 
 					if (parameterName.equals("Type of information")) {
 						rec.typeOfInformation = parameterValue;
@@ -243,11 +244,11 @@ public class RecordEChemPortal {
 						recordDegradation.samplingTime = parameterValue;
 					} else if (parameterName.equals("Interpretation of results")) {
 
-						if (vals.length == 3) {
-							rec.interpretationOfResults = vals[2].trim();
-						} else {
-							rec.interpretationOfResults = parameterValue;
-						}
+						// if (vals.length == 3) {
+						// 	rec.interpretationOfResults = vals[2].trim();
+						// } else {
+						// 	rec.interpretationOfResults = parameterValue;
+						// }
 
 					} else {
 						System.out.println(rec.number + "\t" + parameterName + "\t" + parameterValue);
@@ -860,7 +861,16 @@ public class RecordEChemPortal {
 		er.experimental_parameters.put("Reliability",this.reliability);
 		er.experimental_parameters.put("Test guideline",this.testGuideline);
 		er.experimental_parameters.put("Test guideline compliance",this.GLP_compliance);
-		er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// if (this.interpretationOfResults!=null) {
+		// 	er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// } else {
+		// 	try {
+		// 		er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// 	} catch (Exception e) {
+		// 		System.out.println("Error occurred while setting interpretation of results: " + e.getMessage());
+		// 		System.out.println(JsonUtilities.gsonPretty.toJson(this));
+		// 	}
+		// }
 	}
 
 	private ExperimentalRecord createExperimentalRecord(String propertyName) {

@@ -814,7 +814,7 @@ public class CompareExperimentalRecords {
 			HashSet<String> origEChemCasSet301F = new HashSet<>();
 			for (RecordEChemPortal record : origEChem) {
 				origEChemCasSet.add(record.number);
-				if (record.testGuideline != null && record.testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability")) {
+				if (record.testGuideline != null && record.testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
 					origEChemCasSet301F.add(record.number);
 				}
 			}
@@ -838,7 +838,7 @@ public class CompareExperimentalRecords {
 			for (ExperimentalRecord record : expEChem) {
 				expEChemCasSet.add(record.casrn);
 				String testGuideline = (String) record.getExperimentalParameter("Test guideline");
-				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability")) {
+				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
 					expEChemCasSet301F.add(record.casrn);
 				}
 			}
