@@ -809,6 +809,8 @@ public class RecordQSAR_ToolBox {
 				er.updateReason(rbs.reason);
 				er.keep=false;
 			}
+
+			addMetadata(er);
 		
 //			if(!(scoreFromBiodegradationPercentage+"").equals((scoreFromInterpretationOfResults+""))) {
 //				if(Interpretation_Of_Results!=null) {
@@ -2262,7 +2264,7 @@ public class RecordQSAR_ToolBox {
 	}
 
 	//Adds all metadata for each of BCF data sets
-	private void addMetadata(ExperimentalRecord er) {
+	private void addMetadata(ExperimentalRecord er) {		
 		if(Database==null) { 
 			er.keep=false;
 			er.reason="Database is missing";
@@ -2376,7 +2378,6 @@ public class RecordQSAR_ToolBox {
 			}
 		} else if (Database.equals("ECHA REACH")) {
 			setObservationDuration(er);
-
 			setGuideline(er);
 
 			DecimalFormat df=new DecimalFormat("0");
@@ -2434,7 +2435,6 @@ public class RecordQSAR_ToolBox {
 
 
 	private void setObservationDuration(ExperimentalRecord er) {
-
 		if(Duration_Unit==null) {
 			er.keep=false;
 			er.reason="Missing duration unit";
@@ -2446,8 +2446,11 @@ public class RecordQSAR_ToolBox {
 		ParameterValue pv=new ParameterValue();
 		pv.parameter.name=parameterName;
 		pv.value_point_estimate=mean;
+		pv.unit.name="DAYS";
 		pv.unit.abbreviation="days";
+				
 		er.parameter_values.add(pv);
+		
 	}
 
 	public Double getValueInDays(String obs_duration,String units) {

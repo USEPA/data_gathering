@@ -32,6 +32,7 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
+import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
 import gov.epa.exp_data_gathering.parse.EChemPortal.EstimateParser.Estimate;
@@ -46,39 +47,39 @@ import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.ResultBi
  */
 public class RecordEChemPortal {
 	
-	String substanceName;
-	String nameType;
-	String number;
-	String numberType;
-	Boolean memberOfCategory;
-	String participant;
-	String section;
-	String url;
-	String reliability;
-	String method;
-	Vector<String> values;
-	Vector<String> pressure;
-	Vector<String> temperature;
-	Vector<String> pH;
-	String source;
+	public String substanceName;
+	public String nameType;
+	public String number;
+	public String numberType;
+	public Boolean memberOfCategory;
+	public String participant;
+	public String section;
+	public String url;
+	public String reliability;
+	public String method;
+	public Vector<String> values;
+	public Vector<String> pressure;
+	public Vector<String> temperature;
+	public Vector<String> pH;
+	public String source;
 
-	String typeOfInformation;
-	String endpoint;
-	String testGuidelineQualifier;
-	String testGuideline;
-	String GLP_compliance;
-	String oxygenConditions;
-	String media;
+	public String typeOfInformation;
+	public String endpoint;
+	public String testGuidelineQualifier;
+	public String testGuideline;
+	public String GLP_compliance;
+	public String oxygenConditions;
+	public String media;
 
-	List<RecordDegradation> recordsDegradation;
-	List<RecordKoc> recordsKoc;
+	public List<RecordDegradation> recordsDegradation;
+	public List<RecordKoc> recordsKoc;
 	
-	String interpretationOfResults;
-	Integer derivedbinaryBiodegradation;
+	public String interpretationOfResults;
+	public Integer derivedbinaryBiodegradation;
 	private String decisionDegradationRecord;
-	Double percentDegradation28days;
+	public Double percentDegradation28days;
 	
-	String dateAccessed;
+	public String dateAccessed;
 	
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 
@@ -792,6 +793,18 @@ public class RecordEChemPortal {
 		if (er.keep) {
 			Estimate estimate=EstimateParser.parse(recBio.degradationValue);				
 			ResultBinaryScore rbs=RecordQSAR_ToolBox.determineBinaryBiodegScore(estimate, duration);
+			
+			if (er.parameter_values==null) {
+				er.parameter_values = new ArrayList<ParameterValue>();
+			}
+			ParameterValue pv=new ParameterValue();
+			String parameterName = "Observation duration";
+			pv.parameter.name=parameterName;
+			pv.value_point_estimate=duration;
+			pv.unit.name="DAYS";
+			pv.unit.abbreviation="days";
+			
+			er.parameter_values.add(pv);
 						
 			if(rbs.score!=null) {
 				er.property_value_point_estimate_final=(double)rbs.score;

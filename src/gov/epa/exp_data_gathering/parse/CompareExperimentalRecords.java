@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -20,6 +21,7 @@ import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
+import gov.epa.exp_data_gathering.parse.Parse;
 
 /**
  * @author TMARTI02
@@ -660,6 +662,8 @@ public class CompareExperimentalRecords {
             analyzeRBiodeg_BadRecords();
             System.out.println();
             analyzeRBiodeg_KeepFlag();
+			System.out.println();
+			analyzeRBiodeg_301F();
         }
 
 
@@ -683,19 +687,35 @@ public class CompareExperimentalRecords {
 
 		private void compareRBiodeg_DebugOriginal() {
 			String propertyName = ExperimentalConstants.strRBIODEG;
+			String qsarPath = "data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\";
+			String eChemPath = "data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\";
 			
 			// Load the original JSON records (before ExperimentalRecord conversion)
-			ExperimentalRecords origQSAR = ExperimentalRecords.loadFromJSON(
-				"data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\QSAR_Toolbox Original Records.json"
-			);
-			
-			ExperimentalRecords origEChem = ExperimentalRecords.loadFromJSON(
-				"data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\eChemPortal Original Records.json"
-			);
+			// ExperimentalRecords origQSAR = ExperimentalRecords.loadFromJSON(
+			// 	"data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\QSAR_Toolbox Original Records.json"
+			// );
+
+			List<RecordQSAR_ToolBox> origQSAR = Parse.getOriginalRecordsFromJsonFiles(qsarPath, RecordQSAR_ToolBox[].class);
+
+			HashSet<String> origQsarCasSet = new HashSet<>();
+			for (RecordQSAR_ToolBox record : origQSAR) {
+				origQsarCasSet.add(record.CAS_Number);
+			}
+
+			// ExperimentalRecords origEChem = ExperimentalRecords.loadFromJSON(
+			// 	"data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\eChemPortal Original Records.json"
+			// );
+
+			List<RecordEChemPortal> origEChem = Parse.getOriginalRecordsFromJsonFiles(eChemPath, RecordEChemPortal[].class);
+
+			HashSet<String> origEChemCasSet = new HashSet<>();
+			for (RecordEChemPortal record : origEChem) {
+				origEChemCasSet.add(record.number);
+			}
 			
 			System.out.println("=== ORIGINAL RECORDS (Before Conversion) ===");
-			System.out.println("QSAR_Toolbox Original Records: " + origQSAR.size());
-			System.out.println("eChemPortal Original Records: " + origEChem.size());
+			System.out.println("QSAR_Toolbox Original Records: " + origQSAR.size() + " (" + origQsarCasSet.size() + " unique CASRN)");
+			System.out.println("eChemPortal Original Records: " + origEChem.size() + " (" + origEChemCasSet.size() + " unique CASRN)");
 			
 			// Now compare final records
 			List<Source> sources1 = new ArrayList<>();
@@ -770,6 +790,65 @@ public class CompareExperimentalRecords {
 			System.out.println("=== KEEP/FLAG ANALYSIS ===");
 			System.out.println("QSAR_Toolbox flagged records: " + flaggedQSAR);
 			System.out.println("eChemPortal flagged records: " + flaggedEChem);
+		}
+
+		private void analyzeRBiodeg_301F() {
+			String propertyName = ExperimentalConstants.strRBIODEG;
+			String qsarPath = "data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\";
+			String eChemPath = "data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\";
+
+			List<RecordQSAR_ToolBox> origQSAR = Parse.getOriginalRecordsFromJsonFiles(qsarPath, RecordQSAR_ToolBox[].class);
+
+			HashSet<String> origQsarCasSet = new HashSet<>();
+			HashSet<String> origQsarCasSet301F = new HashSet<>();
+			for (RecordQSAR_ToolBox record : origQSAR) {
+				origQsarCasSet.add(record.CAS_Number);
+				if (record.Test_guideline != null && record.Test_guideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					origQsarCasSet301F.add(record.CAS_Number);
+				}
+			}
+
+			List<RecordEChemPortal> origEChem = Parse.getOriginalRecordsFromJsonFiles(eChemPath, RecordEChemPortal[].class);
+
+			HashSet<String> origEChemCasSet = new HashSet<>();
+			HashSet<String> origEChemCasSet301F = new HashSet<>();
+			for (RecordEChemPortal record : origEChem) {
+				origEChemCasSet.add(record.number);
+				if (record.testGuideline != null && record.testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability")) {
+					origEChemCasSet301F.add(record.number);
+				}
+			}
+
+			ExperimentalRecords expQSAR = ExperimentalRecords.loadFromJSON(qsarPath + "QSAR_Toolbox Experimental Records.json");
+
+			HashSet<String> expQsarCasSet = new HashSet<>();
+			HashSet<String> expQsarCasSet301F = new HashSet<>();
+			for (ExperimentalRecord record : expQSAR) {
+				expQsarCasSet.add(record.casrn);
+				String testGuideline = (String) record.getExperimentalParameter("Test guideline");
+				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					expQsarCasSet301F.add(record.casrn);
+				}
+			}
+
+			ExperimentalRecords expEChem = ExperimentalRecords.loadFromJSON(eChemPath + "eChemPortal Experimental Records.json");
+			
+			HashSet<String> expEChemCasSet = new HashSet<>();
+			HashSet<String> expEChemCasSet301F = new HashSet<>();
+			for (ExperimentalRecord record : expEChem) {
+				expEChemCasSet.add(record.casrn);
+				String testGuideline = (String) record.getExperimentalParameter("Test guideline");
+				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability")) {
+					expEChemCasSet301F.add(record.casrn);
+				}
+			}
+
+			System.out.println("=== 301 F RECORDS ===");
+			System.out.println("Records Set\t\t\t\tSize\tUnique CASRN\t301F CASRNs");
+			System.out.println("QSAR_Toolbox Original Records:\t\t" + origQSAR.size() + "\t" + origQsarCasSet.size() + "\t" + origQsarCasSet301F.size());
+			System.out.println("eChemPortal Original Records:\t\t" + origEChem.size() + "\t" + origEChemCasSet.size() + "\t" + origEChemCasSet301F.size());
+			System.out.println("QSAR_Toolbox Experimental Records:\t" + expQSAR.size() + "\t" + expQsarCasSet.size() + "\t" + expQsarCasSet301F.size());
+			System.out.println("eChemPortal Experimental Records:\t" + expEChem.size() + "\t" + expEChemCasSet.size() + "\t" + expEChemCasSet301F.size());
 		}
 
 		private void compareKoc() {
