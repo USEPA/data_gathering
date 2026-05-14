@@ -89,6 +89,7 @@ public class SqlUtilities {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			System.out.println("Error occurred while fetching DSSTOX connection:");
 			e.printStackTrace();
 		}
 

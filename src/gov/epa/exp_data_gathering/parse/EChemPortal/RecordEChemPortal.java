@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -28,7 +30,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import com.google.gson.Gson;
 
 import gov.epa.QSAR.utilities.JsonUtilities;
+import gov.epa.api.DsstoxLookup;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.database.SqlUtilities;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
@@ -764,6 +768,7 @@ public class RecordEChemPortal {
 				er.keep=false;
 				er.updateReason("Degradation not O2 consumption or ThOD");
 				er.experimental_parameters.put("Measurement method",this.recordsDegradation.get(0).parameter);
+				// er.measurement_method = this.recordsDegradation.get(0).parameter;
 //				System.out.println(er.experimental_parameters.get("Measurement method"));
 			} else {
 				System.out.println("Have null rec but have O2");//doesnt happen
@@ -772,6 +777,7 @@ public class RecordEChemPortal {
 		}
 
 		er.experimental_parameters.put("Measurement method",recBio.parameter);
+		// er.measurement_method = recBio.parameter; // Unnecessary since loading into experimental_parameters
 		
 		
 		Double duration=recBio.samplingTimeDays;
@@ -806,6 +812,40 @@ public class RecordEChemPortal {
 			pv.unit.abbreviation="days";
 			
 			er.parameter_values.add(pv);
+
+			// TODO: Determine how to make this work properly, and trim down printed debugging statements
+			// New code to attempt to auto-populate synonyms and smiles using Dsstox data
+			// if ((er.synonyms == null || er.smiles == null) || (er.synonyms.isEmpty() || er.smiles.isEmpty()) && er.casrn != null && isDsstoxAvailable()) {
+			// 	try {
+			// 		DsstoxLookup dsstoxLookup = new DsstoxLookup();
+			// 		List<String> casrnList = new ArrayList<>();
+			// 		casrnList.add(er.casrn);
+
+			// 		// Query DSSTox database for this CASRN
+			// 		List<DsstoxLookup.DsstoxRecord> dsstoxRecords = dsstoxLookup.getDsstoxRecordsByCAS(casrnList, true);
+
+			// 		if (dsstoxRecords != null && !dsstoxRecords.isEmpty()) {
+			// 			DsstoxLookup.DsstoxRecord record = dsstoxRecords.get(0);
+
+			// 			// Use the preferred name from DSSTox as an alternative name
+			// 			if (record.preferredName != null && !record.preferredName.isEmpty() && !record.preferredName.equalsIgnoreCase(er.chemical_name)) {
+			// 				if (er.synonyms == null || er.synonyms.isEmpty()) {
+			// 					er.synonyms = record.preferredName;
+			// 				}
+			// 			}
+			// 			
+			// 			// Use the preferred name from DSSTox as an alternative name
+			// 			if (record.smiles != null && !record.smiles.isEmpty()) {
+			// 				if (er.smiles == null || er.smiles.isEmpty()) {
+			// 					er.smiles = record.smiles;
+			// 				}
+			// 			}
+			// 		}
+			// 	} catch (Exception e) {
+			// 		// Optional DEBUG statement to print for catching errors
+			// 		// System.out.println("DEBUG: Failed to fetch synonyms for " + er.casrn + ": " + e.getMessage());
+			// 	}
+			// }
 						
 			if(rbs.score!=null) {
 				er.property_value_point_estimate_final=(double)rbs.score;
@@ -1045,6 +1085,18 @@ public class RecordEChemPortal {
 			valueOk=true;
 		}
 		return valueOk;
+	}
+
+	private boolean isDsstoxAvailable() {
+		try {
+			Connection testConn = SqlUtilities.getConnectionDSSTOX();
+			if (testConn != null && !testConn.isClosed()) {
+				return true;
+			}
+		} catch (SQLException e) {
+			return false;
+		}
+		return false;
 	}
 
 }

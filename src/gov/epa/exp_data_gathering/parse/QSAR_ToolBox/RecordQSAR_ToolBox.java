@@ -451,6 +451,9 @@ public class RecordQSAR_ToolBox {
 		setMeasurementMethod(er);
 		if (Test_organisms_species!=null) er.experimental_parameters.put("species", this.Test_organisms_species);
 		if(this.Strain!=null) er.experimental_parameters.put("Strain",this.Strain);
+		if (this.GLP_compliance != null) er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
+		if (this.Details_on_results != null) er.experimental_parameters.put("Biodegradation records", this.Details_on_results);
+		if (this.Endpoint != null) er.experimental_parameters.put("Measurement method", this.Endpoint);
 
 
 		if(EndpointPath!=null) { 
@@ -1221,6 +1224,8 @@ public class RecordQSAR_ToolBox {
 			} else {
 //				System.out.println("here3\t"+er.casrn+"\t"+Type_of_method+"\t"+Type_of_method_other);
 			}
+		} else if (this.Endpoint != null) {
+			er.measurement_method = this.Endpoint;
 		} else {
 //					System.out.println("here4\t"+er.casrn+"\t"+Type_of_method+"\t"+Type_of_method_other);
 		}
