@@ -195,12 +195,14 @@ public class RecordRIFM_2026_01 {
 		double pointEstimate = -1;
 		double minValue = -1;
 		double maxValue = -1;
+		boolean round = false;
 
 		// Parse the data value
 		if (reviewedDataResults.contains("<")) {
 			er.property_value_numeric_qualifier="<";
 			pointEstimate = Double.parseDouble(reviewedDataResults.replace("<", "").trim());
 			er.property_value_point_estimate_original=pointEstimate;
+			round = true;
 
 		} else if (reviewedDataResults.contains("\u00B1")) { // ±
 			String [] vals = reviewedDataResults.split("\u00B1"); // ±
@@ -215,29 +217,27 @@ public class RecordRIFM_2026_01 {
 			er.property_value_max_original = maxValue;
 			er.property_value_point_estimate_original=mean;
 
-		} else if (reviewedDataResults.contains("-") && reviewedDataResults.indexOf("-")>0) {
-			String [] vals = reviewedDataResults.split("-");
-			
-			minValue = Double.parseDouble(vals[0].trim());
-			maxValue = Double.parseDouble(vals[1].trim());
-			pointEstimate = (minValue + maxValue) / 2.0;
-			
-			er.property_value_min_original = minValue;
-			er.property_value_max_original = maxValue;
-			er.property_value_point_estimate_original=pointEstimate;
+		} else if (reviewedDataResults.contains("-")) {
+			if (reviewedDataResults.indexOf("-")>0) {
+				String [] vals = reviewedDataResults.split("-");
+				
+				minValue = Double.parseDouble(vals[0].trim());
+				maxValue = Double.parseDouble(vals[1].trim());
+				pointEstimate = (minValue + maxValue) / 2.0;
+				
+				er.property_value_min_original = minValue;
+				er.property_value_max_original = maxValue;
+				er.property_value_point_estimate_original=pointEstimate;
+			} else {
+				// Case for handling negative original point estimates
+				pointEstimate = Double.parseDouble(reviewedDataResults.trim());
+				er.property_value_point_estimate_original = pointEstimate;
+				round = true;
+			}
 
 		} else {
 			pointEstimate = Double.parseDouble(reviewedDataResults.trim());
 			er.property_value_point_estimate_original=pointEstimate;
-		}
-
-		// Apply 5% and 95% thresholds
-		if (pointEstimate < 5) {
-			pointEstimate = 0.0;
-			if (minValue >= 0) minValue = 0.0;
-		} else if (pointEstimate > 95) {
-			pointEstimate = 100.0;
-			if (maxValue >= 0) maxValue = 100.0;
 		}
 
 		// Duration filtering logic
@@ -248,17 +248,31 @@ public class RecordRIFM_2026_01 {
 		} else if (duration > 28 && er.property_value_point_estimate_original < 5) {
 			// Duration > 28 days AND original value < 5% - exception, keep
 			keepRecord = true;
+			round = true;
 		} else if (duration < 28 && er.property_value_point_estimate_original > 95) {
 			// Duration < 28 days AND original value > 95% - exception, keep
 			keepRecord = true;
+			round = true;
 		} else if (duration >= 0) {
 			// Duration is not 28 and doesn't meet exceptions - discard
 			keepRecord = false;
 		}
 
+		// Apply 5% and 95% thresholds
+		if (pointEstimate < 5 && round) {
+			pointEstimate = 0.0;
+			if (minValue >= 0) minValue = 0.0;
+		} else if (pointEstimate > 95 && round) {
+			pointEstimate = 100.0;
+			if (maxValue >= 0) maxValue = 100.0;
+		} else if (pointEstimate > 100) {
+			pointEstimate = 100.0;
+			if (maxValue >= 0) maxValue = 100.0;
+		}
+
 		if (!keepRecord) {
 			er.keep = false;
-			er.reason = "Duration not 28 days (" + duration + " days)";
+			er.reason = "Duration not 28 days (" + duration + " days), original value=" + er.property_value_point_estimate_original + "%";
 			return;
 		}
 

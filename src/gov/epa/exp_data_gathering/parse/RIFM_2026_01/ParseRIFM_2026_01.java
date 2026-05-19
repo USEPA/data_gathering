@@ -46,8 +46,8 @@ public class ParseRIFM_2026_01 extends Parse {
 
 		try {
 
-			// Read from base folder (where Original Records.json is stored, not the mode-specific subfolder)
-			String strFolder = baseFolderPath + java.io.File.separator;
+			// Read from the current mainFolder (which contains the Original Records for this mode-specific output)
+			String strFolder = mainFolder + java.io.File.separator;
 			// Now using convenience method that works for any Record class:
 			List<RecordRIFM_2026_01> recordsDB = getOriginalRecordsFromJsonFiles(strFolder, RecordRIFM_2026_01[].class,
 					"UTF-8");
