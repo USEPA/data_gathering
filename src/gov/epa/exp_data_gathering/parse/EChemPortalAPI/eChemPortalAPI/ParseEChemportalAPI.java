@@ -32,7 +32,8 @@ import gov.epa.exp_data_gathering.parse.PubChem.RecordPubChem;
 public class ParseEChemportalAPI extends Parse {
 	
 //	String endpointKind=APIConstants.acuteToxicityOral;
-	public String endpointKind=APIConstants.skinSensitisation;
+//	public String endpointKind=APIConstants.skinSensitisation;
+	public String endpointKind=APIConstants.shortTermToxicityToFish;
 	
 	public ParseEChemportalAPI () {
 		sourceName = "eChemPortalAPI";
@@ -58,7 +59,7 @@ public class ParseEChemportalAPI extends Parse {
 	@Override
 	protected void createRecords() {
 		
-		int maxSize=10000;//max number of records in api call
+		int maxSize=1000;//max number of records in api call
 		
 		if(generateOriginalJSONRecords) {
 			
@@ -71,6 +72,7 @@ public class ParseEChemportalAPI extends Parse {
 			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
 //			System.out.println(gson.toJson(options));
 //			options.runDownload(databasePath, true, maxSize);
+			options.runDownloadByYear(1950, 2025, databasePath, generateOriginalJSONRecords, maxSize);
 			
 			File excelFolder=new File(folderMain + "excel files");
 			excelFolder.mkdirs();
@@ -215,7 +217,7 @@ public class ParseEChemportalAPI extends Parse {
 	public static void main(String[] args) {
 		ParseEChemportalAPI p = new ParseEChemportalAPI();
 		
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 
 		
 		if(p.endpointKind.equals(APIConstants.skinSensitisation) || p.endpointKind.equals(APIConstants.skinIrritationCorrosion)) {

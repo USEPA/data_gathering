@@ -64,6 +64,9 @@ public class QueryHandler {
 	private ResultsPage getResultsPage(Query query) {
 		ResultsPage page = null;
 		String bodyString = gson.toJson(query);
+		
+		System.out.println(bodyString);
+		
 		HttpResponse<String> response = null;
 		try {
 			boolean downloaded = false;
@@ -154,24 +157,27 @@ public class QueryHandler {
 	 * @param startFresh	True to rebuild database, false to append to existing database
 	 */
 	public void downloadQueryResultsToDatabase(Query query,String databasePath,boolean startFresh) {
+		
+		System.out.println("Enter downloadQueryResultsToDatabase");
+		
 		String tableName = "results";
 		File db = new File(databasePath);
 		if(!db.getParentFile().exists()) { db.getParentFile().mkdirs(); }
 		java.sql.Connection conn = SQLiteDatabase.createTable(databasePath, tableName, RawDataRecord.fieldNames, startFresh);
 		
+	
 		
-		
-		System.out.println(SqlUtilities.runSQL(conn, "select sqlite_version();"));
+//		System.out.println(SqlUtilities.runSQL(conn, "select sqlite_version();"));
 		
 		
 		try {
 			int totalResults = getQuerySize(query);
 			System.out.println("Found "+totalResults+" results. Downloading to "+databasePath+"...");
 			
-			while (query.paging.offset < totalResults) {
-				downloadResultsPageToDatabase(query,conn);
-				query.updateOffset();
-			}
+//			while (query.paging.offset < totalResults) {
+//				downloadResultsPageToDatabase(query,conn);
+//				query.updateOffset();
+//			}
 			
 			System.out.println("Done!");
 		} catch (Exception ex) {

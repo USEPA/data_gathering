@@ -11,9 +11,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.JSONUtilities;
+import gov.epa.exp_data_gathering.parse.Parse;
+import gov.epa.exp_data_gathering.parse.RIFM_2026_01.RecordRIFM_2026_01;
 
 
 
@@ -23,53 +26,86 @@ import gov.epa.exp_data_gathering.parse.JSONUtilities;
  * 
 * @author TMARTI02
 */
-public class ParseNITE {
+public class ParseNITE extends Parse {
 
 	Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	
-	public void getNITEExperimentalRecords() {
+	public ParseNITE() {
+		sourceName = RecordNITE.sourceName; // TODO Consider creating ExperimentalConstants.strSourceRIFM instead.
+		this.init();
+	}
 
-		List<RecordNITE>recordsOriginal=null;
-		boolean createOriginalRecords=true;
+	@Override
+	protected void createRecords() {
+		List<RecordNITE>recordsOriginal=RecordNITE.parseRecordsFromExcel();
+		writeOriginalRecordsToFile(recordsOriginal);
+	}
+
+	
+	@Override
+	protected ExperimentalRecords goThroughOriginalRecords() {
+
+		boolean useSpreadsheetBasedMapping=false;
 		
 		String source=RecordNITE.sourceName;
 		String propertyName=ExperimentalConstants.strRBIODEG;
 
-		String jsonPath = "data/experimental/"+source+File.separator+source+" "+propertyName+" original records.json";
+		String mainFolder = "data\\experimental\\";
+		String strFolder = mainFolder + source + "\\";
 
-		if (createOriginalRecords) {
-			recordsOriginal=RecordNITE.parseRecordsFromExcel();
-			JSONUtilities.batchAndWriteJSON(recordsOriginal,jsonPath);
-		} else {
-			try {
-				RecordNITE[]records2 = gson.fromJson(new FileReader(jsonPath), RecordNITE[].class);
-				recordsOriginal=Arrays.asList(records2);
-				System.out.println(recordsOriginal.size());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		String jsonPath = strFolder+source+" "+propertyName+" original records.json";
+
+		DsstoxMapperFromChemRegExcelExport dm=null;
+		
+		if (useSpreadsheetBasedMapping) {
+			String filepathChemreg = strFolder + "/excel files/ChemReg curation.xlsx";
+			dm = new DsstoxMapperFromChemRegExcelExport(filepathChemreg);
 		}
+		
+
+		
+		List<RecordNITE> recordsOriginal = getOriginalRecordsFromJsonFiles(strFolder, RecordNITE[].class,
+				"UTF-8");
 				
 		ExperimentalRecords experimentalRecords=new ExperimentalRecords();
 
+		System.out.println("\nType\tName\tCAS\tsidName\tsidCAS\tinchiKeyname\tinchiKeyCAS\tSmiles");
+		
 		for (RecordNITE r:recordsOriginal) {
 			ExperimentalRecord er=r.toExperimentalRecord();
+			
+			if (useSpreadsheetBasedMapping) {
+				if (er.keep) {
+					dm.getCuratedIdentifiers(er);
+					dm.getDtxsid(er);
+				}
+				if (er.dsstox_substance_id == null) {
+					er.keep = false;
+					er.updateReason("Could not map identifiers to DSSTox record");
+				}
+			}
+			
 			experimentalRecords.add(er);
 		}
 
+		if (useSpreadsheetBasedMapping) {
+			dm.saveMissingChemregToTextFiles(sourceName);
+			dm.printMissingChemreg();
+		}
 		
-		//Writer experimental records to Json file:
-		String mainFolder = "Data" + File.separator + "Experimental" + File.separator + source;
-		String fileNameJsonExperimentalRecords = source+"_"+propertyName+" Experimental Records.json";
-		JSONUtilities.batchAndWriteJSON(new Vector<ExperimentalRecord>(experimentalRecords),mainFolder+File.separator+fileNameJsonExperimentalRecords);
-		
-		//Write experimental records to excel file:
-		experimentalRecords.toExcel_File_Split(mainFolder+File.separator+fileNameJsonExperimentalRecords.replace("json", "xlsx"),100000);
+		return experimentalRecords;
 		
 	}
 	
 	public static void main(String[] args) {
 		ParseNITE p=new ParseNITE();
-		p.getNITEExperimentalRecords();
+		p.generateOriginalJSONRecords = true;
+		p.removeDuplicates = false;
+
+		p.writeJsonExperimentalRecordsFile = true;
+		p.writeExcelExperimentalRecordsFile = true;
+		p.writeExcelFileByProperty = true;
+		p.writeCheckingExcelFile = false;// creates random sample spreadsheet
+		p.createFiles();
 	}
 }

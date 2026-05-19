@@ -92,7 +92,7 @@ public class RecordEChemPortal {
 		String value;
 	}
 
-	static class RecordDegradation {
+	public static class RecordDegradation {
 		String parameter;
 		String degradationValue;
 		String samplingTime;

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.Source;
 import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
@@ -81,7 +82,7 @@ public class ParseKoc extends Parse {
 					if (er.publicSource != null && er.publicSource.name.equals("Yaws, 1999"))
 						continue;
 
-					er.chemical_name = TextUtilities.fixName(er.chemical_name);
+					er.chemical_name = ChemicalNameFixer.fixName(er.chemical_name);
 					fixPermethrins(er);
 					dm.getCuratedIdentifiers(er);
 					dm.getDtxsid(er);

@@ -270,6 +270,9 @@ public class ToxQueryOptions extends QueryOptions {
 	 * @return			Vector of ToxQueryOptions of permitted size
 	 */
 	private static List<ToxQueryOptions> resizeAll(List<ToxQueryOptions> options, int maxSize) {
+		
+		System.out.println("Enter resizeAll");
+		
 		List<ToxQueryOptions> newOptions = new ArrayList<ToxQueryOptions>();
 		for (ToxQueryOptions o:options) {
 			int size = o.getQueryMaxSize();
@@ -290,10 +293,16 @@ public class ToxQueryOptions extends QueryOptions {
 	 * @return		Vector of QueryOptions of permitted size
 	 */
 	private List<ToxQueryOptions> resize(int maxSize) {
+		
+		System.out.println("Enter resize");
+		
 		List<ToxQueryOptions> options = new ArrayList<ToxQueryOptions>();
 		options.add(this);
+		
 		if (getQueryMaxSize() >= maxSize) {
+			
 			System.out.println(this.endpointKind+" query too large. Resizing...");
+			
 			options = resizeAll(options,maxSize);
 			System.out.println("Split into "+options.size()+" queries. Merging small queries...");
 			ListIterator<ToxQueryOptions> it = options.listIterator();
@@ -392,12 +401,16 @@ public class ToxQueryOptions extends QueryOptions {
 	@Override
 	public void runDownload(String databaseName,boolean startFresh, int maxSize) {
 		
+		System.out.println("Enter rundownload");
+		
 		UtilitiesUnirest.configUnirest(true);
 
 		
 		List<ToxQueryOptions> splitOptions = resize(maxSize);
 		QueryHandler handler = new QueryHandler(1000,10);
 		int counter = 0;
+		
+		
 						
 		for (ToxQueryOptions options:splitOptions) {
 			String after = options.afterYear==null ? "the beginning of time" : options.afterYear;
@@ -413,4 +426,35 @@ public class ToxQueryOptions extends QueryOptions {
 		}
 		System.out.println("Download complete!");
 	}
+	
+	
+
+	public void runDownloadByYear(int startYear,int stopYear, String databaseName,boolean startFresh, int maxSize) {
+		
+		System.out.println("Enter rundownload");
+		
+		UtilitiesUnirest.configUnirest(true);
+
+		QueryHandler handler = new QueryHandler(1000,10);
+		
+		
+		for (int year=startYear; year<=stopYear;year++) {
+			
+			System.out.println("Querying "+endpointKind+" results for "+year);
+			
+			this.beforeYear=(year+1)+"";
+			this.afterYear=year+"";
+			
+			Query query = this.generateQuery();
+
+			if (year==startYear) {
+				handler.downloadQueryResultsToDatabase(query,databaseName,startFresh);
+			} else {
+				handler.downloadQueryResultsToDatabase(query,databaseName,false);
+			}
+			
+		}
+		System.out.println("Download complete!");
+	}
+	
 }
