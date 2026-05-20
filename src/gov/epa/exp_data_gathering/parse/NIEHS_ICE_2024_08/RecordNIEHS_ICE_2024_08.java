@@ -1,9 +1,6 @@
 package gov.epa.exp_data_gathering.parse.NIEHS_ICE_2024_08;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 
@@ -11,7 +8,6 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
-import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
 

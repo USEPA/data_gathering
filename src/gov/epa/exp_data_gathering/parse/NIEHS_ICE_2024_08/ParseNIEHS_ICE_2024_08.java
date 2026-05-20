@@ -2,18 +2,12 @@ package gov.epa.exp_data_gathering.parse.NIEHS_ICE_2024_08;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 
-import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 
 public class ParseNIEHS_ICE_2024_08 extends Parse {
 

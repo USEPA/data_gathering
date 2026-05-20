@@ -1,10 +1,7 @@
 package gov.epa.exp_data_gathering.parse.PubChem;
 
-import java.io.FileReader;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
 /**

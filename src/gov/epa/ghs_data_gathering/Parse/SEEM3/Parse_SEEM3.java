@@ -2,12 +2,8 @@ package gov.epa.ghs_data_gathering.Parse.SEEM3;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.Vector;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;

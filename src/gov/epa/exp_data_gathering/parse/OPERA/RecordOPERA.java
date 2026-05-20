@@ -8,11 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +17,6 @@ import java.util.Vector;
 import java.util.stream.Collectors;
 
 import org.json.CDL;
-import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -33,12 +27,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
-
 import gov.epa.api.ExperimentalConstants;
 
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
-import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 
 /**
  * See OPERA articles:

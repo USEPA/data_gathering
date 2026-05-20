@@ -3,15 +3,10 @@ package gov.epa.exp_data_gathering.parse.Burkhard;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.Vector;
 
 import com.google.gson.Gson;
@@ -24,9 +19,7 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.JSONUtilities;
-import gov.epa.exp_data_gathering.parse.LiteratureSource;
 import gov.epa.exp_data_gathering.parse.Burkhard.RecordBurkhard.Species;
-import kong.unirest.json.JSONObject;
 
 public class ParseBurkhard  {
 

@@ -7,15 +7,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import gov.epa.database.SqlUtilities;
-import gov.epa.exp_data_gathering.parse.UtilitiesUnirest;
+
 
 //import com.mashape.unirest.http.HttpResponse;
 //import com.mashape.unirest.http.Unirest;

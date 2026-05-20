@@ -10,22 +10,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.AADashboard.ParseAADashboard;
-import gov.epa.exp_data_gathering.parse.AADashboard.RecordAADashboard;
-import gov.epa.exp_data_gathering.parse.Bagley.RecordBagley;
 import gov.epa.ghs_data_gathering.GetData.EChemPortalParse;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.gson.JsonObject;
 
 
 public class ParseAADashboard extends Parse {

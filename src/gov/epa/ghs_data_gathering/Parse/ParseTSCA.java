@@ -3,16 +3,12 @@ package gov.epa.ghs_data_gathering.Parse;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.util.LinkedList;
 import java.util.Vector;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import gov.epa.api.AADashboard;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;

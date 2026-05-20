@@ -2,12 +2,9 @@ package gov.epa.exp_data_gathering.parse.PubChem;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -16,11 +13,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-
-import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.PubChem.AnnotationQuery.Annotation;
 import gov.epa.ghs_data_gathering.Utilities.FileUtilities;
 

@@ -1,7 +1,6 @@
 package gov.epa.exp_data_gathering.parse.SigmaAldrich;
 
 import java.io.File;
-import java.util.Random;
 import java.util.Vector;
 
 import org.jsoup.Jsoup;

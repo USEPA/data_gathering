@@ -2,10 +2,7 @@ package gov.epa.ghs_data_gathering.Database;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 
 import java.sql.Connection;
@@ -15,13 +12,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.json.CDL;
-
 import gov.epa.QSAR.utilities.FileUtilities;
 import gov.epa.api.AADashboard;
 import gov.epa.api.Chemical;

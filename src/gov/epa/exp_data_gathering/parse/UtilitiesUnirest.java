@@ -3,8 +3,6 @@ package gov.epa.exp_data_gathering.parse;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
-
 import kong.unirest.Unirest;
 
 public class UtilitiesUnirest {

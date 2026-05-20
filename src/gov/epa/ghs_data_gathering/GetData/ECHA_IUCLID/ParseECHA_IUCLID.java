@@ -2,16 +2,12 @@ package gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part1;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.Part2.ResultsAndDiscussion.TraditionalSensitisationTest.TestResult;
 import gov.epa.ghs_data_gathering.GetData.ECHA_IUCLID.IUCLID_Document.ReferenceSubstance;

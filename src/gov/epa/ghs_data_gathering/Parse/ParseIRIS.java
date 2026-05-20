@@ -2,10 +2,7 @@ package gov.epa.ghs_data_gathering.Parse;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Vector;
 
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -15,14 +12,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import gov.epa.api.AADashboard;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
-import gov.epa.ghs_data_gathering.Parse.ParseKorea.KoreaRecord;
 
 public class ParseIRIS extends Parse {
 

@@ -114,7 +114,7 @@ public class EstimateParser {
     private static String normalize(String s) {
         String t = s.trim().toLowerCase(Locale.ROOT);
         // Normalize unicode dashes to ASCII hyphen
-        t = t.replace('–', '-').replace('—', '-');
+        t = t.replace('\u2013', '-').replace('\u2014', '-');
         // Remove benign prefixes like "ca.", "~", "approx"
         t = t.replace("ca.", " ").replace("approx.", " ").replace("~", " ");
         // Collapse spaces

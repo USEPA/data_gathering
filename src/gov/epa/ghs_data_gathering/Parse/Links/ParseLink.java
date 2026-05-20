@@ -1,17 +1,12 @@
 package gov.epa.ghs_data_gathering.Parse.Links;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import gov.epa.api.Chemical;
-import gov.epa.api.Chemicals;
-import gov.epa.api.ScoreRecord;
 import gov.epa.ghs_data_gathering.Parse.Parse;
 
 

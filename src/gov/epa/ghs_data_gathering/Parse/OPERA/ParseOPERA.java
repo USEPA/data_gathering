@@ -1,6 +1,5 @@
 package gov.epa.ghs_data_gathering.Parse.OPERA;
 
-import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +10,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
-import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
@@ -19,10 +17,8 @@ import gov.epa.api.ScoreRecord;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.database.SqlUtilities;
 import gov.epa.exp_data_gathering.parse.JSONUtilities;
-import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.ghs_data_gathering.Database.MySQL_DB;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_models.ParseToxValModels;
 
 
 

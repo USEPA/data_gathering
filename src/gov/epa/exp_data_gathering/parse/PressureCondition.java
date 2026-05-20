@@ -4,10 +4,7 @@ import java.text.DecimalFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.text.StringEscapeUtils;
-
 import gov.epa.api.ExperimentalConstants;
-import gov.epa.exp_data_gathering.parse.TemperatureCondition.TempUnitsResult;
 
 
 public class PressureCondition {
@@ -345,11 +342,11 @@ public class PressureCondition {
 
 	
 	public static void main(String[] args) {
-		String[] inputStrings = {"crystals. mp: 147.5-149 °c. uv max (methanol): 228, 260, 310 nm (log epsilon 4.6, 4.3, 3.9)",
-				"Ammonium: 148°c",
-				"75°c at 148 mm",
-				"43-45°c at 500 psi",
-				"43-45°c (75 psi)",
+		String[] inputStrings = {"crystals. mp: 147.5-149 ï¿½c. uv max (methanol): 228, 260, 310 nm (log epsilon 4.6, 4.3, 3.9)",
+				"Ammonium: 148ï¿½c",
+				"75ï¿½c at 148 mm",
+				"43-45ï¿½c at 500 psi",
+				"43-45ï¿½c (75 psi)",
 				"75(psi)",
 				"epa",
 				"pa"

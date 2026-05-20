@@ -1,8 +1,5 @@
 package gov.epa.exp_data_gathering.parse.NICEATM;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Vector;
 
 import com.google.gson.JsonObject;

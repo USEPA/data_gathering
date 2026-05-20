@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +89,7 @@ public class SqlUtilities {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			System.out.println("Error occurred while fetching DSSTOX connection:");
 			e.printStackTrace();
 		}
 

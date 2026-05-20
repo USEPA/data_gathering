@@ -59,7 +59,7 @@ public class EChemPortalExcelExporter {
         cols.add(ColumnSpec.of("Temperature",  r -> joinLines(r.temperature)).asWrapped());
         cols.add(ColumnSpec.of("pH",           r -> joinLines(r.pH)).asWrapped());
         cols.add(ColumnSpec.of("Degradation records", RecordEChemPortal::convertRecordsDegradationToString).asWrapped());
-        cols.add(ColumnSpec.of("Interpretation of results", r -> r.interpretationOfResults));
+        // cols.add(ColumnSpec.of("Interpretation of results", r -> r.interpretationOfResults));
         cols.add(ColumnSpec.of("Binary score (degradation records)", r -> r.derivedbinaryBiodegradation+""));
         cols.add(ColumnSpec.of("Values", r -> joinLines(r.values)).asWrapped());
         cols.add(ColumnSpec.of("% Degradation at 28 days", r -> r.percentDegradation28days+""));

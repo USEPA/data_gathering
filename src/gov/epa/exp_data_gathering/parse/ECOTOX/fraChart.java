@@ -1,18 +1,12 @@
 package gov.epa.exp_data_gathering.parse.ECOTOX;
 import javax.swing.*;
 
-import org.apache.commons.io.IOUtils;
-
-
-
 import java.awt.*;
 import java.awt.image.*;
 
 import javax.imageio.*; // needed to write image to file
 
 import java.io.*; // needed for file readers/writers
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.awt.event.*; // needed for mousemotionadapter
 import java.text.*; // needed for DecimalFormat
 import java.util.Base64;

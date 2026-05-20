@@ -7,11 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -31,14 +30,17 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import com.google.gson.Gson;
 
 import gov.epa.QSAR.utilities.JsonUtilities;
+import gov.epa.api.DsstoxLookup;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.database.SqlUtilities;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
+import gov.epa.exp_data_gathering.parse.JSONUtilities;
+import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
 import gov.epa.exp_data_gathering.parse.EChemPortal.EstimateParser.Estimate;
-import gov.epa.exp_data_gathering.parse.EChemPortalAPI.Query.Unit;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.ResultBinaryScore;
 
@@ -50,39 +52,39 @@ import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.ResultBi
  */
 public class RecordEChemPortal {
 	
-	String substanceName;
-	String nameType;
-	String number;
-	String numberType;
-	Boolean memberOfCategory;
-	String participant;
-	String section;
-	String url;
-	String reliability;
-	String method;
-	Vector<String> values;
-	Vector<String> pressure;
-	Vector<String> temperature;
-	Vector<String> pH;
-	String source;
+	public String substanceName;
+	public String nameType;
+	public String number;
+	public String numberType;
+	public Boolean memberOfCategory;
+	public String participant;
+	public String section;
+	public String url;
+	public String reliability;
+	public String method;
+	public Vector<String> values;
+	public Vector<String> pressure;
+	public Vector<String> temperature;
+	public Vector<String> pH;
+	public String source;
 
-	String typeOfInformation;
-	String endpoint;
-	String testGuidelineQualifier;
-	String testGuideline;
-	String GLP_compliance;
-	String oxygenConditions;
-	String media;
+	public String typeOfInformation;
+	public String endpoint;
+	public String testGuidelineQualifier;
+	public String testGuideline;
+	public String GLP_compliance;
+	public String oxygenConditions;
+	public String media;
 
-	List<RecordDegradation> recordsDegradation;
-	List<RecordKoc> recordsKoc;
+	public List<RecordDegradation> recordsDegradation;
+	public List<RecordKoc> recordsKoc;
 	
-	String interpretationOfResults;
-	Integer derivedbinaryBiodegradation;
+	// public String interpretationOfResults;
+	public Integer derivedbinaryBiodegradation;
 	private String decisionDegradationRecord;
-	Double percentDegradation28days;
+	public Double percentDegradation28days;
 	
-	String dateAccessed;
+	public String dateAccessed;
 	
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 
@@ -216,11 +218,11 @@ public class RecordEChemPortal {
 				RecordDegradation recordDegradation = null;
 
 				for (String value : values) {
-					if (value.isBlank())
+					if (value == null || value.isBlank())
 						continue;
-					String[] vals = value.split(":");
-					String parameterName = vals[0].trim();
-					String parameterValue = vals[1].trim();
+					String[] vals = value.split(":"); // TODO work on handling cases where there are colons in the line (Test guideline)
+					String parameterName = value.substring(0, value.indexOf(":")).trim();
+					String parameterValue = value.substring(value.indexOf(":") + 1).trim();
 
 					if (parameterName.equals("Type of information")) {
 						rec.typeOfInformation = parameterValue;
@@ -246,11 +248,11 @@ public class RecordEChemPortal {
 						recordDegradation.samplingTime = parameterValue;
 					} else if (parameterName.equals("Interpretation of results")) {
 
-						if (vals.length == 3) {
-							rec.interpretationOfResults = vals[2].trim();
-						} else {
-							rec.interpretationOfResults = parameterValue;
-						}
+						// if (vals.length == 3) {
+						// 	rec.interpretationOfResults = vals[2].trim();
+						// } else {
+						// 	rec.interpretationOfResults = parameterValue;
+						// }
 
 					} else {
 						System.out.println(rec.number + "\t" + parameterName + "\t" + parameterValue);
@@ -766,6 +768,7 @@ public class RecordEChemPortal {
 				er.keep=false;
 				er.updateReason("Degradation not O2 consumption or ThOD");
 				er.experimental_parameters.put("Measurement method",this.recordsDegradation.get(0).parameter);
+				// er.measurement_method = this.recordsDegradation.get(0).parameter;
 //				System.out.println(er.experimental_parameters.get("Measurement method"));
 			} else {
 				System.out.println("Have null rec but have O2");//doesnt happen
@@ -774,6 +777,7 @@ public class RecordEChemPortal {
 		}
 
 		er.experimental_parameters.put("Measurement method",recBio.parameter);
+		// er.measurement_method = recBio.parameter; // Unnecessary since loading into experimental_parameters
 		
 		
 		Double duration=recBio.samplingTimeDays;
@@ -796,6 +800,52 @@ public class RecordEChemPortal {
 		if (er.keep) {
 			Estimate estimate=EstimateParser.parse(recBio.degradationValue);				
 			ResultBinaryScore rbs=RecordQSAR_ToolBox.determineBinaryBiodegScore(estimate, duration);
+			
+			if (er.parameter_values==null) {
+				er.parameter_values = new ArrayList<ParameterValue>();
+			}
+			ParameterValue pv=new ParameterValue();
+			String parameterName = "Observation duration";
+			pv.parameter.name=parameterName;
+			pv.value_point_estimate=duration;
+			pv.unit.name="DAYS";
+			pv.unit.abbreviation="days";
+			
+			er.parameter_values.add(pv);
+
+			// TODO: Determine how to make this work properly, and trim down printed debugging statements
+			// New code to attempt to auto-populate synonyms and smiles using Dsstox data
+			// if ((er.synonyms == null || er.smiles == null) || (er.synonyms.isEmpty() || er.smiles.isEmpty()) && er.casrn != null && isDsstoxAvailable()) {
+			// 	try {
+			// 		DsstoxLookup dsstoxLookup = new DsstoxLookup();
+			// 		List<String> casrnList = new ArrayList<>();
+			// 		casrnList.add(er.casrn);
+
+			// 		// Query DSSTox database for this CASRN
+			// 		List<DsstoxLookup.DsstoxRecord> dsstoxRecords = dsstoxLookup.getDsstoxRecordsByCAS(casrnList, true);
+
+			// 		if (dsstoxRecords != null && !dsstoxRecords.isEmpty()) {
+			// 			DsstoxLookup.DsstoxRecord record = dsstoxRecords.get(0);
+
+			// 			// Use the preferred name from DSSTox as an alternative name
+			// 			if (record.preferredName != null && !record.preferredName.isEmpty() && !record.preferredName.equalsIgnoreCase(er.chemical_name)) {
+			// 				if (er.synonyms == null || er.synonyms.isEmpty()) {
+			// 					er.synonyms = record.preferredName;
+			// 				}
+			// 			}
+			// 			
+			// 			// Use the preferred name from DSSTox as an alternative name
+			// 			if (record.smiles != null && !record.smiles.isEmpty()) {
+			// 				if (er.smiles == null || er.smiles.isEmpty()) {
+			// 					er.smiles = record.smiles;
+			// 				}
+			// 			}
+			// 		}
+			// 	} catch (Exception e) {
+			// 		// Optional DEBUG statement to print for catching errors
+			// 		// System.out.println("DEBUG: Failed to fetch synonyms for " + er.casrn + ": " + e.getMessage());
+			// 	}
+			// }
 						
 			if(rbs.score!=null) {
 				er.property_value_point_estimate_final=(double)rbs.score;
@@ -851,7 +901,16 @@ public class RecordEChemPortal {
 		er.experimental_parameters.put("Reliability",this.reliability);
 		er.experimental_parameters.put("Test guideline",this.testGuideline);
 		er.experimental_parameters.put("Test guideline compliance",this.GLP_compliance);
-		er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// if (this.interpretationOfResults!=null) {
+		// 	er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// } else {
+		// 	try {
+		// 		er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
+		// 	} catch (Exception e) {
+		// 		System.out.println("Error occurred while setting interpretation of results: " + e.getMessage());
+		// 		System.out.println(JsonUtilities.gsonPretty.toJson(this));
+		// 	}
+		// }
 	}
 
 	private ExperimentalRecord createExperimentalRecord(String propertyName) {
@@ -1026,6 +1085,18 @@ public class RecordEChemPortal {
 			valueOk=true;
 		}
 		return valueOk;
+	}
+
+	private boolean isDsstoxAvailable() {
+		try {
+			Connection testConn = SqlUtilities.getConnectionDSSTOX();
+			if (testConn != null && !testConn.isClosed()) {
+				return true;
+			}
+		} catch (SQLException e) {
+			return false;
+		}
+		return false;
 	}
 
 }

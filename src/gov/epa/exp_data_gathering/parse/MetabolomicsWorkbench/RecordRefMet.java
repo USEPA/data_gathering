@@ -2,18 +2,14 @@ package gov.epa.exp_data_gathering.parse.MetabolomicsWorkbench;
 
 import java.io.File;
 import java.net.URLEncoder;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,18 +29,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.SerializedName;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import gov.epa.api.RawDataRecord;
 import gov.epa.database.SQLite_CreateTable;
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
-import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
-import gov.epa.ghs_data_gathering.Utilities.FileUtilities;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class RecordRefMet {

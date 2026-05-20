@@ -1,6 +1,5 @@
 package gov.epa.ghs_data_gathering.Parse.OPERA;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -11,7 +10,6 @@ import java.util.Vector;
 import com.google.gson.JsonObject;
 import gov.epa.api.ScoreRecord;
 import gov.epa.database.SQLite_GetRecords;
-import gov.epa.database.SqlUtilities;
 
 public class RecordOPERA {
 

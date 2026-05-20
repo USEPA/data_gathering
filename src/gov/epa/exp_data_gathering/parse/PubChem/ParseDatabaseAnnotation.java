@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -22,7 +21,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import gov.epa.api.ExperimentalConstants;
 import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.database.SqlUtilities;
@@ -38,7 +36,6 @@ import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Data;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.IdentifierData;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Information;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Markup;
-import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Property;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.Reference;
 import gov.epa.exp_data_gathering.parse.PubChem.JSONsForPubChem.StringWithMarkup;
 

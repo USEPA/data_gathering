@@ -9,7 +9,6 @@ import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.io.MDLV2000Writer;
 import org.openscience.cdk.io.SDFWriter;
-import org.openscience.cdk.io.setting.BooleanIOSetting;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import com.google.gson.JsonObject;

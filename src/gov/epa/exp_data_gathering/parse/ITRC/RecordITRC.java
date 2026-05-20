@@ -2,8 +2,6 @@ package gov.epa.exp_data_gathering.parse.ITRC;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -11,10 +9,8 @@ import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -28,7 +24,6 @@ import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.exp_data_gathering.parse.Montgomery.RecordMontgomery;
 
 /**
 * @author TMARTI02
@@ -178,14 +173,14 @@ public class RecordITRC {
 		
 		er.property_value_string = this.LogKocWithStdDev;
 		
-//		LogKocWithStdDev=LogKocWithStdDev.replace("2.02 (±0.01) to 2.1 4 (±0.02)","2.02 (±0.01) to 2.14 (±0.02)");
+//		LogKocWithStdDev=LogKocWithStdDev.replace("2.02 (ï¿½0.01) to 2.1 4 (ï¿½0.02)","2.02 (ï¿½0.01) to 2.14 (ï¿½0.02)");
 		LogKocWithStdDev=LogKocWithStdDev.replace("2.1 4 (","2.14 (");
 		
 		LogKocWithStdDev=LogKocWithStdDev.replace("1.1-2.1","1.1 to 2.1");
 		LogKocWithStdDev=LogKocWithStdDev.replace("2.4-2.6","2.4 to 2.6");
 		LogKocWithStdDev=LogKocWithStdDev.replace("4.3-6.0","4.3 to 6.0");
 		LogKocWithStdDev=LogKocWithStdDev.replace("2.34-2.83","2.34 to 2.83");
-//		LogKocWithStdDev=LogKocWithStdDev.replace("Â±", "±");
+//		LogKocWithStdDev=LogKocWithStdDev.replace("Â±", "ï¿½");
 		
 //		for (int i = 0; i < LogKocWithStdDev.length(); i++) {
 //            char ch = LogKocWithStdDev.charAt(i);

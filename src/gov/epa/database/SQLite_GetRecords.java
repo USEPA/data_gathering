@@ -1,6 +1,5 @@
 package gov.epa.database;
 
-import java.awt.List;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

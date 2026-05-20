@@ -16,7 +16,6 @@ import gov.epa.database.SQLite_GetRecords;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.exp_data_gathering.parse.EChemPortalAPI.Query.APIConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortalAPI.Query.APIJSONs.*;
-import gov.epa.exp_data_gathering.parse.EChemPortalAPI.eChemPortalAPI.eChemPortalAPI;
 
 public class ToxRecordEChemPortalAPI extends RecordEChemPortalAPI {
 	public String doseDescriptor;

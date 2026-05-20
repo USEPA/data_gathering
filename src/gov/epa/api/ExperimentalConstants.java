@@ -72,7 +72,8 @@ public class ExperimentalConstants {
 	public static final String strTTR_ANSA = "Binding to TTR (replacement of ANSA)";//OPERA
 	public static final String strCACO2 = "Caco-2 permeability (Papp)";//OPERA
 	public static final String strRBIODEG = "Ready biodegradability";//OPERA
-
+	public static final String strOXYGENCONSUMPTION = "Percent O2 consumption";
+	public static final String strPercentageBiodegradation = "Percentage biodegradation";
 	
 
 	
@@ -155,6 +156,7 @@ public class ExperimentalConstants {
 	public static final String str_dimensionless_H_vol="Dimensionless H (volumetric)";
 	public static final String str_dimensionless="Dimensionless";
 	public static final String str_binary = "Binary";
+	public static final String str_continuous = "Continuous";
 
 	public static final String str_LOG_UNITS = "Log units";
 	

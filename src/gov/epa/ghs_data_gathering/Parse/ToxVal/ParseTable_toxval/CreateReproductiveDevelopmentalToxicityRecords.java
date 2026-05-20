@@ -1,12 +1,5 @@
 package gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import gov.epa.api.Chemical;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;

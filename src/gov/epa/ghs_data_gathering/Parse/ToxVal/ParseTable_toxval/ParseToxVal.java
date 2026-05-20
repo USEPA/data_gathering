@@ -2,12 +2,9 @@ package gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Vector;
 
 import gov.epa.api.Chemical;
-import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;

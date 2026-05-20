@@ -20,7 +20,6 @@ import java.util.Vector;
 
 import java.util.Locale;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
@@ -453,6 +451,9 @@ public class RecordQSAR_ToolBox {
 		setMeasurementMethod(er);
 		if (Test_organisms_species!=null) er.experimental_parameters.put("species", this.Test_organisms_species);
 		if(this.Strain!=null) er.experimental_parameters.put("Strain",this.Strain);
+		if (this.GLP_compliance != null) er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
+		if (this.Details_on_results != null) er.experimental_parameters.put("Biodegradation records", this.Details_on_results);
+		if (this.Endpoint != null) er.experimental_parameters.put("Measurement method", this.Endpoint);
 
 
 		if(EndpointPath!=null) { 
@@ -651,7 +652,7 @@ public class RecordQSAR_ToolBox {
         	
         	boolean badQualifier=false;
         	
-        	if(Org_carbon_Qualifier!=null && (Org_carbon_Qualifier.equals("<") || Org_carbon_Qualifier.equals("≥"))) {
+        	if(Org_carbon_Qualifier!=null && (Org_carbon_Qualifier.equals("<") || Org_carbon_Qualifier.equals("\u2265"))) { // ≥
         		badQualifier=true;
         	}
         	
@@ -811,6 +812,8 @@ public class RecordQSAR_ToolBox {
 				er.updateReason(rbs.reason);
 				er.keep=false;
 			}
+
+			addMetadata(er);
 		
 //			if(!(scoreFromBiodegradationPercentage+"").equals((scoreFromInterpretationOfResults+""))) {
 //				if(Interpretation_Of_Results!=null) {
@@ -890,9 +893,9 @@ public class RecordQSAR_ToolBox {
 		if(Value_MeanValue !=null) {
 			if(Value_Qualifier==null || Value_Qualifier.equals("ca.")) {
 				estimate.point=Double.parseDouble(Value_MeanValue);	
-			} else if(Value_Qualifier.equals("<") || Value_Qualifier.equals("≤")){
+			} else if(Value_Qualifier.equals("<") || Value_Qualifier.equals("\u2264")){ // ≤
 				estimate.max=Double.parseDouble(Value_MeanValue);				
-			} else if(Value_Qualifier.equals(">") || Value_Qualifier.equals("≥")){
+			} else if(Value_Qualifier.equals(">") || Value_Qualifier.equals("\u2265")){ // ≥
 				estimate.min=Double.parseDouble(Value_MeanValue);
 			} else {
 				System.out.println(this.CAS_Number+"\t"+ Value_Qualifier+"\t"+Value_MinValue+"\t"+Value_MaxValue);
@@ -1221,6 +1224,8 @@ public class RecordQSAR_ToolBox {
 			} else {
 //				System.out.println("here3\t"+er.casrn+"\t"+Type_of_method+"\t"+Type_of_method_other);
 			}
+		} else if (this.Endpoint != null) {
+			er.measurement_method = this.Endpoint;
 		} else {
 //					System.out.println("here4\t"+er.casrn+"\t"+Type_of_method+"\t"+Type_of_method_other);
 		}
@@ -1801,10 +1806,10 @@ public class RecordQSAR_ToolBox {
 					er.property_value_numeric_qualifier="<=";
 				} else if (Qualifier.contentEquals("<")) {
 					er.property_value_numeric_qualifier="<";
-				} else if (Qualifier.contentEquals("≤")) {
-					er.property_value_numeric_qualifier="≤";
-				} else if (Qualifier.contentEquals("≥")) {
-					er.property_value_numeric_qualifier="≥";
+				} else if (Qualifier.contentEquals("\u2264")) { // ≤
+					er.property_value_numeric_qualifier="\u2264"; // ≤
+				} else if (Qualifier.contentEquals("\u2265")) { // ≥
+					er.property_value_numeric_qualifier="\u2265"; // ≥
 
 				} else {
 					System.out.println("Unhandled qualifier:\t"+this.Qualifier);	
@@ -2264,7 +2269,7 @@ public class RecordQSAR_ToolBox {
 	}
 
 	//Adds all metadata for each of BCF data sets
-	private void addMetadata(ExperimentalRecord er) {
+	private void addMetadata(ExperimentalRecord er) {		
 		if(Database==null) { 
 			er.keep=false;
 			er.reason="Database is missing";
@@ -2378,7 +2383,6 @@ public class RecordQSAR_ToolBox {
 			}
 		} else if (Database.equals("ECHA REACH")) {
 			setObservationDuration(er);
-
 			setGuideline(er);
 
 			DecimalFormat df=new DecimalFormat("0");
@@ -2436,7 +2440,6 @@ public class RecordQSAR_ToolBox {
 
 
 	private void setObservationDuration(ExperimentalRecord er) {
-
 		if(Duration_Unit==null) {
 			er.keep=false;
 			er.reason="Missing duration unit";
@@ -2448,8 +2451,11 @@ public class RecordQSAR_ToolBox {
 		ParameterValue pv=new ParameterValue();
 		pv.parameter.name=parameterName;
 		pv.value_point_estimate=mean;
+		pv.unit.name="DAYS";
 		pv.unit.abbreviation="days";
+				
 		er.parameter_values.add(pv);
+		
 	}
 
 	public Double getValueInDays(String obs_duration,String units) {

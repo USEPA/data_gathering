@@ -1,19 +1,15 @@
 package gov.epa.ghs_data_gathering.Parse;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
@@ -21,12 +17,9 @@ import java.util.zip.GZIPInputStream;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
-import gov.epa.ghs_data_gathering.Utilities.Utilities;
 //import gov.epa.api.FlatFileRecord;
 import gov.epa.api.FlatFileRecord2;
 import gov.epa.api.ScoreRecord;
-import gov.epa.ghs_data_gathering.GetData.SkinSensitization.RecordChembench;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 

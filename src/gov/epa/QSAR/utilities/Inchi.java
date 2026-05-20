@@ -2,11 +2,6 @@ package gov.epa.QSAR.utilities;
 
 import org.openscience.cdk.interfaces.IAtomContainer;
 
-import com.epam.indigo.Indigo;
-import com.epam.indigo.IndigoException;
-import com.epam.indigo.IndigoInchi;
-import com.epam.indigo.IndigoObject;
-
 
 
 public class Inchi {

@@ -2,11 +2,8 @@ package gov.epa.exp_data_gathering.parse.EChemPortal;
 
 import java.io.File;
 import java.io.FileReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -15,11 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.util.IOUtils;
 
-import com.google.gson.JsonObject;
-
-import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
-import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
@@ -27,10 +20,6 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PressureCondition;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
-import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.ParseQSAR_ToolBox;
-import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
-
-import java.nio.file.Path;
 
 /**
  * Parses data from echemportal.org
@@ -44,7 +33,7 @@ public class ParseEChemPortal extends Parse {
 	
 	
 	String fileName="todo";
-	static final String filename301F = "biodegradation in water screening tests 2026-04-15.xlsx";
+	static final String filename301F = "biodegradation in water screening tests 2026-05-12.xlsx";
 	static final String filenameKoc = "Koc 2026-04-16.xls";
 
 
@@ -378,7 +367,7 @@ public class ParseEChemPortal extends Parse {
 
 	static void runBiodegWaterScreening() {
 		ParseEChemPortal p=new ParseEChemPortal(filename301F);
-		p.generateOriginalJSONRecords=false;		
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;

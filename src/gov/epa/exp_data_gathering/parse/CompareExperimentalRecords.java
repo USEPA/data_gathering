@@ -4,6 +4,7 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -20,6 +21,7 @@ import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
+import gov.epa.exp_data_gathering.parse.Parse;
 
 /**
  * @author TMARTI02
@@ -632,7 +634,39 @@ public class CompareExperimentalRecords {
 
 		}
 		
-		
+		private void compareRBiodegFull() {
+            String propertyName = ExperimentalConstants.strRBIODEG;
+            String units = ExperimentalConstants.str_binary;
+            
+            List<Source> sources1 = new ArrayList<>();
+            List<Source> sources2 = new ArrayList<>();
+            
+            sources1.add(new Source(RecordQSAR_ToolBox.sourceName, "RBiodeg 301F ECHA Reach"));
+            sources2.add(new Source(RecordEChemPortal.sourceName, "RBiodeg 301 F ECHA Reach"));
+            
+            ExperimentalRecords recs1 = rm.getAllExperimentalRecords(sources1);
+            ExperimentalRecords recs2 = rm.getAllExperimentalRecords(sources2);
+            
+            TreeMap<String, ExperimentalRecords> tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+            TreeMap<String, ExperimentalRecords> tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+            
+            // NEW: Debug the median count difference
+            cm.debugMedianCountDifference(tm1, tm2, propertyName, units, 
+                RecordQSAR_ToolBox.sourceName, RecordEChemPortal.sourceName);
+            
+            System.out.println("\n");
+            compareRBiodeg();
+            System.out.println();
+            compareRBiodeg_DebugOriginal();
+            System.out.println();
+            analyzeRBiodeg_BadRecords();
+            System.out.println();
+            analyzeRBiodeg_KeepFlag();
+			System.out.println();
+			analyzeRBiodeg_301F();
+        }
+
+
 		private void compareRBiodeg() {
 			
 			String propertyName=ExperimentalConstants.strRBIODEG;
@@ -650,7 +684,173 @@ public class CompareExperimentalRecords {
 					ExperimentalConstants.str_binary);
 
 		}
+
+		private void compareRBiodeg_DebugOriginal() {
+			String propertyName = ExperimentalConstants.strRBIODEG;
+			String qsarPath = "data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\";
+			String eChemPath = "data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\";
+			
+			// Load the original JSON records (before ExperimentalRecord conversion)
+			// ExperimentalRecords origQSAR = ExperimentalRecords.loadFromJSON(
+			// 	"data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\QSAR_Toolbox Original Records.json"
+			// );
+
+			List<RecordQSAR_ToolBox> origQSAR = Parse.getOriginalRecordsFromJsonFiles(qsarPath, RecordQSAR_ToolBox[].class);
+
+			HashSet<String> origQsarCasSet = new HashSet<>();
+			for (RecordQSAR_ToolBox record : origQSAR) {
+				origQsarCasSet.add(record.CAS_Number);
+			}
+
+			// ExperimentalRecords origEChem = ExperimentalRecords.loadFromJSON(
+			// 	"data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\eChemPortal Original Records.json"
+			// );
+
+			List<RecordEChemPortal> origEChem = Parse.getOriginalRecordsFromJsonFiles(eChemPath, RecordEChemPortal[].class);
+
+			HashSet<String> origEChemCasSet = new HashSet<>();
+			for (RecordEChemPortal record : origEChem) {
+				origEChemCasSet.add(record.number);
+			}
+			
+			System.out.println("=== ORIGINAL RECORDS (Before Conversion) ===");
+			System.out.println("QSAR_Toolbox Original Records: " + origQSAR.size() + " (" + origQsarCasSet.size() + " unique CASRN)");
+			System.out.println("eChemPortal Original Records: " + origEChem.size() + " (" + origEChemCasSet.size() + " unique CASRN)");
+			
+			// Now compare final records
+			List<Source> sources1 = new ArrayList<>();
+			sources1.add(new Source(RecordQSAR_ToolBox.sourceName, "RBiodeg 301F ECHA Reach"));
+			
+			List<Source> sources2 = new ArrayList<>();
+			sources2.add(new Source(RecordEChemPortal.sourceName, "RBiodeg 301 F ECHA Reach"));
+			
+			ExperimentalRecords finalQSAR = rm.getAllExperimentalRecords(sources1);
+			ExperimentalRecords finalEChem = rm.getAllExperimentalRecords(sources2);
+			
+			System.out.println("\n=== FINAL EXPERIMENTAL RECORDS (After Conversion) ===");
+			System.out.println("QSAR_Toolbox Final Records: " + finalQSAR.size());
+			System.out.println("eChemPortal Final Records: " + finalEChem.size());
+			System.out.println("QSAR Loss: " + (origQSAR.size() - finalQSAR.size()) + 
+				" (" + (100.0 * (origQSAR.size() - finalQSAR.size()) / origQSAR.size()) + "%)");
+			System.out.println("eChemPortal Loss: " + (origEChem.size() - finalEChem.size()) + 
+				" (" + (100.0 * (origEChem.size() - finalEChem.size()) / origEChem.size()) + "%)");
+		}
+
+		private void analyzeRBiodeg_BadRecords() {
+			ExperimentalRecords badQSAR = ExperimentalRecords.loadFromJSON(
+				"data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\QSAR_Toolbox Experimental Records-Bad.json"
+			);
+			
+			ExperimentalRecords badEChem = ExperimentalRecords.loadFromJSON(
+				"data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\eChemPortal Experimental Records-Bad.json"
+			);
+			
+			System.out.println("=== BAD RECORDS ANALYSIS ===");
+			System.out.println("QSAR_Toolbox Bad Records: " + badQSAR.size());
+			System.out.println("eChemPortal Bad Records: " + badEChem.size());
+			
+			// Analyze reasons for rejection
+			Hashtable<String, Integer> reasonsQSAR = new Hashtable<>();
+			Hashtable<String, Integer> reasonsEChem = new Hashtable<>();
+			
+			for (ExperimentalRecord er : badQSAR) {
+				String reason = (er.reason != null) ? er.reason : "No reason given";
+				reasonsQSAR.put(reason, reasonsQSAR.getOrDefault(reason, 0) + 1);
+			}
+			
+			for (ExperimentalRecord er : badEChem) {
+				String reason = (er.reason != null) ? er.reason : "No reason given";
+				reasonsEChem.put(reason, reasonsEChem.getOrDefault(reason, 0) + 1);
+			}
+			
+			System.out.println("\nQSAR_Toolbox rejection reasons:");
+			reasonsQSAR.forEach((reason, count) -> System.out.println("  " + reason + ": " + count));
+			
+			System.out.println("\neChemPortal rejection reasons:");
+			reasonsEChem.forEach((reason, count) -> System.out.println("  " + reason + ": " + count));
+		}
 		
+		private void analyzeRBiodeg_KeepFlag() {
+			List<Source> sources1 = new ArrayList<>();
+			sources1.add(new Source(RecordQSAR_ToolBox.sourceName, "RBiodeg 301F ECHA Reach"));
+			ExperimentalRecords finalQSAR = rm.getAllExperimentalRecords(sources1);
+			
+			List<Source> sources2 = new ArrayList<>();
+			sources2.add(new Source(RecordEChemPortal.sourceName, "RBiodeg 301 F ECHA Reach"));
+			ExperimentalRecords finalEChem = rm.getAllExperimentalRecords(sources2);
+			
+			int flaggedQSAR = 0, flaggedEChem = 0;
+			for (ExperimentalRecord er : finalQSAR) {
+				if (er.flag) flaggedQSAR++;
+			}
+			for (ExperimentalRecord er : finalEChem) {
+				if (er.flag) flaggedEChem++;
+			}
+			
+			System.out.println("=== KEEP/FLAG ANALYSIS ===");
+			System.out.println("QSAR_Toolbox flagged records: " + flaggedQSAR);
+			System.out.println("eChemPortal flagged records: " + flaggedEChem);
+		}
+
+		private void analyzeRBiodeg_301F() {
+			String propertyName = ExperimentalConstants.strRBIODEG;
+			String qsarPath = "data\\experimental\\QSAR_Toolbox\\RBiodeg 301F ECHA Reach\\";
+			String eChemPath = "data\\experimental\\eChemPortal\\RBiodeg 301 F ECHA Reach\\";
+
+			List<RecordQSAR_ToolBox> origQSAR = Parse.getOriginalRecordsFromJsonFiles(qsarPath, RecordQSAR_ToolBox[].class);
+
+			HashSet<String> origQsarCasSet = new HashSet<>();
+			HashSet<String> origQsarCasSet301F = new HashSet<>();
+			for (RecordQSAR_ToolBox record : origQSAR) {
+				origQsarCasSet.add(record.CAS_Number);
+				if (record.Test_guideline != null && record.Test_guideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					origQsarCasSet301F.add(record.CAS_Number);
+				}
+			}
+
+			List<RecordEChemPortal> origEChem = Parse.getOriginalRecordsFromJsonFiles(eChemPath, RecordEChemPortal[].class);
+
+			HashSet<String> origEChemCasSet = new HashSet<>();
+			HashSet<String> origEChemCasSet301F = new HashSet<>();
+			for (RecordEChemPortal record : origEChem) {
+				origEChemCasSet.add(record.number);
+				if (record.testGuideline != null && record.testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					origEChemCasSet301F.add(record.number);
+				}
+			}
+
+			ExperimentalRecords expQSAR = ExperimentalRecords.loadFromJSON(qsarPath + "QSAR_Toolbox Experimental Records.json");
+
+			HashSet<String> expQsarCasSet = new HashSet<>();
+			HashSet<String> expQsarCasSet301F = new HashSet<>();
+			for (ExperimentalRecord record : expQSAR) {
+				expQsarCasSet.add(record.casrn);
+				String testGuideline = (String) record.getExperimentalParameter("Test guideline");
+				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					expQsarCasSet301F.add(record.casrn);
+				}
+			}
+
+			ExperimentalRecords expEChem = ExperimentalRecords.loadFromJSON(eChemPath + "eChemPortal Experimental Records.json");
+			
+			HashSet<String> expEChemCasSet = new HashSet<>();
+			HashSet<String> expEChemCasSet301F = new HashSet<>();
+			for (ExperimentalRecord record : expEChem) {
+				expEChemCasSet.add(record.casrn);
+				String testGuideline = (String) record.getExperimentalParameter("Test guideline");
+				if (testGuideline != null && testGuideline.equals("OECD Guideline 301 F (Ready Biodegradability: Manometric Respirometry Test)")) {
+					expEChemCasSet301F.add(record.casrn);
+				}
+			}
+
+			System.out.println("=== 301 F RECORDS ===");
+			System.out.println("Records Set\t\t\t\tSize\tUnique CASRN\t301F CASRNs");
+			System.out.println("QSAR_Toolbox Original Records:\t\t" + origQSAR.size() + "\t" + origQsarCasSet.size() + "\t" + origQsarCasSet301F.size());
+			System.out.println("eChemPortal Original Records:\t\t" + origEChem.size() + "\t" + origEChemCasSet.size() + "\t" + origEChemCasSet301F.size());
+			System.out.println("QSAR_Toolbox Experimental Records:\t" + expQSAR.size() + "\t" + expQsarCasSet.size() + "\t" + expQsarCasSet301F.size());
+			System.out.println("eChemPortal Experimental Records:\t" + expEChem.size() + "\t" + expEChemCasSet.size() + "\t" + expEChemCasSet301F.size());
+		}
+
 		private void compareKoc() {
 
 			printChemicalsInCommon=true;
@@ -1409,11 +1609,194 @@ public class CompareExperimentalRecords {
 		
 		}
 
+		/**
+		 * Print example records WITH medians from TreeMap (records counted by getCountWithMedian)
+		 * @param tm TreeMap to inspect
+		 * @param sourceName Label for output
+		 * @param maxExamples Number of examples to print
+		 */
+		void printRecordsWithMedian(TreeMap<String, ExperimentalRecords> tm, String sourceName, int maxExamples) {
+			System.out.println("\n=== RECORDS WITH MEDIAN (" + sourceName + ") ===");
+			System.out.println("CAS\tChemical Name\tMedian Value\tRecord Count\tUnits");
+			System.out.println("---");
+			
+			int count = 0;
+			for (String casrn : tm.keySet()) {
+				if (count >= maxExamples) break;
+				
+				ExperimentalRecords recs = tm.get(casrn);
+				if (recs.medianValue != null) {
+					ExperimentalRecord example = recs.get(0);
+					System.out.println(casrn + "\t" + example.chemical_name + "\t" + 
+						recs.medianValue + "\t" + recs.size() + "\t" + example.property_value_units_final);
+					count++;
+				}
+			}
+			System.out.println("(Showing " + count + " of " + getCountWithMedian(tm) + " total with median)");
+		}
 
+		/**
+		 * Print example records WITHOUT medians from TreeMap (records excluded from getCountWithMedian)
+		 * Helps identify why certain chemicals are not contributing to comparisons
+		 * @param tm TreeMap to inspect
+		 * @param propertyName Property being analyzed (for filtering)
+		 * @param units Expected units (for filtering)
+		 * @param sourceName Label for output
+		 * @param maxExamples Number of examples to print
+		 */
+		void printRecordsWithoutMedian(TreeMap<String, ExperimentalRecords> tm, String propertyName, 
+				String units, String sourceName, int maxExamples) {
+			System.out.println("\n=== RECORDS WITHOUT MEDIAN (" + sourceName + ") ===");
+			System.out.println("CAS\tChemical Name\tRecord Count\tReason(s) for No Median");
+			System.out.println("---");
+			
+			int count = 0;
+			for (String casrn : tm.keySet()) {
+				if (count >= maxExamples) break;
+				
+				ExperimentalRecords recs = tm.get(casrn);
+				if (recs.medianValue == null) {
+					ExperimentalRecord example = recs.get(0);
+					String reason = analyzeMedianFailure(recs, units);
+					System.out.println(casrn + "\t" + example.chemical_name + "\t" + 
+						recs.size() + "\t" + reason);
+					count++;
+				}
+			}
+			
+			int totalWithoutMedian = tm.size() - getCountWithMedian(tm);
+			System.out.println("(Showing " + count + " of " + totalWithoutMedian + " total without median)");
+		}
+
+				/**
+         * Analyze why a specific chemical's records failed to produce a median
+         * Returns human-readable string explaining the issue
+         */
+        private String analyzeMedianFailure(ExperimentalRecords recs, String units) {
+            
+            int validCount = 0;
+            int noUnitsMatch = 0;
+            int hasQualifiers = 0;
+            int rangeTooBroad = 0;
+            int noPointEstimate = 0;
+            int binaryOutOfRange = 0;
+            
+            List<Double> vals = new ArrayList<>();
+            
+            for (ExperimentalRecord er : recs) {
+                // Check 1: Units mismatch
+                if (er.property_value_units_final == null || !er.property_value_units_final.equals(units)) {
+                    noUnitsMatch++;
+                    continue;
+                }
+                
+                // Check 2: Qualifier check (skip if not "~" qualifier, except for binary/ranges)
+                if (er.property_value_numeric_qualifier != null && 
+                    !er.property_value_numeric_qualifier.equals("~")) {
+                    hasQualifiers++;
+                    continue;
+                }
+                
+                // Check 3: Try to get value for median calculation
+                Double val = null;
+                
+                if (units.equals(ExperimentalConstants.str_binary)) {
+                    val = er.property_value_point_estimate_final;
+                    if (val != null) {
+                        vals.add(val);
+                        validCount++;
+                    }
+                } else {
+                    // Range check
+                    if (er.property_value_max_final != null && er.property_value_min_final != null) {
+                        double logDiff = Math.abs(Math.log10(er.property_value_min_final / er.property_value_max_final));
+                        if (logDiff >= 1) {
+                            rangeTooBroad++;
+                            continue;
+                        }
+                        val = Math.sqrt(er.property_value_max_final * er.property_value_min_final);
+                    } else if (er.property_value_point_estimate_final != null) {
+                        val = er.property_value_point_estimate_final;
+                    } else {
+                        noPointEstimate++;
+                        continue;
+                    }
+                    
+                    // Log conversion if needed
+                    if (!units.toLowerCase().contains("log") && !units.equals(ExperimentalConstants.str_C)) {
+                        if (val == 0.0) {
+                            noPointEstimate++;
+                            continue;
+                        }
+                        val = Math.log10(val);
+                    }
+                    
+                    vals.add(val);
+                    validCount++;
+                }
+            }
+            
+            // Build reason string - check why median wasn't set despite having valid values
+            StringBuilder sb = new StringBuilder();
+            
+            if (noUnitsMatch > 0) sb.append("No units match (").append(noUnitsMatch).append(") ");
+            if (hasQualifiers > 0) sb.append("Has qualifiers like <,> (").append(hasQualifiers).append(") ");
+            if (rangeTooBroad > 0) sb.append("Range too broad (").append(rangeTooBroad).append(") ");
+            if (noPointEstimate > 0) sb.append("No point estimate (").append(noPointEstimate).append(") ");
+            
+            // Special case: binary with values but outside [0.2, 0.8] range for setBinaryScore
+            if (units.equals(ExperimentalConstants.str_binary) && validCount > 0) {
+                double avg = 0;
+                for (Double v : vals) avg += v;
+                avg /= vals.size();
+                if (avg > 0.2 && avg < 0.8) {
+                    sb.append("Binary avg outside range [0.2, 0.8]: ").append(String.format("%.2f", avg)).append(" ");
+                }
+            }
+            
+            return sb.toString().trim().isEmpty() ? "Unknown reason (" + recs.size() + " records)" : sb.toString().trim();
+		}
+
+		/**
+         * Detailed comparison showing why getCountWithMedian differs between two sources
+         */
+        void debugMedianCountDifference(TreeMap<String, ExperimentalRecords> tm1, 
+                TreeMap<String, ExperimentalRecords> tm2, String propertyName, String units,
+                String source1Name, String source2Name) {
+            
+            System.out.println("\n" + "=".repeat(80));
+            System.out.println("DEBUGGING MEDIAN COUNT DIFFERENCE");
+            System.out.println("=".repeat(80));
+            
+            int count1 = getCountWithMedian(tm1);
+            int count2 = getCountWithMedian(tm2);
+            int total1 = tm1.size();
+            int total2 = tm2.size();
+            
+            System.out.println("\nSUMMARY:");
+            System.out.println(source1Name + ": " + count1 + " with median / " + total1 + " total chemicals (" + 
+                (100.0 * count1 / total1) + "%)");
+            System.out.println(source2Name + ": " + count2 + " with median / " + total2 + " total chemicals (" + 
+                (100.0 * count2 / total2) + "%)");
+            System.out.println("Difference: " + Math.abs(count1 - count2) + " chemicals");
+            
+            // Show examples of each
+            System.out.println("\n" + "-".repeat(80));
+            printRecordsWithMedian(tm1, source1Name, 5);
+            
+            System.out.println("\n" + "-".repeat(80));
+            printRecordsWithMedian(tm2, source2Name, 5);
+            
+            System.out.println("\n" + "-".repeat(80));
+            printRecordsWithoutMedian(tm1, propertyName, units, source1Name + " (excluded)", 5);
+            
+            System.out.println("\n" + "-".repeat(80));
+            printRecordsWithoutMedian(tm2, propertyName, units, source2Name + " (excluded)", 5);
+            
+					System.out.println("\n" + "=".repeat(80));
+				}
 
 	}
-
-
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -1424,7 +1807,11 @@ public class CompareExperimentalRecords {
 //		c.c.lookAtLLNA_MixtureVsNonMixtureNIEHS_ICE();//only 8?
 //		c.c.compareSensitization();
 
-		c.c.compareRBiodeg();
+		// c.c.compareRBiodeg();
+		// c.c.compareRBiodeg_DebugOriginal();
+		// c.c.analyzeRBiodeg_BadRecords();
+		// c.c.analyzeRBiodeg_KeepFlag();
+		c.c.compareRBiodegFull();
 		//		c.c.compareBCF();
 //		c.c.compareKoc();
 //		c.c.compareAquaticTox();
@@ -1433,10 +1820,4 @@ public class CompareExperimentalRecords {
 
 	}
 
-
-
-
-
-
 }
-

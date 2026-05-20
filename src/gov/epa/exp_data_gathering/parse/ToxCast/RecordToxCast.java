@@ -1,8 +1,6 @@
 package gov.epa.exp_data_gathering.parse.ToxCast;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Vector;
 
 

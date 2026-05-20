@@ -10,8 +10,6 @@ import com.google.gson.JsonObject;
 
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
-import gov.epa.exp_data_gathering.parse.ThreeM.ParseThreeM;
-
 import java.io.FileReader;
 
 public class ParseSampleSource extends Parse {
