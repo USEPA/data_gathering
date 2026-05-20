@@ -489,7 +489,7 @@ public class ParseQSAR_ToolBox extends Parse {
 //        System.out.println(RecordQSAR_ToolBox.gson.toJson(jsonObject));
 		
 		p.maxExcelRows=100000;
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;

@@ -8,6 +8,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
+import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 
@@ -38,9 +40,10 @@ public class RecordNITE {
 		
 		List<RecordNITE> records2=new ArrayList<>();
 		
+		
 		for (JsonObject jo:records) {
 			
-			System.out.println(gson.toJson(jo));
+//			System.out.println(gson.toJson(jo));
 			
 			RecordNITE r=new RecordNITE();
 			records2.add(r);
@@ -50,6 +53,8 @@ public class RecordNITE {
 			r.rbiodeg=(int)Double.parseDouble(jo.get("RBIODEG").getAsString());
 			r.set=jo.get("Set").getAsString();;
 			r.chemical_name=jo.get("Name").getAsString();
+						
+			if (r.casrn.toLowerCase().contains("nocas")) r.casrn=null;
 			
 //			System.out.println(gson.toJson(r));
 		}
@@ -73,7 +78,7 @@ public class RecordNITE {
 
 		ExperimentalRecord er=new ExperimentalRecord();
 		
-		er.chemical_name=chemical_name;
+		er.chemical_name=ChemicalNameFixer.fixName(chemical_name);
 		er.casrn=casrn;
 		er.smiles=smiles;
 		er.property_value_point_estimate_original=(double)rbiodeg;

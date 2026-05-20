@@ -1,4 +1,4 @@
-package gov.epa.exp_data_gathering.parse.EChemPortal;
+package gov.epa.exp_data_gathering.parse;
 
 /**
 * @author TMARTI02

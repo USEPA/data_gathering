@@ -19,5 +19,10 @@ debug.log
 *.rtf
 *.pdf
 driver/
+driver latest/
+*.png
+*.jpeg
+pom-L2626BTMARTI02.xml
+pom(backup).xml
 .vscode/
 .github/

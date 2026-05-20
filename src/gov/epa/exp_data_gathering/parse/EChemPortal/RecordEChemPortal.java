@@ -828,7 +828,7 @@ public class RecordEChemPortal {
 			
 			er.parameter_values.add(pv);
 
-			// TODO: Determine how to make this work properly, and trim down printed debugging statements
+			// TODO: Determine how to make this work properly if desired, and trim down printed debugging statements
 			// New code to attempt to auto-populate synonyms and smiles using Dsstox data
 			// if ((er.synonyms == null || er.smiles == null) || (er.synonyms.isEmpty() || er.smiles.isEmpty()) && er.casrn != null && isDsstoxAvailable()) {
 			// 	try {

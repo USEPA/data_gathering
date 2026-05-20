@@ -448,11 +448,11 @@ public class CaseStudies {
 	void runSingleChemical() {
 //		c.go("26542-47-2","C[Si](C)(CCC=O)O[Si](C)(C)CCC=O","DTXSID80609414");
 
-//		String sid = "DTXSID80609414";
-//		String cas = "26542-47-2";
-//		String smiles = "C[Si](C)(CCC=O)O[Si](C)(C)CCC=O";
-//		String name = "3,3'-(1,1,3,3-Tetramethyldisiloxane-1,3-diyl)dipropanal";
-//		Double similarity = 0.27;
+		String sid = "DTXSID80609414";
+		String cas = "26542-47-2";
+		String smiles = "C[Si](C)(CCC=O)O[Si](C)(C)CCC=O";
+		String name = "3,3'-(1,1,3,3-Tetramethyldisiloxane-1,3-diyl)dipropanal";
+		Double similarity = 0.27;
 
 
 //		String sid="DTXSID101382351";
@@ -509,11 +509,11 @@ public class CaseStudies {
 ////		String sid="DTXSID1021740";//butanol
 //		String sid="DTXSID0021418";//tryptophan
 		
-		String sid="DTXSID1021952";//Triphenyl phosphate
-		String cas=null;
-		String smiles=null;
-		String name=null;		
-		Double similarity=null;
+//		String sid="DTXSID1021952";//Triphenyl phosphate
+//		String cas=null;
+//		String smiles=null;
+//		String name=null;		
+//		Double similarity=null;
 		
 //		Double similarity=0.61;//if null, search for it
 
@@ -711,8 +711,8 @@ public class CaseStudies {
 		
 		c.folder = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\Comptox\\000 scientists\\Tony\\hazard module case studies2\\";
 		
-		c.runExample();
-//		c.runSingleChemical();
+//		c.runExample();
+		c.runSingleChemical();
 //		c.runChemicals();
 	}
 

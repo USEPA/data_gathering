@@ -6,11 +6,12 @@ import java.util.Vector;
 import com.google.gson.JsonObject;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
-import gov.epa.exp_data_gathering.parse.UnitConverter;
+import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 
 public class RecordRIFM_2026_01 {
 	public String SMILES;
@@ -37,77 +38,58 @@ public class RecordRIFM_2026_01 {
 	public static final String lastUpdated = "2026-03-20";
 	public static final String sourceName = "RIFM_2026_01"; // TODO Consider creating ExperimentalConstants.strSourceRIFM_2026_01 instead.
 
-	/**
-	 * Output mode for property value transformation: "BINARY" or "CONTINUOUS"
-	 * Set by ParseRIFM_2026_01.setOutputMode() during initialization
-	 */
-	public static String outputMode = "BINARY";
 
 	private static final String fileName = "Biodegradation data_Summary_January 2026.xlsx";
 
-	private static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
+//	private static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 
-	/**
-	 * Sets the output mode for all RecordRIFM_2026_01 instances.
-	 * 
-	 * @param mode "BINARY" or "CONTINUOUS"
-	 */
-	public static void setMode(String mode) {
-		outputMode = mode;
-	}
 
 	public static Vector<JsonObject> parseRIFM_2026_01RecordsFromExcel() {
 		ExcelSourceReader esr = new ExcelSourceReader(fileName, sourceName);
 		Vector<JsonObject> records = esr.parseRecordsFromExcel(4); // TODO Chemical name index guessed from header. Is this accurate?
 		return records;
 	}
-
-	public ExperimentalRecord toExperimentalRecord() {
+	
+	
+	
+	public ExperimentalRecord toExperimentalRecord(String outputMode) {
 		ExperimentalRecord er=new ExperimentalRecord();
 		
 		er.source_name=sourceName;
 		er.document_name=Reference;
-		er.smiles=SMILES;
-		
+
 		er.casrn=CAS.replace(".","");
 		er.chemical_name=ChemicalNameFixer.fixName(Chemical_name);
+		er.smiles=SMILES;
 		
-		//		System.out.println(er.chemical_name+"\t"+er.casrn);
-		
-		er.experimental_parameters=new Hashtable<>();
-		er.parameter_values=new ArrayList<>();
-		
+//		System.out.println(er.chemical_name+"\t"+er.casrn);
+		setParameters(er);
+
 		if(SRC_comments!=null&& !SRC_comments.isBlank()) {
 			er.updateNote(SRC_comments);
 		}
 		
-//		if(Reviewed_Data.isBlank()) {
-//			er.keep=false;
-//			er.reason="Missing degradation %";
-//			return er;
-//		}
+		Estimate estimate = getPropertyValueEstimate();
+		Double duration=Double.parseDouble(this.Duration.replace(" days",""));//works without try/catch
+		BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
 		
+		return er;
+	}
+
+
+	private void setParameters(ExperimentalRecord er) {
+		
+		er.experimental_parameters=new Hashtable<>();
+		er.parameter_values=new ArrayList<>();
+				
 		if (!Test_guideline.contains("301F")) {
 			er.keep=false;
 			er.reason="Wrong guideline";
+			er.experimental_parameters.put("Test guideline", Test_guideline);
+		} else {
+			//Standardize guideline name:
+			er.experimental_parameters.put("Test guideline", "OECD Guideline 301 F (Ready Biodegradability)");
 		}
-
-		er.experimental_parameters.put("Test guideline", Test_guideline);
-
-		er.property_value_units_original="%";
-
-		try {
-			if (outputMode.equalsIgnoreCase("BINARY")) {
-				convertToBinary(er, Reviewed_Data_Results);
-			} else if (outputMode.equalsIgnoreCase("CONTINUOUS")) {
-				convertToContinuous(er, Reviewed_Data_Results, Duration);
-			}
-		} catch (Exception ex) {
-			er.keep=false;
-			er.reason="could not parse degradation: "+ Reviewed_Data_Results;
-			System.out.println(er.reason + "\n\t" + ex);
-		}
-		
 		
 		String parameterName="Observation duration";
 		ParameterValue pv=new ParameterValue();
@@ -121,170 +103,33 @@ public class RecordRIFM_2026_01 {
 			er.parameter_values.add(pv);
 		} else {
 			System.out.println("Different duration units:"+Duration+" for CAS="+CAS);
-			
 		}
+	}
+
+
+	private Estimate getPropertyValueEstimate() {
+		Estimate estimate=new Estimate();
 		
-		return er;
-	}
-
-	public static void convertToBinary(ExperimentalRecord er, String reviewedDataResults) {
-		// Implementation for converting record to binary
-		er.property_name=ExperimentalConstants.strRBIODEG;
-		er.property_value_units_final=ExperimentalConstants.str_binary;
-
-		if (reviewedDataResults.contains("<")) {
-				er.property_value_numeric_qualifier="<";
-				er.property_value_point_estimate_original=Double.parseDouble(reviewedDataResults.replace("<", "").trim());
-				er.property_value_point_estimate_final=0.0;
-
-			} else if (reviewedDataResults.contains("\u00B1")) { // ±
-				
-				String [] vals = reviewedDataResults.split("\u00B1"); // ±
-				
-				double mean = Double.parseDouble(vals[0].trim());
-				double plusminus = Double.parseDouble(vals[1].trim());
-				
-				er.property_value_min_original = mean - plusminus;
-				er.property_value_max_original = mean + plusminus;
-								
-				if(mean>60) {
-					er.property_value_point_estimate_final=1.0;
-				} else {
-					er.property_value_point_estimate_final=0.0;
-				}
-
-			} else if (reviewedDataResults.contains("-") && reviewedDataResults.indexOf("-")>0) {
-				
-				String [] vals = reviewedDataResults.split("-");
-				
-				er.property_value_min_original = Double.parseDouble(vals[0]);
-				er.property_value_max_original = Double.parseDouble(vals[1]);
-				
-				if(er.property_value_min_original>60) {
-					er.property_value_point_estimate_final=1.0;
-				} else {
-					er.property_value_point_estimate_final=0.0;
-				}
-				
-			} else {
-				er.property_value_point_estimate_original=Double.parseDouble(reviewedDataResults);
-				
-				if(er.property_value_point_estimate_original>60) {
-					er.property_value_point_estimate_final=1.0;
-				} else {
-					er.property_value_point_estimate_final=0.0;
-				}
-			}
-	}
-
-	public static void convertToContinuous(ExperimentalRecord er, String reviewedDataResults, String durationStr) {
-		// Implementation for converting record to continuous
-		er.property_name=ExperimentalConstants.strOXYGENCONSUMPTION;
-		er.property_value_units_final="%";
-
-		// Parse duration
-		double duration = -1;
-		if (durationStr != null && durationStr.contains("days")) {
-			String strDuration = durationStr.replace(" days", "").trim();
-			try {
-				duration = Double.parseDouble(strDuration);
-			} catch (NumberFormatException e) {
-				duration = -1;
-			}
-		}
-
-		double pointEstimate = -1;
-		double minValue = -1;
-		double maxValue = -1;
-		boolean round = false;
-
-		// Parse the data value
-		if (reviewedDataResults.contains("<")) {
-			er.property_value_numeric_qualifier="<";
-			pointEstimate = Double.parseDouble(reviewedDataResults.replace("<", "").trim());
-			er.property_value_point_estimate_original=pointEstimate;
-			round = true;
-
-		} else if (reviewedDataResults.contains("\u00B1")) { // ±
-			String [] vals = reviewedDataResults.split("\u00B1"); // ±
+		if (Reviewed_Data_Results.contains("<")) {
+			estimate.max=Double.parseDouble(Reviewed_Data_Results.replace("<", "").trim());
+		} else if (Reviewed_Data_Results.contains("\u00B1")) {
+			String [] vals = Reviewed_Data_Results.split("\u00B1");
 			double mean = Double.parseDouble(vals[0].trim());
 			double plusminus = Double.parseDouble(vals[1].trim());
-			
-			minValue = mean - plusminus;
-			maxValue = mean + plusminus;
-			pointEstimate = mean;
-			
-			er.property_value_min_original = minValue;
-			er.property_value_max_original = maxValue;
-			er.property_value_point_estimate_original=mean;
-
-		} else if (reviewedDataResults.contains("-")) {
-			if (reviewedDataResults.indexOf("-")>0) {
-				String [] vals = reviewedDataResults.split("-");
-				
-				minValue = Double.parseDouble(vals[0].trim());
-				maxValue = Double.parseDouble(vals[1].trim());
-				pointEstimate = (minValue + maxValue) / 2.0;
-				
-				er.property_value_min_original = minValue;
-				er.property_value_max_original = maxValue;
-				er.property_value_point_estimate_original=pointEstimate;
-			} else {
-				// Case for handling negative original point estimates
-				pointEstimate = Double.parseDouble(reviewedDataResults.trim());
-				er.property_value_point_estimate_original = pointEstimate;
-				round = true;
-			}
-
+			estimate.min = mean - plusminus;
+			estimate.max = mean + plusminus;
+		} else if (Reviewed_Data_Results.contains("-") && Reviewed_Data_Results.indexOf("-")>0) {
+			String [] vals = Reviewed_Data_Results.split("-");
+			estimate.min = Double.parseDouble(vals[0]);
+			estimate.max = Double.parseDouble(vals[1]);
 		} else {
-			pointEstimate = Double.parseDouble(reviewedDataResults.trim());
-			er.property_value_point_estimate_original=pointEstimate;
+			estimate.point=Double.parseDouble(Reviewed_Data_Results);
 		}
-
-		// Duration filtering logic
-		boolean keepRecord = true;
-		if (duration == 28) {
-			// Exactly 28 days - always keep
-			keepRecord = true;
-		} else if (duration > 28 && er.property_value_point_estimate_original < 5) {
-			// Duration > 28 days AND original value < 5% - exception, keep
-			keepRecord = true;
-			round = true;
-		} else if (duration < 28 && er.property_value_point_estimate_original > 95) {
-			// Duration < 28 days AND original value > 95% - exception, keep
-			keepRecord = true;
-			round = true;
-		} else if (duration >= 0) {
-			// Duration is not 28 and doesn't meet exceptions - discard
-			keepRecord = false;
-		}
-
-		// Apply 5% and 95% thresholds
-		if (pointEstimate < 5 && round) {
-			pointEstimate = 0.0;
-			if (minValue >= 0) minValue = 0.0;
-		} else if (pointEstimate > 95 && round) {
-			pointEstimate = 100.0;
-			if (maxValue >= 0) maxValue = 100.0;
-		} else if (pointEstimate > 100) {
-			pointEstimate = 100.0;
-			if (maxValue >= 0) maxValue = 100.0;
-		}
-
-		if (!keepRecord) {
-			er.keep = false;
-			er.reason = "Duration not 28 days (" + duration + " days), original value=" + er.property_value_point_estimate_original + "%";
-			return;
-		}
-
-		// Set final values after all filtering
-		er.property_value_point_estimate_final = pointEstimate;
-		if (minValue >= 0) {
-			er.property_value_min_final = minValue;
-		}
-		if (maxValue >= 0) {
-			er.property_value_max_final = maxValue;
-		}
+		return estimate;
+		
 	}
 
+	
+
+	
 }

@@ -632,7 +632,7 @@ public class ParseToxValDB {
 	 * NOTE: it wasn't necessary to create extra database columns for columns like species_common because can use sql to label it to match the java variable name
 	 * In toxval v94 there is one to one relationship between toxval table and record_source table so dont need separate query to get record_source info
 	 * 
-	 * @param dtxsid
+	 * @param source
 	 * @return
 	 */
 	private String createSQLQuery_toxval_v94_by_source(String source) {

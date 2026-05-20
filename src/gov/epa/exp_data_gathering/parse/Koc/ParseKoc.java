@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.Source;
 import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
