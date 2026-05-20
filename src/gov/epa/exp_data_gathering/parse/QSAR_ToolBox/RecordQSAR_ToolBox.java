@@ -28,6 +28,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
@@ -37,7 +38,7 @@ import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.exp_data_gathering.parse.EChemPortal.EstimateParser.Estimate;
+import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 
@@ -801,18 +802,16 @@ public class RecordQSAR_ToolBox {
 		if (er.keep) {
 //			Integer scoreFromInterpretationOfResults=setBinaryScoreFromInterpretationOfResults(er);
 			
-			Estimate estimate = getDegradationEstimate();				
-			ResultBinaryScore rbs=RecordQSAR_ToolBox.determineBinaryBiodegScore(estimate, duration);
-						
-			if(rbs.score!=null) {
-				er.property_value_point_estimate_final=(double)rbs.score;
-				er.property_value_units_final=ExperimentalConstants.str_binary;
-			} else {
-//				System.out.println(er.casrn+"\t"+er.reason);
-				er.updateReason(rbs.reason);
-				er.keep=false;
+			Estimate estimate = getDegradationEstimate();	
+			
+			String outputMode=ExperimentalConstants.str_binary;//TODO pass as parameter
+			
+			if (outputMode.equalsIgnoreCase(ExperimentalConstants.str_binary)) {
+				BiodegradationPropertyValues.convertToBinary(er, estimate, duration);
+			} else if (outputMode.equalsIgnoreCase(ExperimentalConstants.str_continuous)) {
+				BiodegradationPropertyValues.convertToContinuous(er, estimate, duration);
 			}
-
+			
 			addMetadata(er);
 		
 //			if(!(scoreFromBiodegradationPercentage+"").equals((scoreFromInterpretationOfResults+""))) {
@@ -913,57 +912,9 @@ public class RecordQSAR_ToolBox {
 	}
 		
 	
-	public static class ResultBinaryScore {
-		public Integer score;
-		public String reason;
-	}
 	
-	public static ResultBinaryScore determineBinaryBiodegScore(Estimate estimate, double duration) {
 	
-		ResultBinaryScore rbs=new ResultBinaryScore();
-		int daysCutoff = 28;
-
-		if (estimate.point != null) {
-			if (estimate.point >= 60) {
-				if(duration <= daysCutoff) {
-					rbs.score=1;
-				} else {
-					rbs.reason="Point estimate > 60% but duration > 28 days";
-				}
-			} else {
-				if (duration >= daysCutoff) {
-					rbs.score=0;
-				}else { // can't tell if they waited long enough
-					rbs.reason="Point estimate < 60% but duration < 28 days";
-				}
-			}
-
-		} else if (estimate.min != null && estimate.max != null) {
-			
-			if (estimate.min >= 60 && duration <= daysCutoff) {
-				rbs.score=1;
-			} else if (estimate.max < 60 && duration >= daysCutoff) {
-				rbs.score=0;
-			} else {
-				rbs.reason="Can't assign score based on min and max degradation values";
-			}
-						
-		
-		} else if (estimate.max != null) {
-			if (estimate.max < 60 && duration >= daysCutoff) {
-				rbs.score=0;
-			} else {
-				rbs.reason="Can't assign score based on max degradation value";
-			}
-		} else if (estimate.min != null) {
-			if (estimate.min >= 60 && duration <= daysCutoff) {
-				rbs.score=1;
-			} else {
-				rbs.reason="Can't assign score based on min degradation value";
-			}
-		}
-		return rbs;
-	}
+	
 	
 	private Integer setBinaryScoreFromInterpretationOfResults(ExperimentalRecord er) {
 		

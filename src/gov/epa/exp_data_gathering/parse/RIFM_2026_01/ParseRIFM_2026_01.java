@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Vector;
 import com.google.gson.JsonObject;
 
+import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.DsstoxMapperFromChemRegExcelExport;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
@@ -12,6 +13,7 @@ import gov.epa.exp_data_gathering.parse.Parse;
 
 public class ParseRIFM_2026_01 extends Parse {
 
+	
 	/**
 	 * Output mode for the parser: "BINARY" or "CONTINUOUS"
 	 * BINARY: Converts oxygen consumption % to 0.0 (not biodegradable) / 1.0 (biodegradable) if >60%
@@ -72,7 +74,7 @@ public class ParseRIFM_2026_01 extends Parse {
 				if (r.CAS == null)
 					continue;
 				
-				ExperimentalRecord er = r.toExperimentalRecord();
+				ExperimentalRecord er = r.toExperimentalRecord(this.outputMode);
 
 				if (useExcelMapping) {
 					if (er.keep) {
@@ -110,16 +112,16 @@ public class ParseRIFM_2026_01 extends Parse {
 	 */
 	public void setOutputMode(String mode) {
 		this.outputMode = mode;
-		RecordRIFM_2026_01.setMode(mode);
+		
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
-		if ("CONTINUOUS".equalsIgnoreCase(mode)) {
+		if (mode.equals(ExperimentalConstants.str_continuous)) {
 			subfolder = "Percent Biodegradation 301F RIFM";
-		} else if ("BINARY".equalsIgnoreCase(mode)) {
+		} else if (mode.equals(ExperimentalConstants.str_binary)) {
 			subfolder = "RBiodeg 301F RIFM";
 		} else {
-			throw new IllegalArgumentException("Invalid output mode. Use 'BINARY' or 'CONTINUOUS'.");
+			throw new IllegalArgumentException("Invalid output mode. Use binary or continuous constants");
 		}
 		
 		this.mainFolder = baseFolderPath + java.io.File.separator + subfolder;
@@ -149,12 +151,16 @@ public class ParseRIFM_2026_01 extends Parse {
 		p.writeExcelFileByProperty = true;
 		p.writeCheckingExcelFile = false;// creates random sample spreadsheet
 
-		// Set output mode - options are "BINARY" or "CONTINUOUS"
+		// Set output mode:
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
-		p.setOutputMode("CONTINUOUS");
 
+		p.setOutputMode(ExperimentalConstants.str_continuous);
 		p.createFiles();
+
+		p.setOutputMode(ExperimentalConstants.str_binary);
+		p.createFiles();
+
 
 	}
 }
