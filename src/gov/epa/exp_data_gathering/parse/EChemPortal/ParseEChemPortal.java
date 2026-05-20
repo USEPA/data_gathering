@@ -20,6 +20,7 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PressureCondition;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
+import gov.epa.exp_data_gathering.parse.RIFM_2026_01.RecordRIFM_2026_01;
 
 /**
  * Parses data from echemportal.org
@@ -30,7 +31,19 @@ import gov.epa.exp_data_gathering.parse.TextUtilities;
  *
  */
 public class ParseEChemPortal extends Parse {
+
+	/**
+	 * Output mode for the parser: "BINARY" or "CONTINUOUS"
+	 * BINARY: Converts oxygen consumption % to 0.0 (not biodegradable) / 1.0 (biodegradable) if >60%
+	 * CONTINUOUS: Preserves actual oxygen consumption percentage values
+	 */
+	private String outputMode = "BINARY";
 	
+	/**
+	 * Base folder for output (before mode-specific subfolder is appended)
+	 * Used to switch between mode-specific output folders
+	 */
+	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "RIFM_2026_01";
 	
 	String fileName="todo";
 	static final String filename301F = "biodegradation in water screening tests 2026-05-12.xlsx";
@@ -373,6 +386,11 @@ public class ParseEChemPortal extends Parse {
 		p.writeExcelExperimentalRecordsFile=true;
 		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+
+		// Set output mode - options are "BINARY" or "CONTINUOUS"
+		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
+		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
+		p.setOutputMode("BINARY");
 		p.createFiles();
 	}
 	
@@ -386,6 +404,43 @@ public class ParseEChemPortal extends Parse {
 		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 		p.createFiles();
+	}
+
+	/**
+	 * Sets the output mode for property value transformation and updates output folder accordingly.
+	 * BINARY mode outputs to: data/experimental/RIFM_2026_01/RBiodeg 301F RIFM
+	 * CONTINUOUS mode outputs to: data/experimental/RIFM_2026_01/Percent Biodegradation 301F RIFM
+	 * 
+	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
+	 */
+	public void setOutputMode(String mode) {
+		this.outputMode = mode;
+		RecordEChemPortal.setMode(mode);
+		
+		// Update mainFolder and jsonFolder based on mode
+		String subfolder;
+		if ("CONTINUOUS".equalsIgnoreCase(mode)) {
+			subfolder = "Percent Biodegradation 301 F ECHA Reach";
+		} else if ("BINARY".equalsIgnoreCase(mode)) {
+			subfolder = "RBiodeg 301 F ECHA Reach";
+		} else {
+			throw new IllegalArgumentException("Invalid output mode. Use 'BINARY' or 'CONTINUOUS'.");
+		}
+		
+		this.mainFolder = baseFolderPath + java.io.File.separator + subfolder;
+		this.jsonFolder = this.mainFolder;
+		
+		// Ensure the folder exists
+		new java.io.File(this.mainFolder).mkdirs();
+	}
+
+	/**
+	 * Gets the current output mode.
+	 * 
+	 * @return the current output mode ("BINARY" or "CONTINUOUS")
+	 */
+	public String getOutputMode() {
+		return this.outputMode;
 	}
 	
 	public static void main(String[] args) {

@@ -178,6 +178,7 @@ public class RecordRIFM_2026_01 {
 	}
 
 	public static void convertToContinuous(ExperimentalRecord er, String reviewedDataResults, String durationStr) {
+		// Implementation for converting record to continuous
 		er.property_name=ExperimentalConstants.strOXYGENCONSUMPTION;
 		er.property_value_units_final="%";
 

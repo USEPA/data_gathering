@@ -85,9 +85,24 @@ public class RecordEChemPortal {
 	public Double percentDegradation28days;
 	
 	public String dateAccessed;
+
+	/**
+	 * Output mode for property value transformation: "BINARY" or "CONTINUOUS"
+	 * Set by ParseRIFM_2026_01.setOutputMode() during initialization
+	 */
+	public static String outputMode = "BINARY";
 	
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 
+
+	/**
+	 * Sets the output mode for all RecordRIFM_2026_01 instances.
+	 * 
+	 * @param mode "BINARY" or "CONTINUOUS"
+	 */
+	public static void setMode(String mode) {
+		outputMode = mode;
+	}
 	
 	static class RecordKoc {
 		String type;
@@ -873,6 +888,14 @@ public class RecordEChemPortal {
 		
 //		System.out.println(er.toJSON());
 		return er;
+	}
+
+	public static void convertToBinary(ExperimentalRecord er, String reviewedDataResults) {
+		// Implementation for converting record to binary
+	}
+
+	public static void convertToContinuous(ExperimentalRecord er, String reviewedDataResults, String durationStr) {
+		// Implementation for converting record to continuous
 	}
 
 	private void setBiodegradationParameters(ExperimentalRecord er) {
