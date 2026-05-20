@@ -803,15 +803,8 @@ public class RecordQSAR_ToolBox {
 //			Integer scoreFromInterpretationOfResults=setBinaryScoreFromInterpretationOfResults(er);
 			
 			Estimate estimate = getDegradationEstimate();	
-			
 			String outputMode=ExperimentalConstants.str_binary;//TODO pass as parameter
-			
-			if (outputMode.equalsIgnoreCase(ExperimentalConstants.str_binary)) {
-				BiodegradationPropertyValues.convertToBinary(er, estimate, duration);
-			} else if (outputMode.equalsIgnoreCase(ExperimentalConstants.str_continuous)) {
-				BiodegradationPropertyValues.convertToContinuous(er, estimate, duration);
-			}
-			
+			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
 			addMetadata(er);
 		
 //			if(!(scoreFromBiodegradationPercentage+"").equals((scoreFromInterpretationOfResults+""))) {
