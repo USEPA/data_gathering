@@ -37,7 +37,7 @@ public class ParseEChemPortal extends Parse {
 	 * BINARY: Converts oxygen consumption % to 0.0 (not biodegradable) / 1.0 (biodegradable) if >60%
 	 * CONTINUOUS: Preserves actual oxygen consumption percentage values
 	 */
-	private String outputMode = "BINARY";
+//	private String outputMode = "BINARY";
 	
 	/**
 	 * Base folder for output (before mode-specific subfolder is appended)
@@ -46,7 +46,7 @@ public class ParseEChemPortal extends Parse {
 	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "eChemPortal";
 	
 	String fileName="todo";
-	static final String filename301F = "biodegradation in water screening tests 2026-05-12.xlsx";
+	static final String filename301F = "biodegradation in water screening tests 2026-05-21.xlsx";
 	static final String filenameKoc = "Koc 2026-04-16.xls";
 
 
@@ -420,8 +420,9 @@ public class ParseEChemPortal extends Parse {
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
 	 */
 	public void setOutputMode(String mode) {
-		this.outputMode = mode;
-		RecordEChemPortal.setMode(mode);
+//		this.outputMode = mode;
+//		RecordEChemPortal.setMode(mode);
+		RecordEChemPortal.outputMode=mode;
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
@@ -445,9 +446,9 @@ public class ParseEChemPortal extends Parse {
 	 * 
 	 * @return the current output mode ("BINARY" or "CONTINUOUS")
 	 */
-	public String getOutputMode() {
-		return this.outputMode;
-	}
+//	public String getOutputMode() {
+//		return this.outputMode;
+//	}
 	
 	public static void main(String[] args) {
 		
