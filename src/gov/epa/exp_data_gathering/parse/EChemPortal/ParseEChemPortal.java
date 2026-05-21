@@ -410,15 +410,18 @@ public class ParseEChemPortal extends Parse {
 	 * CONTINUOUS mode outputs to: data/experimental/RIFM_2026_01/Percent Biodegradation 301F RIFM
 	 * 
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
+	 * 
+	 * TODO send the propertyName instead of mode
+	 * 
 	 */
 	public void setOutputMode(String mode) {
 		RecordEChemPortal.outputMode = mode;
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
-		if ("CONTINUOUS".equalsIgnoreCase(mode)) {
+		if (ExperimentalConstants.str_continuous.equalsIgnoreCase(mode)) {
 			subfolder = "Percent Biodegradation 301 F ECHA Reach";
-		} else if ("BINARY".equalsIgnoreCase(mode)) {
+		} else if (ExperimentalConstants.str_binary.equalsIgnoreCase(mode)) {
 			subfolder = "RBiodeg 301 F ECHA Reach";
 		} else if (ExperimentalConstants.strKOC.equalsIgnoreCase(mode)) {
 			subfolder = "Koc ECHA Reach";
