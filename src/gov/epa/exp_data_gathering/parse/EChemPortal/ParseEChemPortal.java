@@ -43,7 +43,7 @@ public class ParseEChemPortal extends Parse {
 	 * Base folder for output (before mode-specific subfolder is appended)
 	 * Used to switch between mode-specific output folders
 	 */
-	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "RIFM_2026_01";
+	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "eChemPortal";
 	
 	String fileName="todo";
 	static final String filename301F = "biodegradation in water screening tests 2026-05-12.xlsx";
@@ -380,17 +380,21 @@ public class ParseEChemPortal extends Parse {
 
 	static void runBiodegWaterScreening() {
 		ParseEChemPortal p=new ParseEChemPortal(filename301F);
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;
-		p.writeExcelFileByProperty=false;		
+		p.writeExcelFileByProperty=true;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 
 		// Set output mode - options are "BINARY" or "CONTINUOUS"
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
-		p.setOutputMode("BINARY");
+		
+		p.setOutputMode(ExperimentalConstants.str_continuous);
+		p.createFiles();
+
+		p.setOutputMode(ExperimentalConstants.str_binary);
 		p.createFiles();
 	}
 	
@@ -403,6 +407,8 @@ public class ParseEChemPortal extends Parse {
 		p.writeExcelExperimentalRecordsFile=true;
 		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+
+		p.setOutputMode(ExperimentalConstants.strKOC);
 		p.createFiles();
 	}
 
@@ -447,7 +453,6 @@ public class ParseEChemPortal extends Parse {
 		
 		IOUtils.setByteArrayMaxOverride(200000000);
 
-		
 		runBiodegWaterScreening();
 //		runKoc();
 	}

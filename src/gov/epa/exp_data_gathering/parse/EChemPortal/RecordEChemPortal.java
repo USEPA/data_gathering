@@ -40,9 +40,11 @@ import gov.epa.exp_data_gathering.parse.JSONUtilities;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.exp_data_gathering.parse.EChemPortal.EstimateParser.Estimate;
+import gov.epa.exp_data_gathering.parse.EstimateParser;
+import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
-import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.ResultBinaryScore;
+import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
+import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues.ResultBinaryScore;
 
 /**
  * Stores data from echemportal.org
@@ -618,7 +620,7 @@ public class RecordEChemPortal {
 	public static Vector<RecordEChemPortal> parseEChemPortalQueriesFromExcel() {
 		Vector<RecordEChemPortal> records = new Vector<RecordEChemPortal>();
 		String folderNameExcel = "excel files";
-		String mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName;
+		String mainFolder = "data" + File.separator + "experimental" + File.separator + sourceName;
 		String excelFilePath = mainFolder + File.separator + folderNameExcel;
 		File folder = new File(excelFilePath);
 		String[] filenames = folder.list();
@@ -765,7 +767,7 @@ public class RecordEChemPortal {
 	
 	ExperimentalRecord toExperimentalRecordWaterBiodegration() {
 
-		ExperimentalRecord er = createExperimentalRecord(ExperimentalConstants.strRBIODEG);
+		ExperimentalRecord er = createExperimentalRecord();
 		
 		setBiodegradationParameters(er);
 		
@@ -814,7 +816,7 @@ public class RecordEChemPortal {
 		
 		if (er.keep) {
 			Estimate estimate=EstimateParser.parse(recBio.degradationValue);				
-			ResultBinaryScore rbs=RecordQSAR_ToolBox.determineBinaryBiodegScore(estimate, duration);
+			ResultBinaryScore rbs=BiodegradationPropertyValues.determineBinaryBiodegScore(estimate, duration);
 			
 			if (er.parameter_values==null) {
 				er.parameter_values = new ArrayList<ParameterValue>();
@@ -827,6 +829,12 @@ public class RecordEChemPortal {
 			pv.unit.abbreviation="days";
 			
 			er.parameter_values.add(pv);
+
+			// String durationStr = df.format(duration) + " days";
+
+			// er.experimental_parameters.put("Observation duration", durationStr);
+
+			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
 
 			// TODO: Determine how to make this work properly if desired, and trim down printed debugging statements
 			// New code to attempt to auto-populate synonyms and smiles using Dsstox data
@@ -861,41 +869,34 @@ public class RecordEChemPortal {
 			// 		// System.out.println("DEBUG: Failed to fetch synonyms for " + er.casrn + ": " + e.getMessage());
 			// 	}
 			// }
-						
-			if(rbs.score!=null) {
-				er.property_value_point_estimate_final=(double)rbs.score;
-				er.property_value_units_final=ExperimentalConstants.str_binary;
-//				System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-			} else {
-//				System.out.println(er.casrn+"\t"+er.reason);
-				er.updateReason(rbs.reason);
+			
+			// Obsolete, now processing using BiodegradationPropertyValues class
+// 			if(rbs.score!=null) {
+// 				er.property_value_point_estimate_final=(double)rbs.score;
+// 				er.property_value_units_final=ExperimentalConstants.str_binary;
+// //				System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
+// 			} else {
+// //				System.out.println(er.casrn+"\t"+er.reason);
+// 				er.updateReason(rbs.reason);
 				
-//				if(rbs.reason.contains("Can't assign score based on min and max degradation values")) {
-//					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-//				}
+// //				if(rbs.reason.contains("Can't assign score based on min and max degradation values")) {
+// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
+// //				}
 				
-//				if(rbs.reason.contains("Can't assign score based on max degradation value")) {
-//					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-//				}
+// //				if(rbs.reason.contains("Can't assign score based on max degradation value")) {
+// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
+// //				}
 				
-//				if(rbs.reason.contains("Can't assign score based on min degradation value")) {
-//					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-//				}
+// //				if(rbs.reason.contains("Can't assign score based on min degradation value")) {
+// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
+// //				}
 				
-				er.keep=false;
-			}
+// 				er.keep=false;
+// 			}
 		}		
 		
 //		System.out.println(er.toJSON());
 		return er;
-	}
-
-	public static void convertToBinary(ExperimentalRecord er, String reviewedDataResults) {
-		// Implementation for converting record to binary
-	}
-
-	public static void convertToContinuous(ExperimentalRecord er, String reviewedDataResults, String durationStr) {
-		// Implementation for converting record to continuous
 	}
 
 	private void setBiodegradationParameters(ExperimentalRecord er) {
@@ -936,14 +937,24 @@ public class RecordEChemPortal {
 		// }
 	}
 
-	private ExperimentalRecord createExperimentalRecord(String propertyName) {
+	private ExperimentalRecord createExperimentalRecord() {
 		ExperimentalRecord er=new ExperimentalRecord();
 		
 		er.date_accessed = dateAccessed;
 		er.source_name = ExperimentalConstants.strSourceEChemPortal;
 		er.original_source_name = this.source;
-		er.property_name=propertyName;
-		
+
+		if (outputMode == ExperimentalConstants.str_continuous) {
+			er.property_name=ExperimentalConstants.strPercentageBiodegradation;
+		} else if (outputMode == ExperimentalConstants.str_binary) {
+			er.property_name=ExperimentalConstants.strRBIODEG;
+		} else if (outputMode == ExperimentalConstants.strKOC) {
+			er.property_name=ExperimentalConstants.strKOC;
+		} else {
+			System.out.println("Unhandled output mode: " + outputMode + ", setting property name to biodegradation");
+			er.property_name=ExperimentalConstants.strRBIODEG;
+		}
+
 		if(numberType!=null) {
 			if (numberType.equals("CAS Number")) { 
 				er.casrn = number;
@@ -972,7 +983,7 @@ public class RecordEChemPortal {
 
 		
 		for (RecordKoc recordKoc:this.recordsKoc) {
-			ExperimentalRecord er=createExperimentalRecord(ExperimentalConstants.strKOC);
+			ExperimentalRecord er=createExperimentalRecord();
 			
 			er.experimental_parameters=new Hashtable<>();
 			er.experimental_parameters.put("Measurement method",this.method);

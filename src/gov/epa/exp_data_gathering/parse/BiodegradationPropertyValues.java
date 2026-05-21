@@ -36,6 +36,8 @@ public class BiodegradationPropertyValues {
 		boolean hasMin   = estimate.min   != null;
 		boolean hasMax   = estimate.max   != null;
 
+		setStringQualifier(er, estimate, duration);
+
 		// ~28 days
 		if (Math.abs(duration - DAYS) < EPS) {
 			if (hasPoint) {
@@ -158,25 +160,11 @@ public class BiodegradationPropertyValues {
 		
 //		System.out.println(recBio.degradationValue+"\n"+JsonUtilities.gsonPretty.toJson(estimate)+"\n");
 
-		if(estimate.min!=null && estimate.max!=null) {
-			er.property_value_string=Parse.formatValue(er.property_value_min_original)+" - "+Parse.formatValue(er.property_value_max_original);
-		} else if(estimate.min!=null) {
-			er.property_value_string="> "+Parse.formatValue(er.property_value_min_original);
-		} else if(estimate.max!=null) {
-			er.property_value_string="< "+Parse.formatValue(er.property_value_max_original);
-		} else if(estimate.point!=null) {
-			er.property_value_string=Parse.formatValue(er.property_value_point_estimate_original);
-		} 
-
-		if(er.property_value_string!=null) {
-			DecimalFormat df=new DecimalFormat("0.#");
-			er.property_value_string+=" % degradation in "+ duration+ " days";
-//			System.out.println(er.property_value_string);
-		}
+		setStringQualifier(er, estimate, duration);
 		
 	}
 	
-	private static ResultBinaryScore determineBinaryBiodegScore(Estimate estimate, double duration) {
+	public static ResultBinaryScore determineBinaryBiodegScore(Estimate estimate, double duration) {
 		
 		ResultBinaryScore rbs=new ResultBinaryScore();
 		int daysCutoff = 28;
@@ -221,6 +209,30 @@ public class BiodegradationPropertyValues {
 			}
 		}
 		return rbs;
+	}
+
+	public static void setStringQualifier(ExperimentalRecord er, Estimate estimate, double duration) {
+		if (er.property_value_min_original != null && estimate.min == null) estimate.min = er.property_value_min_original;
+		if (er.property_value_max_original != null && estimate.max == null) estimate.max = er.property_value_max_original;
+		if (er.property_value_point_estimate_original != null && estimate.point == null) estimate.point = er.property_value_point_estimate_original;
+
+		if(estimate.min!=null && estimate.max!=null) {
+			er.property_value_string=Parse.formatValue(er.property_value_min_original)+" - "+Parse.formatValue(er.property_value_max_original);
+		} else if(estimate.min!=null) {
+			er.property_value_string="> "+Parse.formatValue(er.property_value_min_original);
+			er.property_value_numeric_qualifier = ">";
+		} else if(estimate.max!=null) {
+			er.property_value_string="< "+Parse.formatValue(er.property_value_max_original);
+			er.property_value_numeric_qualifier = "<";
+		} else if(estimate.point!=null) {
+			er.property_value_string=Parse.formatValue(er.property_value_point_estimate_original);
+		} 
+
+		if(er.property_value_string!=null) {
+			DecimalFormat df=new DecimalFormat("0.#");
+			er.property_value_string+=" % degradation (O2 consumption) in "+ duration+ " days";
+			// System.out.println(er.property_value_string);
+		}
 	}
 
 }
