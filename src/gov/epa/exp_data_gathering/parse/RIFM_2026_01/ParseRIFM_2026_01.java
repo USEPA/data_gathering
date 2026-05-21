@@ -13,14 +13,7 @@ import gov.epa.exp_data_gathering.parse.Parse;
 
 public class ParseRIFM_2026_01 extends Parse {
 
-	
-	/**
-	 * Output mode for the parser: "BINARY" or "CONTINUOUS"
-	 * BINARY: Converts oxygen consumption % to 0.0 (not biodegradable) / 1.0 (biodegradable) if >60%
-	 * CONTINUOUS: Preserves actual oxygen consumption percentage values
-	 */
-	private String outputMode = "BINARY";
-	
+		
 	/**
 	 * Base folder for output (before mode-specific subfolder is appended)
 	 * Used to switch between mode-specific output folders
@@ -74,7 +67,7 @@ public class ParseRIFM_2026_01 extends Parse {
 				if (r.CAS == null)
 					continue;
 				
-				ExperimentalRecord er = r.toExperimentalRecord(this.outputMode);
+				ExperimentalRecord er = r.toExperimentalRecord();
 
 				if (useExcelMapping) {
 					if (er.keep) {
@@ -111,8 +104,7 @@ public class ParseRIFM_2026_01 extends Parse {
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
 	 */
 	public void setOutputMode(String mode) {
-		this.outputMode = mode;
-		
+		RecordRIFM_2026_01.outputMode = mode;
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
@@ -129,15 +121,6 @@ public class ParseRIFM_2026_01 extends Parse {
 		
 		// Ensure the folder exists
 		new java.io.File(this.mainFolder).mkdirs();
-	}
-
-	/**
-	 * Gets the current output mode.
-	 * 
-	 * @return the current output mode ("BINARY" or "CONTINUOUS")
-	 */
-	public String getOutputMode() {
-		return this.outputMode;
 	}
 
 	public static void main(String[] args) {

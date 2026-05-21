@@ -41,6 +41,12 @@ public class RecordRIFM_2026_01 {
 
 	private static final String fileName = "Biodegradation data_Summary_January 2026.xlsx";
 
+	/**
+	 * Output mode for property value transformation: "BINARY" or "CONTINUOUS"
+	 * Set by ParseRIFM_2026_01.setOutputMode() during initialization
+	 */
+	public static String outputMode = ExperimentalConstants.str_binary;
+
 //	private static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 
 
@@ -52,7 +58,7 @@ public class RecordRIFM_2026_01 {
 	
 	
 	
-	public ExperimentalRecord toExperimentalRecord(String outputMode) {
+	public ExperimentalRecord toExperimentalRecord() {
 		ExperimentalRecord er=new ExperimentalRecord();
 		
 		er.source_name=sourceName;
