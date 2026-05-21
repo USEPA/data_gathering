@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.http.annotation.Experimental;
 import org.apache.poi.util.IOUtils;
 
 import gov.epa.api.ExperimentalConstants;
@@ -31,13 +32,6 @@ import gov.epa.exp_data_gathering.parse.RIFM_2026_01.RecordRIFM_2026_01;
  *
  */
 public class ParseEChemPortal extends Parse {
-
-	/**
-	 * Output mode for the parser: "BINARY" or "CONTINUOUS"
-	 * BINARY: Converts oxygen consumption % to 0.0 (not biodegradable) / 1.0 (biodegradable) if >60%
-	 * CONTINUOUS: Preserves actual oxygen consumption percentage values
-	 */
-	private String outputMode = "BINARY";
 	
 	/**
 	 * Base folder for output (before mode-specific subfolder is appended)
@@ -420,8 +414,7 @@ public class ParseEChemPortal extends Parse {
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
 	 */
 	public void setOutputMode(String mode) {
-		this.outputMode = mode;
-		RecordEChemPortal.setMode(mode);
+		RecordEChemPortal.outputMode = mode;
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
@@ -429,6 +422,8 @@ public class ParseEChemPortal extends Parse {
 			subfolder = "Percent Biodegradation 301 F ECHA Reach";
 		} else if ("BINARY".equalsIgnoreCase(mode)) {
 			subfolder = "RBiodeg 301 F ECHA Reach";
+		} else if (ExperimentalConstants.strKOC.equalsIgnoreCase(mode)) {
+			subfolder = "Koc ECHA Reach";
 		} else {
 			throw new IllegalArgumentException("Invalid output mode. Use 'BINARY' or 'CONTINUOUS'.");
 		}
@@ -438,15 +433,6 @@ public class ParseEChemPortal extends Parse {
 		
 		// Ensure the folder exists
 		new java.io.File(this.mainFolder).mkdirs();
-	}
-
-	/**
-	 * Gets the current output mode.
-	 * 
-	 * @return the current output mode ("BINARY" or "CONTINUOUS")
-	 */
-	public String getOutputMode() {
-		return this.outputMode;
 	}
 	
 	public static void main(String[] args) {

@@ -92,19 +92,9 @@ public class RecordEChemPortal {
 	 * Output mode for property value transformation: "BINARY" or "CONTINUOUS"
 	 * Set by ParseRIFM_2026_01.setOutputMode() during initialization
 	 */
-	public static String outputMode = "BINARY";
+	public static String outputMode = ExperimentalConstants.str_binary;
 	
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
-
-
-	/**
-	 * Sets the output mode for all RecordRIFM_2026_01 instances.
-	 * 
-	 * @param mode "BINARY" or "CONTINUOUS"
-	 */
-	public static void setMode(String mode) {
-		outputMode = mode;
-	}
 	
 	static class RecordKoc {
 		String type;
