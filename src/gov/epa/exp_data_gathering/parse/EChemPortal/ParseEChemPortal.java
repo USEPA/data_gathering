@@ -220,8 +220,8 @@ public class ParseEChemPortal extends Parse {
 			for (RecordEChemPortal r:recordsEChemPortal) {
 				
 				if (fileName.equals(filename301F)) {
-					ExperimentalRecord er=r.toExperimentalRecordWaterBiodegration();
-					recordsExperimental.add(er);
+					ExperimentalRecords ers=r.toExperimentalRecordsWaterBiodegration();
+					recordsExperimental.addAll(ers);
 				} else if (fileName.equals(filenameKoc)) {
 					List<ExperimentalRecord>ers=r.toExperimentalRecordsKoc();
 					recordsExperimental.addAll(ers);
@@ -383,11 +383,12 @@ public class ParseEChemPortal extends Parse {
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
 		
+		p.setOutputMode(ExperimentalConstants.str_binary);
+		p.createFiles();
+		
 		p.setOutputMode(ExperimentalConstants.str_continuous);
 		p.createFiles();
 
-		p.setOutputMode(ExperimentalConstants.str_binary);
-		p.createFiles();
 	}
 	
 

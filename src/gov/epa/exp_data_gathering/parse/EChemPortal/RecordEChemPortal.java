@@ -36,6 +36,7 @@ import gov.epa.database.SqlUtilities;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.DownloadWebpageUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
+import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.JSONUtilities;
 import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
@@ -538,73 +539,73 @@ public class RecordEChemPortal {
 			RecordDegradation recNew=gson.fromJson(gson.toJson(recs.get(0)),RecordDegradation.class);
 			recNew.degradationValue=avgPoint+"";
 
-//			System.out.println(this.number+"\t"+ JsonUtilities.gsonPretty.toJson(recs)+"\n"+JsonUtilities.gsonPretty.toJson(recNew)+"\n\n");
+			System.out.println(this.number+"\t"+ JsonUtilities.gsonPretty.toJson(recs)+"\n"+JsonUtilities.gsonPretty.toJson(recNew)+"\n\n");
 			return recNew;
 		}
-			
+		
 		return null;
 	}
 	
 	
 
-	static void determinePercentBiodegradation28days(RecordEChemPortal rec) {
-		
-		double minDurationDiff=9999;
-		List<RecordDegradation> bestRecs=new ArrayList<>();
-		
-		for (RecordDegradation recBio:rec.recordsDegradation) {
-			
-			if(recBio.samplingTimeDays==null) continue;
-			
-			if (!recBio.parameter.contains("% degradation (O2 consumption)")) {
-//			    System.out.println(JsonUtilities.gsonPretty.toJson(recBio));
-			    continue;
-			}
-			
-			double diff=Math.abs(recBio.samplingTimeDays-28);
-			
-			if(diff<0.01) {
-				bestRecs.add(recBio);
-			}
-			
-		}
-		
-		if(bestRecs.size()==0)return;
-		
-//		if(bestRecs.size()>1)		
-//			System.out.println(JsonUtilities.gsonPretty.toJson(bestRecs));
-		
-		int count=0;
-		Double avgDeg=0.0;
-		for (RecordDegradation recBio:bestRecs) {
-			
-			Estimate estimate=EstimateParser.parse(recBio.degradationValue);
-			
-			if(estimate.point==null) {
-				continue;
-			} else {
-				count++;
-				avgDeg+=estimate.point;
-			}
-		}
-		
-		if(count>0) {
-			avgDeg/=(double)count;
-			rec.percentDegradation28days=avgDeg;
-		}
-		
-		
-//		//TODO there might be multiple 28 day records
+//	static void determinePercentBiodegradation28days(RecordEChemPortal rec) {
 //		
-//		Estimate estimate=EstimateParser.parse(bestRec.degradationValue);
+//		double minDurationDiff=9999;
+//		List<RecordDegradation> bestRecs=new ArrayList<>();
 //		
+//		for (RecordDegradation recBio:rec.recordsDegradation) {
 //			
-//		if(rec.derivedbinaryBiodegradation!=null) {
-//			rec.decisionDegradationRecord = bestRec.toString();
+//			if(recBio.samplingTimeDays==null) continue;
+//			
+//			if (!recBio.parameter.contains("% degradation (O2 consumption)")) {
+////			    System.out.println(JsonUtilities.gsonPretty.toJson(recBio));
+//			    continue;
+//			}
+//			
+//			double diff=Math.abs(recBio.samplingTimeDays-28);
+//			
+//			if(diff<0.01) {
+//				bestRecs.add(recBio);
+//			}
+//			
 //		}
-		
-	
-	}
+//		
+//		if(bestRecs.size()==0)return;
+//		
+////		if(bestRecs.size()>1)		
+////			System.out.println(JsonUtilities.gsonPretty.toJson(bestRecs));
+//		
+//		int count=0;
+//		Double avgDeg=0.0;
+//		for (RecordDegradation recBio:bestRecs) {
+//			
+//			Estimate estimate=EstimateParser.parse(recBio.degradationValue);
+//			
+//			if(estimate.point==null) {
+//				continue;
+//			} else {
+//				count++;
+//				avgDeg+=estimate.point;
+//			}
+//		}
+//		
+//		if(count>0) {
+//			avgDeg/=(double)count;
+//			rec.percentDegradation28days=avgDeg;
+//		}
+//		
+//		
+////		//TODO there might be multiple 28 day records
+////		
+////		Estimate estimate=EstimateParser.parse(bestRec.degradationValue);
+////		
+////			
+////		if(rec.derivedbinaryBiodegradation!=null) {
+////			rec.decisionDegradationRecord = bestRec.toString();
+////		}
+//		
+//	
+//	}
 	
 	
 	public static Vector<RecordEChemPortal> parseEChemPortalQueriesFromExcel() {
@@ -700,98 +701,69 @@ public class RecordEChemPortal {
 		}
 	}
 	
-	
-	private void setPropertyValues(RecordDegradation recBio, ExperimentalRecord er) {
+	ExperimentalRecords toExperimentalRecordsWaterBiodegration() {
 
-		Estimate estimate=EstimateParser.parse(recBio.degradationValue);
-		
-//		System.out.println(recBio.degradationValue+"\n"+JsonUtilities.gsonPretty.toJson(estimate)+"\n");
+		ExperimentalRecords ers=new ExperimentalRecords();
 
-		if(estimate.min!=null && estimate.max!=null) {
-			er.property_value_min_original=estimate.min;
-			er.property_value_max_original=estimate.max;
-			
-			er.property_value_string=Parse.formatValue(er.property_value_min_original)+" - "+Parse.formatValue(er.property_value_max_original);
-
-			//			System.out.println(er.property_value_min_original+"\t"+er.property_value_max_original);
-
-		} else if(estimate.min!=null) {
-			er.property_value_min_original=estimate.min;
-			er.property_value_string="> "+Parse.formatValue(er.property_value_min_original);
-			//			System.out.println(er.property_value_min_original);
-
-		} else if(estimate.max!=null) {
-			er.property_value_max_original=estimate.max;
-			//			System.out.println(er.property_value_max_original);
-			er.property_value_string="< "+Parse.formatValue(er.property_value_max_original);
-
-		} else if(estimate.point!=null) {
-			er.property_value_point_estimate_original=estimate.point;
-
-			String qualifier=null;
-			if(recBio.degradationValue.contains("ca.")) {
-				qualifier="~";
-			}
-			
-			if(qualifier==null) {
-				er.property_value_string=Parse.formatValue(er.property_value_point_estimate_original);
-			} else {
-				er.property_value_string=qualifier+" "+Parse.formatValue(er.property_value_point_estimate_original);
-			}
-			
-		} 
-
-		if(er.property_value_string!=null) {
-			DecimalFormat df=new DecimalFormat("0.#");
-			er.property_value_string+=" "+recBio.parameter+" in "+df.format(recBio.samplingTimeDays)+" days";
-//			System.out.println(er.property_value_string);
-			er.property_value_units_original=ExperimentalConstants.str_dimensionless;
+		for (RecordDegradation recBio:this.recordsDegradation) {
+			ExperimentalRecord er = createExperimentalRecord();
+			setSamplingTimeDays(recBio);
+			setBiodegradationParameters(er, recBio);
+			Estimate estimate=EstimateParser.parse(recBio.degradationValue);
+			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, recBio.samplingTimeDays);
+			ers.add(er);
 		}
-
-//		if(er.property_value_string==null) {
-//			er.keep=false;
-//			er.reason="No property_value_string";
-//		}
-
+		
+//		checkForConflictsInBinaryScore(ers);
+		
+		return ers;
 	}
-	
-	ExperimentalRecord toExperimentalRecordWaterBiodegration() {
 
-		ExperimentalRecord er = createExperimentalRecord();
-		
-		setBiodegradationParameters(er);
-		
-		RecordDegradation recBio=this.getRecordDegradation28Day();
-		
-		if(recBio==null) {
-//			System.out.println(JsonUtilities.gsonPretty.toJson(this.recordsDegradation));
-			boolean haveO2=false;
-			for(RecordDegradation rec:this.recordsDegradation) {
-				if (rec.parameter.contains("% degradation (O2 consumption)")) {
-					haveO2=true;
+	private void checkForConflictsInBinaryScore(ExperimentalRecords ers) {
+		if(outputMode.equals(ExperimentalConstants.str_binary)) {
+			boolean havePos=false;
+			boolean haveNeg=false;
+			
+			for (ExperimentalRecord er:ers) {
+				
+				if(!er.keep) continue;
+				
+				if(er.property_value_point_estimate_final==null) {
+					System.out.println(er.casrn+"\t"+er.chemical_name+"\t no point estimate");
+					continue;
+				}
+				
+				if(er.property_value_point_estimate_final==1) {
+					havePos=true;
+				} else if (er.property_value_point_estimate_final==0) {
+					haveNeg=true;
+				}
+				
+				if(havePos && haveNeg) {
+					System.out.println(er.casrn+"\t"+er.chemical_name+"\thave pos and neg");
+					break;
 				}
 			}
-			if(!haveO2) {
-				er.keep=false;
-				er.updateReason("Degradation not O2 consumption or ThOD");
-				er.experimental_parameters.put("Measurement method",this.recordsDegradation.get(0).parameter);
-				// er.measurement_method = this.recordsDegradation.get(0).parameter;
-//				System.out.println(er.experimental_parameters.get("Measurement method"));
-			} else {
-				System.out.println("Have null rec but have O2");//doesnt happen
-			}
-			return er;
 		}
+	}
+
+	private void setBiodegradationParameters(ExperimentalRecord er,RecordDegradation recBio) {
+		er.experimental_parameters=new Hashtable<>();
+
+		if (this.oxygenConditions!=null) {
+			er.experimental_parameters.put("Oxygen conditions", this.oxygenConditions);
+		}
+		
+//		er.experimental_parameters.put("Biodegradation records", this.convertRecordsDegradationToString());
+		er.experimental_parameters.put("Reliability",this.reliability);
+		er.experimental_parameters.put("Test guideline",this.testGuideline);
+		er.experimental_parameters.put("Test guideline compliance",this.GLP_compliance);
 
 		er.experimental_parameters.put("Measurement method",recBio.parameter);
-		// er.measurement_method = recBio.parameter; // Unnecessary since loading into experimental_parameters
-		
-		
-		Double duration=recBio.samplingTimeDays;
-
-		DecimalFormat df=new DecimalFormat("0");
-		
-		setPropertyValues(recBio, er);
+		if (!recBio.parameter.contains("% degradation (O2 consumption)")) {
+			er.keep=false;
+			er.updateReason("Degradation not O2 consumption or ThOD");				
+		}
 		
 		if (er.experimental_parameters.containsKey("Test guideline")) {
 			String strGuidelines = (String) er.experimental_parameters.get("Test guideline");
@@ -804,117 +776,18 @@ public class RecordEChemPortal {
 			er.updateReason("guideline unavailable");//doesnt happen?
 		}
 		
-		if (er.keep) {
-			Estimate estimate=EstimateParser.parse(recBio.degradationValue);				
-			ResultBinaryScore rbs=BiodegradationPropertyValues.determineBinaryBiodegScore(estimate, duration);
-			
-			if (er.parameter_values==null) {
-				er.parameter_values = new ArrayList<ParameterValue>();
-			}
-			ParameterValue pv=new ParameterValue();
-			String parameterName = "Observation duration";
-			pv.parameter.name=parameterName;
-			pv.value_point_estimate=duration;
-			pv.unit.name="DAYS";
-			pv.unit.abbreviation="days";
-			
-			er.parameter_values.add(pv);
-
-			// String durationStr = df.format(duration) + " days";
-
-			// er.experimental_parameters.put("Observation duration", durationStr);
-
-			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
-
-			// TODO: Determine how to make this work properly if desired, and trim down printed debugging statements
-			// New code to attempt to auto-populate synonyms and smiles using Dsstox data
-			// if ((er.synonyms == null || er.smiles == null) || (er.synonyms.isEmpty() || er.smiles.isEmpty()) && er.casrn != null && isDsstoxAvailable()) {
-			// 	try {
-			// 		DsstoxLookup dsstoxLookup = new DsstoxLookup();
-			// 		List<String> casrnList = new ArrayList<>();
-			// 		casrnList.add(er.casrn);
-
-			// 		// Query DSSTox database for this CASRN
-			// 		List<DsstoxLookup.DsstoxRecord> dsstoxRecords = dsstoxLookup.getDsstoxRecordsByCAS(casrnList, true);
-
-			// 		if (dsstoxRecords != null && !dsstoxRecords.isEmpty()) {
-			// 			DsstoxLookup.DsstoxRecord record = dsstoxRecords.get(0);
-
-			// 			// Use the preferred name from DSSTox as an alternative name
-			// 			if (record.preferredName != null && !record.preferredName.isEmpty() && !record.preferredName.equalsIgnoreCase(er.chemical_name)) {
-			// 				if (er.synonyms == null || er.synonyms.isEmpty()) {
-			// 					er.synonyms = record.preferredName;
-			// 				}
-			// 			}
-			// 			
-			// 			// Use the preferred name from DSSTox as an alternative name
-			// 			if (record.smiles != null && !record.smiles.isEmpty()) {
-			// 				if (er.smiles == null || er.smiles.isEmpty()) {
-			// 					er.smiles = record.smiles;
-			// 				}
-			// 			}
-			// 		}
-			// 	} catch (Exception e) {
-			// 		// Optional DEBUG statement to print for catching errors
-			// 		// System.out.println("DEBUG: Failed to fetch synonyms for " + er.casrn + ": " + e.getMessage());
-			// 	}
-			// }
-			
-			// Obsolete, now processing using BiodegradationPropertyValues class
-// 			if(rbs.score!=null) {
-// 				er.property_value_point_estimate_final=(double)rbs.score;
-// 				er.property_value_units_final=ExperimentalConstants.str_binary;
-// //				System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-// 			} else {
-// //				System.out.println(er.casrn+"\t"+er.reason);
-// 				er.updateReason(rbs.reason);
-				
-// //				if(rbs.reason.contains("Can't assign score based on min and max degradation values")) {
-// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-// //				}
-				
-// //				if(rbs.reason.contains("Can't assign score based on max degradation value")) {
-// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-// //				}
-				
-// //				if(rbs.reason.contains("Can't assign score based on min degradation value")) {
-// //					System.out.println(er.casrn+","+er.property_value_point_estimate_final+","+er.property_value_string+","+er.experimental_parameters.get("Interpretation of results"));
-// //				}
-				
-// 				er.keep=false;
-// 			}
-		}		
-		
-//		System.out.println(er.toJSON());
-		return er;
-	}
-
-	private void setBiodegradationParameters(ExperimentalRecord er) {
-		er.experimental_parameters=new Hashtable<>();
-		if (this.oxygenConditions!=null) {
-			er.experimental_parameters.put("Oxygen conditions", this.oxygenConditions);
+		if (er.parameter_values==null) {
+			er.parameter_values = new ArrayList<ParameterValue>();
 		}
 		
-		for (RecordDegradation recBio:this.recordsDegradation) {
-			Double duration=null;
-			if(recBio.samplingTime.contains("d")) {
-				duration = Double.parseDouble(recBio.samplingTime.replace(" d", ""));
-			} else if(recBio.samplingTime.contains("h")) {
-				duration = Double.parseDouble(recBio.samplingTime.replace(" h", ""));
-				duration/=24.0;
-			} else if(recBio.samplingTime.contains("wk")) {
-				duration = Double.parseDouble(recBio.samplingTime.replace(" wk", ""));
-				duration*=7.0;
-			} else {
-				System.out.println("Bad duration units:"+recBio.samplingTime);
-			}
-			recBio.samplingTimeDays=duration;
-		}
+		ParameterValue pv=new ParameterValue();
+		String parameterName = "Observation duration";
+		pv.parameter.name=parameterName;
+		pv.value_point_estimate=recBio.samplingTimeDays;
+		pv.unit.name="DAYS";
+		pv.unit.abbreviation="days";
+		er.parameter_values.add(pv);
 		
-		er.experimental_parameters.put("Biodegradation records", this.convertRecordsDegradationToString());
-		er.experimental_parameters.put("Reliability",this.reliability);
-		er.experimental_parameters.put("Test guideline",this.testGuideline);
-		er.experimental_parameters.put("Test guideline compliance",this.GLP_compliance);
 		// if (this.interpretationOfResults!=null) {
 		// 	er.experimental_parameters.put("Interpretation of results",this.interpretationOfResults);
 		// } else {
@@ -925,6 +798,22 @@ public class RecordEChemPortal {
 		// 		System.out.println(JsonUtilities.gsonPretty.toJson(this));
 		// 	}
 		// }
+	}
+
+	private void setSamplingTimeDays(RecordDegradation recBio) {
+		Double duration=null;
+		if(recBio.samplingTime.contains("d")) {
+			duration = Double.parseDouble(recBio.samplingTime.replace(" d", ""));
+		} else if(recBio.samplingTime.contains("h")) {
+			duration = Double.parseDouble(recBio.samplingTime.replace(" h", ""));
+			duration/=24.0;
+		} else if(recBio.samplingTime.contains("wk")) {
+			duration = Double.parseDouble(recBio.samplingTime.replace(" wk", ""));
+			duration*=7.0;
+		} else {
+			System.out.println("Bad duration units:"+recBio.samplingTime);
+		}
+		recBio.samplingTimeDays=duration;
 	}
 
 	private ExperimentalRecord createExperimentalRecord() {
