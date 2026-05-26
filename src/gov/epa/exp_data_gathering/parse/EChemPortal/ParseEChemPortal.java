@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.http.annotation.Experimental;
 import org.apache.poi.util.IOUtils;
 
 import gov.epa.api.ExperimentalConstants;
@@ -21,7 +20,6 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PressureCondition;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
-import gov.epa.exp_data_gathering.parse.RIFM_2026_01.RecordRIFM_2026_01;
 
 /**
  * Parses data from echemportal.org
@@ -222,8 +220,8 @@ public class ParseEChemPortal extends Parse {
 			for (RecordEChemPortal r:recordsEChemPortal) {
 				
 				if (fileName.equals(filename301F)) {
-					ExperimentalRecord er=r.toExperimentalRecordWaterBiodegration();
-					recordsExperimental.add(er);
+					ExperimentalRecords ers=r.toExperimentalRecordsWaterBiodegration();
+					recordsExperimental.addAll(ers);
 				} else if (fileName.equals(filenameKoc)) {
 					List<ExperimentalRecord>ers=r.toExperimentalRecordsKoc();
 					recordsExperimental.addAll(ers);
@@ -385,11 +383,12 @@ public class ParseEChemPortal extends Parse {
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
 		
+		p.setOutputMode(ExperimentalConstants.str_binary);
+		p.createFiles();
+		
 		p.setOutputMode(ExperimentalConstants.str_continuous);
 		p.createFiles();
 
-		p.setOutputMode(ExperimentalConstants.str_binary);
-		p.createFiles();
 	}
 	
 
@@ -412,15 +411,18 @@ public class ParseEChemPortal extends Parse {
 	 * CONTINUOUS mode outputs to: data/experimental/RIFM_2026_01/Percent Biodegradation 301F RIFM
 	 * 
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
+	 * 
+	 * TODO send the propertyName instead of mode
+	 * 
 	 */
 	public void setOutputMode(String mode) {
 		RecordEChemPortal.outputMode = mode;
 		
 		// Update mainFolder and jsonFolder based on mode
 		String subfolder;
-		if ("CONTINUOUS".equalsIgnoreCase(mode)) {
+		if (ExperimentalConstants.str_continuous.equalsIgnoreCase(mode)) {
 			subfolder = "Percent Biodegradation 301 F ECHA Reach";
-		} else if ("BINARY".equalsIgnoreCase(mode)) {
+		} else if (ExperimentalConstants.str_binary.equalsIgnoreCase(mode)) {
 			subfolder = "RBiodeg 301 F ECHA Reach";
 		} else if (ExperimentalConstants.strKOC.equalsIgnoreCase(mode)) {
 			subfolder = "Koc ECHA Reach";

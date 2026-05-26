@@ -36,7 +36,7 @@ public class BiodegradationPropertyValues {
 		boolean hasMin   = estimate.min   != null;
 		boolean hasMax   = estimate.max   != null;
 
-		setStringQualifier(er, estimate, duration);
+		setPropertyValueString(er, estimate, duration);
 
 		// ~28 days
 		if (Math.abs(duration - DAYS) < EPS) {
@@ -160,7 +160,7 @@ public class BiodegradationPropertyValues {
 		
 //		System.out.println(recBio.degradationValue+"\n"+JsonUtilities.gsonPretty.toJson(estimate)+"\n");
 
-		setStringQualifier(er, estimate, duration);
+		setPropertyValueString(er, estimate, duration);
 		
 	}
 	
@@ -211,19 +211,21 @@ public class BiodegradationPropertyValues {
 		return rbs;
 	}
 
-	public static void setStringQualifier(ExperimentalRecord er, Estimate estimate, double duration) {
-		if (er.property_value_min_original != null && estimate.min == null) estimate.min = er.property_value_min_original;
-		if (er.property_value_max_original != null && estimate.max == null) estimate.max = er.property_value_max_original;
-		if (er.property_value_point_estimate_original != null && estimate.point == null) estimate.point = er.property_value_point_estimate_original;
+	public static void setPropertyValueString(ExperimentalRecord er, Estimate estimate, double duration) {
+
+		//Following code seems redundant since  er.property_value_min_original is set from estimate.min:
+//		if (er.property_value_min_original != null && estimate.min == null) estimate.min = er.property_value_min_original;
+//		if (er.property_value_max_original != null && estimate.max == null) estimate.max = er.property_value_max_original;
+//		if (er.property_value_point_estimate_original != null && estimate.point == null) estimate.point = er.property_value_point_estimate_original;
 
 		if(estimate.min!=null && estimate.max!=null) {
 			er.property_value_string=Parse.formatValue(er.property_value_min_original)+" - "+Parse.formatValue(er.property_value_max_original);
 		} else if(estimate.min!=null) {
 			er.property_value_string="> "+Parse.formatValue(er.property_value_min_original);
-			er.property_value_numeric_qualifier = ">";
+//			er.property_value_numeric_qualifier = ">";
 		} else if(estimate.max!=null) {
 			er.property_value_string="< "+Parse.formatValue(er.property_value_max_original);
-			er.property_value_numeric_qualifier = "<";
+//			er.property_value_numeric_qualifier = "<";
 		} else if(estimate.point!=null) {
 			er.property_value_string=Parse.formatValue(er.property_value_point_estimate_original);
 		} 
