@@ -33,20 +33,52 @@ public class RecordITRC {
 	String PFAS_Name;
 	String Acronym;
 	String Isomer;
-	String LogKocWithStdDev;
+	// String LogKocWithStdDev;
 	String Type;
 	String Applicable_Matrices;
 	String Testing_Conditions;
 	String Reference_Label;
 	String Reference_Citation;
 	int Reference_Number;
+	String CAS;
+	
+	// Which of the above fields should be placed within the RecordsKOC/Bio objects?
+	// Information such as the reference, and study conditions info can vary across records
+	// for the same chemical, so might be better placed in the sub-records objects?
+	// Seems like I need to also add info such as the reference label/citation/number to the
+	// sub-records, as individual chemicals may have data from many sources
+
+	List<RecordKOC> RecordsKOC;
+	List<RecordBio> RecordsBio;
 	
 	public static final String sourceName="ITRC July 2023";
 	static String filename="PhysChemProp_Table_July2023-FINAL.xlsx";
+	// static String filename="ITRC_PFAS_-BCF-BAF_compilation_Table5-1_Oct2021.xlsx"
 	
 	transient static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	transient UnitConverter uc = new UnitConverter("Data" + File.separator + "density.txt");
 	
+	static class RecordKOC {
+		String LogKocWithStdDev;
+	}
+
+	static class RecordBio {
+		String BCF_Min;
+		String BCF_Max;
+		String BCF;
+		String BAF_Min;
+		String BAF_Max;
+		String BAF;
+		String Organism_Common_Name;
+		String Organism_Scientific_Name;
+		String Tissue_Type;
+		String Wet_Dry_Lipid_Basis;
+		String Lab_Field_Model_Study;
+		String Location;
+		String Freshwater_Marine_Estuary;
+		String Waterbody_Description;
+		String Reviewer_Notes;
+	}
 
 	Hashtable<Integer, String> getCitations(Sheet sheetReferences) {
 		
@@ -66,13 +98,15 @@ public class RecordITRC {
 		}
 		return ht;
 	}
-	public List<RecordITRC> parseExcelFile() {
+	public List<RecordITRC> parseExcelFile(String filename) {
 		
 		List<RecordITRC>recs=new ArrayList<>();
+
+		String folderPath = "data\\experimental\\"+sourceName+"\\excel files\\";
 		
 		try {
 
-			String filePath="data\\experimental\\"+sourceName+"\\excel files\\"+filename;
+			String filePath=folderPath+filename;
 			
 			System.out.println(filePath);
 			
@@ -89,8 +123,6 @@ public class RecordITRC {
 			Sheet sheetReferences=wb.getSheet("References");
 			
 			Hashtable<Integer,String>htCitations=getCitations(sheetReferences);
-			
-			Hashtable<String,String>htNameToCAS=new Hashtable<>();
 			
 			String name=null;
 			String acronym=null;
@@ -118,11 +150,11 @@ public class RecordITRC {
 				if(!cellAcronym.getStringCellValue().isBlank()) {
 					acronym=cellAcronym.getStringCellValue();
 				}
+
 				
 				rec.PFAS_Name=name;
 				rec.Acronym=acronym;
-				rec.LogKocWithStdDev=cellLogKoc.getStringCellValue();
-
+				
 				rec.Isomer=row.getCell(2).getStringCellValue();
 				rec.Type=row.getCell(4).getStringCellValue();
 				rec.Applicable_Matrices=row.getCell(5).getStringCellValue();
@@ -134,7 +166,12 @@ public class RecordITRC {
 				rec.Reference_Number=(int)cellValue.getNumberValue();
 				
 				rec.Reference_Citation=htCitations.get(rec.Reference_Number);
+				
+				rec.RecordsKOC = new ArrayList<>();
 
+				RecordKOC recordKOC = new RecordKOC();
+				recordKOC.LogKocWithStdDev = cellLogKoc.getStringCellValue();
+				rec.RecordsKOC.add(recordKOC);
 				
 //				System.out.println(rowNum+"\t"+name+"\t"+cellLogKoc.getStringCellValue());
 			
@@ -151,11 +188,158 @@ public class RecordITRC {
 		return recs;
 		
 	}
+
+	public List<RecordITRC> parseExcelFileBio(String filename) {
+		
+		List<RecordITRC> recs = new ArrayList<>();
+		String folderPath = "data\\experimental\\" + sourceName + "\\excel files\\";
+		
+		try {
+			String filePath = folderPath + filename;
+			System.out.println(filePath);
+			
+			FileInputStream fis = new FileInputStream(new File(filePath));
+			Workbook wb = WorkbookFactory.create(fis);
+			Sheet sheetBAF = wb.getSheet("BCF-BAF Database");
+			
+			// Build hashtable to map column headers
+			Row headerRow = sheetBAF.getRow(6);
+			Hashtable<String, Integer> htCols = new Hashtable<>();
+			for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+				String colName = headerRow.getCell(i).getStringCellValue();
+				htCols.put(colName, i);
+			}
+			
+			// Use HashMap to group RecordBio by unique PFAS_Name (chemical identifier)
+			java.util.HashMap<String, RecordITRC> chemicalMap = new java.util.HashMap<>();
+			
+			// Parse data rows (rows 8 through 1411 as you specified, adjust to 0-based indexing = 7-1410)
+			for (int rowNum = 7; rowNum <= 1410; rowNum++) {
+				Row row = sheetBAF.getRow(rowNum);
+				if (row == null) continue;
+				
+				// Extract chemical identifying information from row
+				String pfasName = getCellStringValue(row, htCols.get("PFAS Name"));
+				String acronym = getCellStringValue(row, htCols.get("Acronym"));
+				
+				// Skip rows without PFAS Name
+				if (pfasName == null || pfasName.isBlank()) continue;
+				
+				// Get or create RecordITRC for this unique chemical
+				RecordITRC rec = chemicalMap.get(pfasName);
+				if (rec == null) {
+					rec = new RecordITRC();
+					rec.PFAS_Name = pfasName;
+					rec.Acronym = acronym;
+					rec.CAS = getCellStringValue(row, htCols.get("CAS No."));
+					// Populate other chemical-level fields that don't vary by row
+					// rec.Isomer = getCellStringValue(row, htCols.get("Isomer"));
+					// rec.Type = getCellStringValue(row, htCols.get("Type"));
+					// rec.Applicable_Matrices = getCellStringValue(row, htCols.get("Applicable Matrices"));
+					// rec.Testing_Conditions = getCellStringValue(row, htCols.get("Testing Conditions"));
+					rec.Reference_Label = getCellStringValue(row, htCols.get("Reference"));
+					// TODO: Implement method for gathering reference info from BCF-BAF Log sheet
+					// rec.Reference_Citation = getCellStringValue(row, htCols.get("Reference Citation"));
+					rec.RecordsBio = new ArrayList<>();
+					chemicalMap.put(pfasName, rec);
+				}
+				
+				// Handle BCF/BAF Values
+				RecordBio recordBio = new RecordBio();
+				recordBio.BCF = getCellStringValue(row, htCols.get("BCF"));
+				recordBio.BCF_Min = getCellStringValue(row, htCols.get("BCF Min"));
+				recordBio.BCF_Max = getCellStringValue(row, htCols.get("BCF Max"));
+				recordBio.BAF = getCellStringValue(row, htCols.get("BAF"));
+				recordBio.BAF_Min = getCellStringValue(row, htCols.get("BAF Min"));
+				recordBio.BAF_Max = getCellStringValue(row, htCols.get("BAF Max"));
+				populateBioMetadata(recordBio, row, htCols);
+				rec.RecordsBio.add(recordBio);
+				
+				// Create RecordBio for BCF if value exists
+				// if (bcfVal != null && !bcfVal.isBlank()) {
+				// 	RecordBio recordBio = new RecordBio();
+				// 	recordBio.BCF_Min = getCellStringValue(row, htCols.get("BCF Min"));
+				// 	recordBio.BCF_Max = getCellStringValue(row, htCols.get("BCF Max"));
+				// 	recordBio.BCF = bcfVal;
+				// 	recordBio.BAF_Min = null;
+				// 	recordBio.BAF_Max = null;
+				// 	recordBio.BAF = null;
+				// 	populateBioMetadata(recordBio, row, htCols);
+				// 	rec.RecordsBio.add(recordBio);
+				// }
+			
+				// Create RecordBio for BAF if value exists (separate record)
+				// if (bafVal != null && !bafVal.isBlank()) {
+				// 	RecordBio recordBio = new RecordBio();
+				// 	recordBio.BCF_Min = null;
+				// 	recordBio.BCF_Max = null;
+				// 	recordBio.BCF = null;
+				// 	recordBio.BAF_Min = getCellStringValue(row, htCols.get("BAF Min"));
+				// 	recordBio.BAF_Max = getCellStringValue(row, htCols.get("BAF Max"));
+				// 	recordBio.BAF = bafVal;
+				// 	populateBioMetadata(recordBio, row, htCols);
+				// 	rec.RecordsBio.add(recordBio);
+				// }
+			}
+			
+			// Convert HashMap values to list
+			recs.addAll(chemicalMap.values());
+			
+			System.out.println("Number of unique chemicals=" + recs.size());
+			wb.close();
+			fis.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return recs;
+	}
+
+	private String getCellStringValue(Row row, Integer colIndex) {
+		if (colIndex == null || row == null) return null;
+		Cell cell = row.getCell(colIndex);
+		if (cell == null) return null;
+		
+		try {
+			switch (cell.getCellType()) {
+				case STRING:
+					return cell.getStringCellValue();
+				case NUMERIC:
+					// Handle numeric cells by converting to string
+					double numVal = cell.getNumericCellValue();
+					// Check if it's a whole number
+					if (numVal == (long) numVal) {
+						return String.format("%d", (long) numVal);
+					} else {
+						return String.valueOf(numVal);
+					}
+				case BLANK:
+					return null;
+				default:
+					return null;
+			}
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private void populateBioMetadata(RecordBio bioRecord, Row row, Hashtable<String, Integer> htCols) {
+		bioRecord.Organism_Common_Name = getCellStringValue(row, htCols.get("Organism Common Name"));
+		bioRecord.Organism_Scientific_Name = getCellStringValue(row, htCols.get("Scientific Name"));
+		bioRecord.Tissue_Type = getCellStringValue(row, htCols.get("Tissue Type (valid values)"));
+		bioRecord.Wet_Dry_Lipid_Basis = getCellStringValue(row, htCols.get("Wet/Dry/Lipid Basis"));
+		bioRecord.Lab_Field_Model_Study = getCellStringValue(row, htCols.get("Lab or Field or Model Study"));
+		bioRecord.Location = getCellStringValue(row, htCols.get("Location"));
+		bioRecord.Freshwater_Marine_Estuary = getCellStringValue(row, htCols.get("Freshwater/marine/estuarine"));
+		bioRecord.Waterbody_Description = getCellStringValue(row, htCols.get("Waterbody Description"));
+		bioRecord.Reviewer_Notes = getCellStringValue(row, htCols.get("Reviewer Notes"));
+	}
 	
 
 	public static void main(String[] args) {
 		RecordITRC rm=new RecordITRC();
-		rm.parseExcelFile();
+		rm.parseExcelFile(filename);
 //		rm.getCitations();
 		
 	}
@@ -171,16 +355,16 @@ public class RecordITRC {
 
 //		er.property_value_point_estimate_original=Koc;
 		
-		er.property_value_string = this.LogKocWithStdDev;
+		// er.property_value_string = this.LogKocWithStdDev;
 		
-//		LogKocWithStdDev=LogKocWithStdDev.replace("2.02 (�0.01) to 2.1 4 (�0.02)","2.02 (�0.01) to 2.14 (�0.02)");
-		LogKocWithStdDev=LogKocWithStdDev.replace("2.1 4 (","2.14 (");
+//		LogKocWithStdDev=LogKocWithStdDev.replace("2.02 (Ã¯Â¯ÂÂ¿Â½0.01) to 2.1 Ã¯Â Â(Ã¯Â¿Â½0.02)","Ã¯Â.Â02 (Ã¯Â¿Â½0.01) Ã¯ÂoÂ 2.14 (Ã¯Â¿Â½0.02)");
+		// LogKocWithStdDev=LogKocWithStdDev.replace("2.1 4 (","2.14 (");
 		
-		LogKocWithStdDev=LogKocWithStdDev.replace("1.1-2.1","1.1 to 2.1");
-		LogKocWithStdDev=LogKocWithStdDev.replace("2.4-2.6","2.4 to 2.6");
-		LogKocWithStdDev=LogKocWithStdDev.replace("4.3-6.0","4.3 to 6.0");
-		LogKocWithStdDev=LogKocWithStdDev.replace("2.34-2.83","2.34 to 2.83");
-//		LogKocWithStdDev=LogKocWithStdDev.replace("±", "�");
+		// LogKocWithStdDev=LogKocWithStdDev.replace("1.1-2.1","1.1 to 2.1");
+		// LogKocWithStdDev=LogKocWithStdDev.replace("2.4-2.6","2.4 to 2.6");
+		// LogKocWithStdDev=LogKocWithStdDev.replace("4.3-6.0","4.3 to 6.0");
+		// LogKocWithStdDev=LogKocWithStdDev.replace("2.34-2.83","2.34 to 2.83");
+//		LogKocWithStdDev=LogKocWithStdDev.replace("ÃÃÂ±",Ã¯Â"ÂÃ¯Â¿Â½");
 		
 //		for (int i = 0; i < LogKocWithStdDev.length(); i++) {
 //            char ch = LogKocWithStdDev.charAt(i);
@@ -191,41 +375,41 @@ public class RecordITRC {
 //        }
 		
 				
-		if(LogKocWithStdDev.contains("to")) {
+		// if(LogKocWithStdDev.contains("to")) {
 			
-			String [] vals=LogKocWithStdDev.split(" to ");
+		// 	String [] vals=LogKocWithStdDev.split(" to ");
 			
-			if(vals.length==2) {
+		// 	if(vals.length==2) {
 				
-				String val1=vals[0];
+		// 		String val1=vals[0];
 				
-				if(val1.contains("(")) {
-					val1=val1.substring(0,val1.indexOf("(")).trim();
-				}
+		// 		if(val1.contains("(")) {
+		// 			val1=val1.substring(0,val1.indexOf("(")).trim();
+		// 		}
 				
-				String val2=vals[1];
+		// 		String val2=vals[1];
 				
-				if(val2.contains("(")) {
-					val2=val2.substring(0,val2.indexOf("(")).trim();
-				}
+		// 		if(val2.contains("(")) {
+		// 			val2=val2.substring(0,val2.indexOf("(")).trim();
+		// 		}
 
 //				System.out.println(val1+"\t"+val2);
 				
-				er.property_value_min_original=Double.parseDouble(val1);
-				er.property_value_max_original=Double.parseDouble(val2);
+				// er.property_value_min_original=Double.parseDouble(val1);
+				// er.property_value_max_original=Double.parseDouble(val2);
 
 				
-			} else {
-				System.out.println("Only 1 value with to:"+LogKocWithStdDev);//Doesnt happen
-			}
-		} else {
-			String val=LogKocWithStdDev;
-			if(val.contains("(")) {
-				val=val.substring(0,val.indexOf("(")).trim();
-			}
-			er.property_value_point_estimate_original=Double.parseDouble(val);
+			// } else {
+			// 	System.out.println("Only 1 value with to:"+LogKocWithStdDev);//Doesnt happen
+			// }
+		// } else {
+		// 	String val=LogKocWithStdDev;
+		// 	if(val.contains("(")) {
+		// 		val=val.substring(0,val.indexOf("(")).trim();
+		// 	}
+		// 	er.property_value_point_estimate_original=Double.parseDouble(val);
 //			System.out.println(LogKocWithStdDev+"\t"+er.property_value_point_estimate_original);
-		}
+		// }
 		
 		
 		if(!this.Isomer.equals("Not available")) {		
@@ -288,9 +472,239 @@ public class RecordITRC {
 		}
 		
 //		er.experimental_parameters.put("% organic carbon", this.foc);
-		uc.convertRecord(er);
+		// uc.convertRecord(er);
 		
 		return er;
+	}
+
+	public List<ExperimentalRecord> toExperimentalRecordsKoc() {
+		List<ExperimentalRecord> records = new ArrayList<>();
+		
+		for (RecordKOC recordKOC : RecordsKOC) {
+			String logKocValue = recordKOC.LogKocWithStdDev;
+			
+			ExperimentalRecord er = new ExperimentalRecord();
+			
+			er.chemical_name = PFAS_Name.trim();
+			er.synonyms = Acronym;
+			
+			er.property_name = ExperimentalConstants.strKOC;
+			er.property_value_units_original = ExperimentalConstants.str_LOG_L_KG;
+			er.property_value_string = logKocValue;
+			
+			// Apply string replacements
+			logKocValue = logKocValue.replace("2.1 4 (", "2.14 (");
+			logKocValue = logKocValue.replace("1.1-2.1", "1.1 to 2.1");
+			logKocValue = logKocValue.replace("2.4-2.6", "2.4 to 2.6");
+			logKocValue = logKocValue.replace("4.3-6.0", "4.3 to 6.0");
+			logKocValue = logKocValue.replace("2.34-2.83", "2.34 to 2.83");
+			
+			// Parse range or point estimate
+			if (logKocValue.contains("to")) {
+				String[] vals = logKocValue.split(" to ");
+				if (vals.length == 2) {
+					String val1 = vals[0];
+					if (val1.contains("(")) {
+						val1 = val1.substring(0, val1.indexOf("(")).trim();
+					}
+					String val2 = vals[1];
+					if (val2.contains("(")) {
+						val2 = val2.substring(0, val2.indexOf("(")).trim();
+					}
+					er.property_value_min_original = Double.parseDouble(val1);
+					er.property_value_max_original = Double.parseDouble(val2);
+				}
+			} else {
+				String val = logKocValue;
+				if (val.contains("(")) {
+					val = val.substring(0, val.indexOf("(")).trim();
+				}
+				er.property_value_point_estimate_original = Double.parseDouble(val);
+			}
+			
+			// Add experimental parameters and metadata
+			if (Isomer != null && !Isomer.equals("Not available")) {
+				er.updateNote("Isomer=" + Isomer);
+			}
+			
+			er.experimental_parameters = new TreeMap<>();
+			if (Testing_Conditions != null && !Testing_Conditions.equals("NA") && !Testing_Conditions.equals("NR")) {
+				er.experimental_parameters.put("Testing_Conditions", Testing_Conditions);
+			}
+			if (Applicable_Matrices != null && !Applicable_Matrices.equals("--") && !Applicable_Matrices.equals("NR")) {
+				er.experimental_parameters.put("Media", Applicable_Matrices);
+			}
+			
+			LiteratureSource ls = new LiteratureSource();
+			ls.citation = Reference_Citation;
+			ls.name = Reference_Label;
+			er.literatureSource = ls;
+			
+			PublicSource ps = new PublicSource();
+			ps.name = sourceName;
+			ps.url = "https://pfas-1.itrcweb.org/external-data-tables/";
+			er.publicSource = ps;
+			
+			er.source_name = sourceName;
+			
+			if (Type != null && Type.contains("F")) {
+				er.keep = false;
+				er.reason = "Field measurement";
+			}
+			if (Type != null && Type.contains("M")) {
+				er.keep = false;
+				er.reason = "Modeled";
+			}
+			
+			uc.convertRecord(er);
+			records.add(er);
+		}
+		
+		return records;
+	}
+
+	public List<ExperimentalRecord> toExperimentalRecordsBio(String valueType) {
+		List<ExperimentalRecord> records = new ArrayList<>();
+		
+		if (RecordsBio == null) return records;
+		
+		for (RecordBio recordBio : RecordsBio) {
+			// Create record for the specified property type if value exists
+			if ("BCF".equals(valueType) && recordBio.BCF != null && !recordBio.BCF.isBlank()) {
+				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BCF");
+				records.add(er);
+			}
+			
+			// Create record for BAF if value exists
+			if ("BAF".equals(valueType) && recordBio.BAF != null && !recordBio.BAF.isBlank()) {
+				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BAF");
+				records.add(er);
+			}
+		}
+		
+		return records;
+	}
+
+	private ExperimentalRecord createExperimentalRecordFromBio(RecordITRC parentRecord, RecordBio recordBio, String propertyType) {
+		ExperimentalRecord er = new ExperimentalRecord();
+		
+		// Use chemical identifying information from parent RecordITRC
+		er.chemical_name = parentRecord.PFAS_Name;
+		er.synonyms = parentRecord.Acronym;
+		er.casrn = parentRecord.CAS;
+		
+		// Set property based on type (BCF or BAF)
+		if ("BCF".equals(propertyType)) {
+			er.property_name = ExperimentalConstants.strBCF;
+			
+			// Parse BCF value
+			parsePropertyValue(er, recordBio.BCF, recordBio.BCF_Min, recordBio.BCF_Max);
+			
+		} else if ("BAF".equals(propertyType)) {
+			er.property_name = ExperimentalConstants.strBAF;
+			
+			// Parse BAF value
+			parsePropertyValue(er, recordBio.BAF, recordBio.BAF_Min, recordBio.BAF_Max);
+		}
+		
+		// Set experimental parameters from RecordBio
+		er.experimental_parameters = new TreeMap<>();
+		if (recordBio.Lab_Field_Model_Study != null) {
+			er.experimental_parameters.put("Study Type", recordBio.Lab_Field_Model_Study);
+		}
+		if (recordBio.Location != null) {
+			er.experimental_parameters.put("Location", recordBio.Location);
+		}
+		if (recordBio.Freshwater_Marine_Estuary != null) {
+			er.experimental_parameters.put("Environment Type", recordBio.Freshwater_Marine_Estuary);
+		}
+		if (recordBio.Organism_Common_Name != null) {
+			er.experimental_parameters.put("Organism Common Name", recordBio.Organism_Common_Name);
+		}
+		if (recordBio.Organism_Scientific_Name != null) {
+			er.experimental_parameters.put("Organism Scientific Name", recordBio.Organism_Scientific_Name);
+		}
+		if (recordBio.Tissue_Type != null) {
+			er.experimental_parameters.put("Tissue Type", recordBio.Tissue_Type);
+		}
+		if (recordBio.Wet_Dry_Lipid_Basis != null) {
+			er.experimental_parameters.put("Basis", recordBio.Wet_Dry_Lipid_Basis);
+		}
+		if (recordBio.Reviewer_Notes != null) {
+			er.experimental_parameters.put("Reviewer Notes", recordBio.Reviewer_Notes);
+		}
+		if (recordBio.Waterbody_Description != null) {
+			er.experimental_parameters.put("Waterbody Description", recordBio.Waterbody_Description);
+		}
+		
+		// Set source information from parent RecordITRC
+		LiteratureSource ls = new LiteratureSource();
+		ls.citation = parentRecord.Reference_Label;
+		ls.name = parentRecord.Reference_Label;
+		er.literatureSource = ls;
+		
+		PublicSource ps = new PublicSource();
+		ps.name = sourceName;
+		ps.url = "https://pfas-1.itrcweb.org/external-data-tables/";
+		er.publicSource = ps;
+		
+		er.source_name = sourceName;
+		
+		// Filter out records with data from undesired types of sources
+		// if (recordBio.Lab_Field_Model_Study != null && recordBio.Lab_Field_Model_Study.contains("Field")) {
+		// 	er.keep = false;
+		// 	er.reason = "Field measurement";
+		// }
+		if (recordBio.Lab_Field_Model_Study != null && recordBio.Lab_Field_Model_Study.contains("Model")) {
+			er.keep = false;
+			er.reason = "Modeled data";
+		}
+		
+		return er;
+	}
+
+	private void parsePropertyValue(ExperimentalRecord er, String mainValue, String minValue, String maxValue) {
+		try {
+			er.property_value_string = "";
+
+			// Parse min if exists
+			if (minValue != null && !minValue.isBlank()) {
+				double val = Double.parseDouble(minValue.trim());
+				er.property_value_min_original = val;
+				er.property_value_min_final = val;
+				er.property_value_string += val + " <";
+			}
+
+			// Try to parse main value
+			if (mainValue != null && !mainValue.isBlank()) {
+				double val = Double.parseDouble(mainValue.trim());
+				er.property_value_point_estimate_original = val;
+				if (minValue != null && !minValue.isBlank()) {
+					er.property_value_string += " ";
+				}
+				er.property_value_point_estimate_final = val;
+				er.property_value_string += val;
+			}
+			
+			// Parse max if exists
+			if (maxValue != null && !maxValue.isBlank()) {
+				double val = Double.parseDouble(maxValue.trim());
+				er.property_value_max_original = val;
+				if (mainValue != null && !mainValue.isBlank()) {
+					er.property_value_string += " ";
+				}
+				er.property_value_max_final = val;
+				er.property_value_string += "< " + val;
+			}
+
+			er.property_value_units_original = ExperimentalConstants.str_L_KG;
+			er.property_value_units_final = ExperimentalConstants.str_L_KG;
+
+
+		} catch (NumberFormatException e) {
+			// If numeric parsing fails, keep string representation
+			System.out.println("Could not parse numeric value from: " + mainValue + ", " + minValue + ", " + maxValue);
+		}
 	}
 
 }
