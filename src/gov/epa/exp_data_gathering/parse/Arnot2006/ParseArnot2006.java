@@ -42,7 +42,7 @@ public class ParseArnot2006 extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			Vector<JsonObject> records = RecordArnot2006.parseRecordsFromExcel();
 			System.out.println(records.size());

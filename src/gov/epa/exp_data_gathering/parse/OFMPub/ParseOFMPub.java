@@ -26,7 +26,7 @@ public class ParseOFMPub extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordOFMPub> records = RecordOFMPub.parseWebpagesInDatabase();
 		writeOriginalRecordsToFile(records);
 	}

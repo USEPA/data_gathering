@@ -36,7 +36,7 @@ public class ParseNICEATMOld extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordNICEATMOld.parseNICEATMRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

@@ -22,7 +22,7 @@ public class ParseSampleSource extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordSampleSource.parseSampleSourceRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

@@ -29,7 +29,7 @@ public class ParseCFSAN extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordCFSAN.parseCFSANRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

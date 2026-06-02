@@ -26,7 +26,7 @@ public class ParseQSARDB extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordQSARDB> records = RecordQSARDB.parseQSARDBRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

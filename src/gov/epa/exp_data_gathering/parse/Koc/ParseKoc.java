@@ -34,7 +34,7 @@ public class ParseKoc extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 
 		if (generateOriginalJSONRecords) {
 			System.out.println("Getting original records from excel spreadsheet of multiple literature sources");

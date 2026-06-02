@@ -27,7 +27,7 @@ public class ParseAADashboard extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
     	Vector<RecordAADashboard> records = RecordAADashboard.databaseReader("AA dashboard.db", RecordAADashboard.sourceName);
 		writeOriginalRecordsToFile(records);
 	}

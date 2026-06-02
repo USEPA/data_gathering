@@ -30,7 +30,7 @@ public class ParseICF extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordICF.parseICFRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

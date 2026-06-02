@@ -40,7 +40,7 @@ public class ParseChemicalBook extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordChemicalBook> records = RecordChemicalBook.parseWebpagesInDatabase();
 		writeOriginalRecordsToFile(records);
 	}

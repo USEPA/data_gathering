@@ -38,7 +38,7 @@ public class ParseEpisuiteOriginal extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordEpisuiteOriginal> records = RecordEpisuiteOriginal.recordWaterFragmentData();
 		writeOriginalRecordsToFile(records);
 	}

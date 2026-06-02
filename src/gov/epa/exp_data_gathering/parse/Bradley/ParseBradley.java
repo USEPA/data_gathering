@@ -30,7 +30,7 @@ public class ParseBradley extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordBradley.parseBradleyRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

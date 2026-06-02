@@ -41,7 +41,7 @@ public class ParseOECD_Toolbox_SkinIrrit extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		String folder="Data\\experimental\\"+sourceName+"\\";
 		// String filename="Data matrix_1_8_19__15_52_25.xlsx";
 		String filename="Data matrix Skin Irritation.xlsx";

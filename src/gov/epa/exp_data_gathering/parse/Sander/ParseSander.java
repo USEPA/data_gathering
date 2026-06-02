@@ -23,7 +23,7 @@ public class ParseSander extends Parse {
 		this.init();
 	}
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 
 		if(generateOriginalJSONRecords) {
 			Vector<RecordSander> records = RecordSander.parseWebpagesInDatabase();

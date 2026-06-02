@@ -31,7 +31,7 @@ public class ParseLookChem extends Parse {
 	 * Parses HTML entries, either in zip folder or database, to RecordLookChem objects, then saves them to a JSON file
 	 */
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		// Vector<RecordLookChem> records = RecordLookChem.parseWebpagesInZipFile();
 		Vector<RecordLookChem> records = new Vector<RecordLookChem>();
 		for (String v:versions) {

@@ -21,7 +21,7 @@ public class ParseRIFM extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordRIFM.parseRIFMRecordsFromExcel();
 		
 		for(JsonObject record:records) {

@@ -52,7 +52,7 @@ public class ParseChemidplus extends Parse {
 	 * Parses HTML entries, either in zip folder or database, to RecordChemidplus objects, then saves them to a JSON file
 	 */
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		String databasePath = databaseFolder+File.separator+sourceName+"_raw_html.db";		
 
 		if(generateOriginalJSONRecords) {

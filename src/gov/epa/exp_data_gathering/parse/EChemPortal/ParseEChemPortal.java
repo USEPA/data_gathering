@@ -65,7 +65,7 @@ public class ParseEChemPortal extends Parse {
 	
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			
 			Vector<RecordEChemPortal> records=null;

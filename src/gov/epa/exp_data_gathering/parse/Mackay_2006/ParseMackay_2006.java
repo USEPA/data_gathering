@@ -21,7 +21,7 @@ public class ParseMackay_2006 extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		
 		if(generateOriginalJSONRecords) {
 			//done with python

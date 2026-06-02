@@ -42,7 +42,7 @@ public class ParseITRC extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			RecordITRC ri=new RecordITRC();
 			List<RecordITRC> records = null;

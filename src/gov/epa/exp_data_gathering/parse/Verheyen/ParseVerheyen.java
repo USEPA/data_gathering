@@ -32,7 +32,7 @@ public class ParseVerheyen extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordVerheyen.parseVerheyenRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

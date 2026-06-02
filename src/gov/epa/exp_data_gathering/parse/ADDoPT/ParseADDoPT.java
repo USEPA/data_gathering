@@ -27,7 +27,7 @@ public class ParseADDoPT extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordADDoPT.parseADDoPTRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

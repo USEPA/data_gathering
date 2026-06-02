@@ -17,7 +17,7 @@ public class ParsePesticidePropertyDB extends Parse {
 		this.init();
 	}
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 
 		if(generateOriginalJSONRecords) {
 			List<RecordPesticidePropertyDB> records = RecordPesticidePropertyDB.parseChemicalTextFile();

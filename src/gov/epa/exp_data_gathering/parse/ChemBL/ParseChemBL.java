@@ -24,7 +24,7 @@ public class ParseChemBL extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordChemBL> records = RecordChemBL.parseJSONsInDatabase();
 		writeOriginalRecordsToFile(records);
 	}
