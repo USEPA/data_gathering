@@ -251,9 +251,13 @@ public class RecordEChemPortal {
 						recordDegradation.parameter = parameterValue.replace('\u00A0',' ');;
 						rec.recordsDegradation.add(recordDegradation);
 					} else if (parameterName.equals("% Degradation, Value")) {
+						recordDegradation = new RecordDegradation();
 						recordDegradation.degradationValue = parameterValue;
+						rec.recordsDegradation.add(recordDegradation);
 					} else if (parameterName.equals("% Degradation, Sampling time")) {
+						recordDegradation = new RecordDegradation();
 						recordDegradation.samplingTime = parameterValue;
+						rec.recordsDegradation.add(recordDegradation);
 					} else if (parameterName.equals("Interpretation of results")) {
 
 						// if (vals.length == 3) {
@@ -377,7 +381,9 @@ public class RecordEChemPortal {
 						recordKoc.type=parameterValue;
 						rec.recordsKoc.add(recordKoc);
 					} else if (parameterName.equals("Adsorption coefficient, Value")) {
+						recordKoc = new RecordKoc();
 						recordKoc.value=parameterValue;
+						rec.recordsKoc.add(recordKoc);
 					} else {
 						System.out.println(rec.number + "\t" + parameterName + "\t" + parameterValue);
 					}
