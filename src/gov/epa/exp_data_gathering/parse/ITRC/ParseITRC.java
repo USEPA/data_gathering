@@ -1,14 +1,19 @@
 package gov.epa.exp_data_gathering.parse.ITRC;
 
 
+import java.io.FileReader;
+import java.lang.reflect.Type;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import gov.epa.api.ExperimentalConstants;
+import com.google.gson.reflect.TypeToken;
+
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
+import gov.epa.exp_data_gathering.parse.ITRC.RecordITRC.RecordBio.Species;
 
 /**
 * @author TMARTI02
@@ -71,6 +76,9 @@ public class ParseITRC extends Parse {
 //			System.out.println(recordsDB.size());
 			
 			Iterator<RecordITRC> it = recordsDB.iterator();
+
+			Type type = new TypeToken<Hashtable<String, List<RecordITRC.RecordBio.Species>>>(){}.getType();
+			Hashtable<String, List<Species>>htSpecies=JsonUtilities.gsonPretty.fromJson(new FileReader("data\\experimental\\Arnot 2006\\htSuperCategory.json"), type);
 			while (it.hasNext()) {
 				RecordITRC r = it.next();
 				
@@ -82,7 +90,7 @@ public class ParseITRC extends Parse {
 				
 				// Handle BAF/BCF records
 				if(r.RecordsBio != null && r.RecordsBio.size() > 0) {
-					List<ExperimentalRecord> bafRecords = r.toExperimentalRecordsBio(valueType);
+					List<ExperimentalRecord> bafRecords = r.toExperimentalRecordsBio(valueType, htSpecies);
 					recordsExperimental.addAll(bafRecords);
 				}
 			}

@@ -2,11 +2,17 @@ package gov.epa.exp_data_gathering.parse.ITRC;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
@@ -24,6 +30,7 @@ import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
+import gov.epa.exp_data_gathering.parse.ITRC.RecordITRC.RecordBio.Species;
 
 /**
 * @author TMARTI02
@@ -78,6 +85,159 @@ public class RecordITRC {
 		String Freshwater_Marine_Estuary;
 		String Waterbody_Description;
 		String Reviewer_Notes;
+		String Reference_Label;
+		String Reference_Citation;
+		String Reference_Url;
+		String Reference_Doi;
+		String Reference_Author;
+		String Reference_Journal;
+		String Reference_Title;
+		String Reference_Year;
+
+		static class Species {
+			Integer id;
+			String species_common;
+			String species_scientific;
+			String species_supercategory;
+			String habitat;
+		}
+
+		private String getSpeciesSupercategory(Hashtable<String, List<Species>> htSpecies) {
+
+			if(Organism_Common_Name!=null && htSpecies.containsKey(Organism_Common_Name.toLowerCase())) {
+				
+					List<Species>speciesList=htSpecies.get(Organism_Common_Name.toLowerCase());
+
+					for(Species species:speciesList) {
+
+
+						//				if(species.species_scientific!=null) {
+						//					if (!species.species_scientific.toLowerCase().equals(this.scientific_name.toLowerCase())) {
+						//						System.out.println(this.scientific_name+"\t"+species.species_scientific+"\tmismatch");
+						//					}
+						//				} else {
+						////					System.out.println(Organism_Common_Name+"\tspecies has null scientific");
+						//				}
+
+						if(species.species_supercategory.contains("fish")) {
+							return "Fish";
+						} else if(species.species_supercategory.contains("algae")) {
+							return "Algae";
+						} else if(species.species_supercategory.contains("crustaceans")) {
+							return "Crustaceans";
+						} else if(species.species_supercategory.contains("insects/spiders")) {
+							return "Insects/spiders";
+						} else if(species.species_supercategory.contains("molluscs")) {
+							return "Molluscs";
+						} else if(species.species_supercategory.contains("worms")) {
+							return "Worms";
+						} else if(species.species_supercategory.contains("invertebrates")) {
+							return "Invertebrates";
+						} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+							return "Flowers, trees, shrubs, ferns";
+						} else if(species.species_supercategory.contains("microorganisms")) {
+							return "Microorganisms";
+						} else if(species.species_supercategory.contains("amphibians")) {
+							return "Amphibians";
+						} else if(species.species_supercategory.equals("omit")) {
+							return "Omit";
+						}
+					}
+	//		}
+				} else if(htSpecies.containsKey(Organism_Scientific_Name.toLowerCase())) {
+
+					List<Species>speciesList=htSpecies.get(Organism_Scientific_Name.toLowerCase());
+
+					for(Species species:speciesList) {
+
+
+						//				if(species.species_scientific!=null) {
+						//					if (!species.species_scientific.toLowerCase().equals(this.scientific_name.toLowerCase())) {
+						//						System.out.println(this.scientific_name+"\t"+species.species_scientific+"\tmismatch");
+						//					}
+						//				} else {
+						////					System.out.println(common_name+"\tspecies has null scientific");
+						//				}
+
+						if(species.species_supercategory.contains("fish")) {
+							return "Fish";
+						} else if(species.species_supercategory.contains("algae")) {
+							return "Algae";
+						} else if(species.species_supercategory.contains("crustaceans")) {
+							return "Crustaceans";
+						} else if(species.species_supercategory.contains("insects/spiders")) {
+							return "Insects/spiders";
+						} else if(species.species_supercategory.contains("molluscs")) {
+							return "Molluscs";
+						} else if(species.species_supercategory.contains("worms")) {
+							return "Worms";
+						} else if(species.species_supercategory.contains("invertebrates")) {
+							return "Invertebrates";
+						} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+							return "Flowers, trees, shrubs, ferns";
+						} else if(species.species_supercategory.contains("microorganisms")) {
+							return "microorganisms";
+						} else if(species.species_supercategory.contains("amphibians")) {
+							return "amphibians";
+						} else if(species.species_supercategory.equals("reptiles")) {
+							return "reptiles";
+						}else if(species.species_supercategory.equals("omit")) {
+							return "omit";
+						} else {
+							System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
+						}
+					}
+				} else {
+					System.out.println("missing in hashtable:\t"+"*"+Organism_Scientific_Name.toLowerCase()+"*");
+				}
+	//		}
+		return null;
+		}
+
+		/**
+		 * this works for prod_dsstox- not v93 version since species table is different
+		 * 
+		 * @param tvq
+		 * @return
+		 */
+		public static Hashtable<String, List<Species>> createSupercategoryHashtable(Connection conn) {
+			Hashtable<String,List<Species>>htSpecies=new Hashtable<>();
+
+			String sql="select species_id, species_common, species_scientific, species_supercategory, habitat from species";
+
+			try {
+
+				Statement st = conn.createStatement();			
+				ResultSet rs = st.executeQuery(sql);
+
+				while (rs.next()) {
+
+					Species species=new Species();
+
+					species.id=rs.getInt(1);
+					species.species_common=rs.getString(2);
+					species.species_scientific=rs.getString(3);
+					species.species_supercategory=rs.getString(4);
+					species.habitat=rs.getString(5);
+
+					if(htSpecies.get(species.species_common)==null) {
+						List<Species>speciesList=new ArrayList<>();
+						speciesList.add(species);
+						htSpecies.put(species.species_common, speciesList);
+					} else {
+						List<Species>speciesList=htSpecies.get(species.species_common);
+						speciesList.add(species);
+					}
+				}
+
+
+				//			System.out.println(sql);
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			return htSpecies;
+		}
 	}
 
 	Hashtable<Integer, String> getCitations(Sheet sheetReferences) {
@@ -98,6 +258,26 @@ public class RecordITRC {
 		}
 		return ht;
 	}
+
+	Hashtable<String, Integer> getCitationsBio(Sheet sheetReferences) {
+		
+		Hashtable<String,Integer>ht=new Hashtable<>();
+		
+		for (int rowNum=6;rowNum<=170;rowNum++) {
+			Row row=sheetReferences.getRow(rowNum);
+			// Integer citationNumber=(int) row.getCell(0).getNumericCellValue();
+			String citationName = row.getCell(0).getStringCellValue();
+
+			ht.put(citationName, rowNum);
+			
+//			if(citationTag.equals("Munoz, Budzinski, and Labadie, 2017")) System.out.println(richCitation);
+
+			
+//			System.out.println(citationTag);
+		}
+		return ht;
+	}
+
 	public List<RecordITRC> parseExcelFile(String filename) {
 		
 		List<RecordITRC>recs=new ArrayList<>();
@@ -209,6 +389,20 @@ public class RecordITRC {
 				String colName = headerRow.getCell(i).getStringCellValue();
 				htCols.put(colName, i);
 			}
+
+			// Handle reference information
+			Sheet sheetRef = wb.getSheet("BCF-BAF Log");
+
+			// Build hashtable to map column headers for references
+			Row headerRowRefs = sheetRef.getRow(5);
+			Hashtable<String, Integer> htColsRefs = new Hashtable<>();
+			for (int i = 0; i < headerRowRefs.getLastCellNum(); i++) {
+				String colName = headerRowRefs.getCell(i).getStringCellValue();
+				htColsRefs.put(colName, i);
+			}
+
+			// TODO: Finish implementation of reference information, need to use ref number column
+			Hashtable<String,Integer>htRefsRows=getCitationsBio(sheetRef);
 			
 			// Use HashMap to group RecordBio by unique PFAS_Name (chemical identifier)
 			java.util.HashMap<String, RecordITRC> chemicalMap = new java.util.HashMap<>();
@@ -231,7 +425,8 @@ public class RecordITRC {
 					rec = new RecordITRC();
 					rec.PFAS_Name = pfasName;
 					rec.Acronym = acronym;
-					rec.CAS = getCellStringValue(row, htCols.get("CAS No."));
+					String temp = getCellStringValue(row, htCols.get("CAS No."));
+					rec.CAS = (!temp.equals("0")) ? temp : null;
 					// Populate other chemical-level fields that don't vary by row
 					// rec.Isomer = getCellStringValue(row, htCols.get("Isomer"));
 					// rec.Type = getCellStringValue(row, htCols.get("Type"));
@@ -252,7 +447,15 @@ public class RecordITRC {
 				recordBio.BAF = getCellStringValue(row, htCols.get("BAF"));
 				recordBio.BAF_Min = getCellStringValue(row, htCols.get("BAF Min"));
 				recordBio.BAF_Max = getCellStringValue(row, htCols.get("BAF Max"));
-				populateBioMetadata(recordBio, row, htCols);
+
+				// Handle metadata
+				if (rec.Reference_Label != null && !rec.Reference_Label.isEmpty()) {
+					Row rowRef = sheetRef.getRow(htRefsRows.get(rec.Reference_Label));
+					populateBioMetadata(recordBio, row, htCols, rowRef, htColsRefs);
+				} else {
+					populateBioMetadata(recordBio, row, htCols);
+				}
+				
 				rec.RecordsBio.add(recordBio);
 				
 				// Create RecordBio for BCF if value exists
@@ -334,6 +537,40 @@ public class RecordITRC {
 		bioRecord.Freshwater_Marine_Estuary = getCellStringValue(row, htCols.get("Freshwater/marine/estuarine"));
 		bioRecord.Waterbody_Description = getCellStringValue(row, htCols.get("Waterbody Description"));
 		bioRecord.Reviewer_Notes = getCellStringValue(row, htCols.get("Reviewer Notes"));
+	}
+
+	private void populateBioMetadata(RecordBio bioRecord, Row row, Hashtable<String, Integer> htCols, Row rowRef, Hashtable<String, Integer> htColsRefs) {
+		// Handle metadata from main sheet
+		bioRecord.Organism_Common_Name = getCellStringValue(row, htCols.get("Organism Common Name"));
+		bioRecord.Organism_Scientific_Name = getCellStringValue(row, htCols.get("Scientific Name"));
+		bioRecord.Tissue_Type = getCellStringValue(row, htCols.get("Tissue Type (valid values)"));
+		bioRecord.Wet_Dry_Lipid_Basis = getCellStringValue(row, htCols.get("Wet/Dry/Lipid Basis"));
+		bioRecord.Lab_Field_Model_Study = getCellStringValue(row, htCols.get("Lab or Field or Model Study"));
+		bioRecord.Location = getCellStringValue(row, htCols.get("Location"));
+		bioRecord.Freshwater_Marine_Estuary = getCellStringValue(row, htCols.get("Freshwater/marine/estuarine"));
+		bioRecord.Waterbody_Description = getCellStringValue(row, htCols.get("Waterbody Description"));
+		bioRecord.Reviewer_Notes = getCellStringValue(row, htCols.get("Reviewer Notes"));
+
+		// Handle citation metadata from log sheet
+		bioRecord.Reference_Label = getCellStringValue(rowRef, htColsRefs.get("Reference")).trim();
+		bioRecord.Reference_Title = getCellStringValue(rowRef, htColsRefs.get("Title")).trim();
+		bioRecord.Reference_Journal = getCellStringValue(rowRef, htColsRefs.get("Journal")).trim();
+		bioRecord.Reference_Url = getCellStringValue(rowRef, htColsRefs.get("URL")).trim();
+
+		Pattern doiPattern = Pattern.compile("\\b10\\.\\d{4,9}/[-._;()/:A-Z0-9]+", Pattern.CASE_INSENSITIVE);
+		Matcher doiMatcher = doiPattern.matcher(bioRecord.Reference_Url);
+		if (doiMatcher.find()) {
+			bioRecord.Reference_Doi = doiMatcher.group(); // Regex match for DOI within the Reference URL
+		}
+
+		Pattern yearPattern = Pattern.compile("\\d{4}\\w?");
+		Matcher yearMatcher = yearPattern.matcher(bioRecord.Reference_Label);
+		if (yearMatcher.find()) {
+			bioRecord.Reference_Year = yearMatcher.group();
+			bioRecord.Reference_Author = bioRecord.Reference_Label.substring(0, bioRecord.Reference_Label.indexOf(yearMatcher.group())).trim();
+		}
+
+		bioRecord.Reference_Citation = bioRecord.Reference_Author + ", " + bioRecord.Reference_Year + ". " + bioRecord.Reference_Title + ". " + bioRecord.Reference_Journal + ". " + bioRecord.Reference_Url;
 	}
 	
 
@@ -563,7 +800,7 @@ public class RecordITRC {
 		return records;
 	}
 
-	public List<ExperimentalRecord> toExperimentalRecordsBio(String valueType) {
+	public List<ExperimentalRecord> toExperimentalRecordsBio(String valueType, Hashtable<String, List<Species>> htSpecies) {
 		List<ExperimentalRecord> records = new ArrayList<>();
 		
 		if (RecordsBio == null) return records;
@@ -571,13 +808,13 @@ public class RecordITRC {
 		for (RecordBio recordBio : RecordsBio) {
 			// Create record for the specified property type if value exists
 			if ("BCF".equals(valueType) && recordBio.BCF != null && !recordBio.BCF.isBlank()) {
-				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BCF");
+				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BCF", htSpecies);
 				records.add(er);
 			}
 			
 			// Create record for BAF if value exists
 			if ("BAF".equals(valueType) && recordBio.BAF != null && !recordBio.BAF.isBlank()) {
-				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BAF");
+				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BAF", htSpecies);
 				records.add(er);
 			}
 		}
@@ -585,13 +822,16 @@ public class RecordITRC {
 		return records;
 	}
 
-	private ExperimentalRecord createExperimentalRecordFromBio(RecordITRC parentRecord, RecordBio recordBio, String propertyType) {
+	private ExperimentalRecord createExperimentalRecordFromBio(RecordITRC parentRecord, RecordBio recordBio, String propertyType, Hashtable<String, List<Species>> htSpecies) {
 		ExperimentalRecord er = new ExperimentalRecord();
 		
 		// Use chemical identifying information from parent RecordITRC
 		er.chemical_name = parentRecord.PFAS_Name;
 		er.synonyms = parentRecord.Acronym;
 		er.casrn = parentRecord.CAS;
+		if (parentRecord.CAS == null) {
+			er.updateNote("CASRN set to null since original value was 0");
+		}
 		
 		// Set property based on type (BCF or BAF)
 		if ("BCF".equals(propertyType)) {
@@ -618,11 +858,14 @@ public class RecordITRC {
 		if (recordBio.Freshwater_Marine_Estuary != null) {
 			er.experimental_parameters.put("Environment Type", recordBio.Freshwater_Marine_Estuary);
 		}
-		if (recordBio.Organism_Common_Name != null) {
-			er.experimental_parameters.put("Organism Common Name", recordBio.Organism_Common_Name);
-		}
-		if (recordBio.Organism_Scientific_Name != null) {
-			er.experimental_parameters.put("Organism Scientific Name", recordBio.Organism_Scientific_Name);
+		if (recordBio.Organism_Common_Name != null || recordBio.Organism_Scientific_Name != null) {
+			er.experimental_parameters.put("Species Supercategory", recordBio.getSpeciesSupercategory(htSpecies));
+			if (recordBio.Organism_Common_Name != null) {
+				er.experimental_parameters.put("Organism Common Name", recordBio.Organism_Common_Name);
+			}
+			if (recordBio.Organism_Scientific_Name != null) {
+				er.experimental_parameters.put("Organism Scientific Name", recordBio.Organism_Scientific_Name);
+			}
 		}
 		if (recordBio.Tissue_Type != null) {
 			er.experimental_parameters.put("Tissue Type", recordBio.Tissue_Type);
@@ -631,7 +874,8 @@ public class RecordITRC {
 			er.experimental_parameters.put("Basis", recordBio.Wet_Dry_Lipid_Basis);
 		}
 		if (recordBio.Reviewer_Notes != null) {
-			er.experimental_parameters.put("Reviewer Notes", recordBio.Reviewer_Notes);
+			// er.experimental_parameters.put("Reviewer Notes", recordBio.Reviewer_Notes);
+			er.updateNote(recordBio.Reviewer_Notes);
 		}
 		if (recordBio.Waterbody_Description != null) {
 			er.experimental_parameters.put("Waterbody Description", recordBio.Waterbody_Description);
@@ -639,13 +883,20 @@ public class RecordITRC {
 		
 		// Set source information from parent RecordITRC
 		LiteratureSource ls = new LiteratureSource();
-		ls.citation = parentRecord.Reference_Label;
-		ls.name = parentRecord.Reference_Label;
+		ls.citation = recordBio.Reference_Citation;
+		ls.name = recordBio.Reference_Label;
+		ls.url = recordBio.Reference_Url;
+		ls.doi = recordBio.Reference_Doi;
+		ls.author = recordBio.Reference_Author;
+		ls.journal = recordBio.Reference_Journal;
+		ls.title = recordBio.Reference_Title;
+		ls.year = recordBio.Reference_Year;
 		er.literatureSource = ls;
 		
 		PublicSource ps = new PublicSource();
 		ps.name = sourceName;
 		ps.url = "https://pfas-1.itrcweb.org/external-data-tables/";
+		ps.description = "Bioconcentration and bioaccumulation factor data from ITRC data last updated in October 2021";
 		er.publicSource = ps;
 		
 		er.source_name = sourceName;
@@ -657,8 +908,13 @@ public class RecordITRC {
 		// }
 		if (recordBio.Lab_Field_Model_Study != null && recordBio.Lab_Field_Model_Study.contains("Model")) {
 			er.keep = false;
-			er.reason = "Modeled data";
+			er.updateReason("Modeled data");
 		}
+		if (recordBio.Wet_Dry_Lipid_Basis != null && !recordBio.Wet_Dry_Lipid_Basis.equals("Wet")) {
+			er.keep = false;
+			er.updateReason("Non-wet basis");
+		}
+
 		
 		return er;
 	}
@@ -666,35 +922,34 @@ public class RecordITRC {
 	private void parsePropertyValue(ExperimentalRecord er, String mainValue, String minValue, String maxValue) {
 		try {
 			er.property_value_string = "";
-
-			// Parse min if exists
-			if (minValue != null && !minValue.isBlank()) {
-				double val = Double.parseDouble(minValue.trim());
-				er.property_value_min_original = val;
-				er.property_value_min_final = val;
-				er.property_value_string += val + " <";
-			}
-
-			// Try to parse main value
-			if (mainValue != null && !mainValue.isBlank()) {
-				double val = Double.parseDouble(mainValue.trim());
-				er.property_value_point_estimate_original = val;
-				if (minValue != null && !minValue.isBlank()) {
-					er.property_value_string += " ";
-				}
-				er.property_value_point_estimate_final = val;
-				er.property_value_string += val;
-			}
 			
-			// Parse max if exists
-			if (maxValue != null && !maxValue.isBlank()) {
-				double val = Double.parseDouble(maxValue.trim());
-				er.property_value_max_original = val;
-				if (mainValue != null && !mainValue.isBlank()) {
-					er.property_value_string += " ";
+			Boolean hasMin = minValue != null && !minValue.isBlank();
+			Boolean hasMain = mainValue != null && !mainValue.isBlank();
+			Boolean hasMax = maxValue != null && !maxValue.isBlank();
+
+			// If min and max exist, use range (possibly dropping main)
+			if (hasMin && hasMax) {
+				double minVal = Double.parseDouble(minValue.trim());
+				double maxVal = Double.parseDouble(maxValue.trim());
+				er.property_value_string = minVal + " - " + maxVal;
+				er.property_value_min_original = minVal;
+				er.property_value_min_final = minVal;
+				er.property_value_max_original = maxVal;
+				er.property_value_max_final = maxVal;
+				if (hasMain) {
+					er.updateNote("Dropped point estimate value because min and max were provided");
 				}
-				er.property_value_max_final = val;
-				er.property_value_string += "< " + val;
+			} else if (hasMain) {
+				double mainVal = Double.parseDouble(mainValue.trim());
+				er.property_value_string = (String.valueOf(mainVal));
+				er.property_value_point_estimate_original = mainVal;
+				er.property_value_point_estimate_final = mainVal;
+				if (hasMax) {
+					er.updateNote("Dropped max value because point estimate was provided and no minimum was provided (and max is the log-value of the point estimate)");
+				}
+			} else {
+				er.keep = false;
+				er.updateReason("Invalid combination of data values");
 			}
 
 			er.property_value_units_original = ExperimentalConstants.str_L_KG;
