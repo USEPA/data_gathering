@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.poi.util.IOUtils;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
@@ -222,6 +223,13 @@ public class ParseEChemPortal extends Parse {
 				if (fileName.equals(filename301F)) {
 					ExperimentalRecords ers=r.toExperimentalRecordsWaterBiodegration();
 					recordsExperimental.addAll(ers);
+
+//					for (ExperimentalRecord er:ers) {
+//						if(er.casrn!=null && er.casrn.equals("112-38-9")) {
+//							System.out.println(JsonUtilities.gsonPretty.toJson(er));
+//						}			
+//					}
+				
 				} else if (fileName.equals(filenameKoc)) {
 					List<ExperimentalRecord>ers=r.toExperimentalRecordsKoc();
 					recordsExperimental.addAll(ers);
@@ -242,6 +250,12 @@ public class ParseEChemPortal extends Parse {
 		return recordsExperimental;
 	}
 	
+	
+	/**
+	 * Adds ExperimentalRecords
+	 * @param ecpr
+	 * @param records
+	 */
 	private void addExperimentalRecords(RecordEChemPortal ecpr,ExperimentalRecords records) {
 		
 		if (!ecpr.values.isEmpty()) {

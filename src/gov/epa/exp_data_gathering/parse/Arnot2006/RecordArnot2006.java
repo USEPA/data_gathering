@@ -275,6 +275,9 @@ public class RecordArnot2006 {
 		setExposureMedia(er);
 		setCriteria(er);
 		
+		er.experimental_parameters.put("Lipid content percentage", this.lipid_content_percentage);
+		
+		
 		if(!temperature_mean_C.equals("N/A")) er.temperature_C=Double.parseDouble(temperature_mean_C);
 		if(!ph_mean.equals("N/A")) er.pH=ph_mean;
 		

@@ -247,6 +247,17 @@ public class RecordBurkhard {
 		
 //		er.experimental_parameters.put("study quality",Study_Quality_BAF);
 		
+		
+		if(Log_BAF_mean!=null && Log_BAF_min!=null && Log_BAF_max!=null ) {
+			if(Log_BAF_mean.equals(Log_BAF_min) && Log_BAF_mean.equals(Log_BAF_max)) {
+				//Just use mean since all the same
+				Log_BAF_min=null;
+				Log_BAF_max=null;
+				System.out.println("Log_BAF_mean/min/max all match:"+this.Chemical);
+			}
+		}
+		
+		
 		try {
 			if(Log_BAF_mean!=null) {
 				Log_BAF_mean=Log_BAF_mean.replace("?", "--");
@@ -260,12 +271,12 @@ public class RecordBurkhard {
 						&& Log_BAF_arithmetic_or_logarithmic.toLowerCase().contains("arithmetic")) {
 					er.property_value_string = propertyValue2 + " " + Log_BAF_units;
 
-					er.property_value_max_original = Double.parseDouble(Log_BAF_min);
-					er.property_value_min_original = Double.parseDouble(Log_BAF_max);
+					er.property_value_min_original = Double.parseDouble(Log_BAF_min);
+					er.property_value_max_original = Double.parseDouble(Log_BAF_max);
 				} else {
-					er.property_value_max_original = Double.parseDouble(Log_BAF_min);
-					er.property_value_min_original = Double.parseDouble(Log_BAF_max);
-					er.property_value_string = propertyValue2 + "log10("+Log_BAF_units+")";
+					er.property_value_min_original = Double.parseDouble(Log_BAF_min);
+					er.property_value_max_original = Double.parseDouble(Log_BAF_max);
+					er.property_value_string = propertyValue2 + " log10("+Log_BAF_units+")";
 
 				}
 			} else if (Log_BAF_mean!=null && isNumeric(Log_BAF_mean) && Log_BAF_arithmetic_or_logarithmic!=null && Log_BAF_arithmetic_or_logarithmic.toLowerCase().contains("arithmetic")) {
