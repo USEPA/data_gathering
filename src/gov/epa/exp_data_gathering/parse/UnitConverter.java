@@ -495,11 +495,9 @@ public class UnitConverter {
 //		System.out.println("enter convert bcf");
 		
 		if (er.property_value_units_original.equals(ExperimentalConstants.str_L_KG)) {
-		
 			assignFinalFieldsWithoutConverting(er);
 			er.property_value_units_final = ExperimentalConstants.str_L_KG;
 		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_mL_kg)) {
-			
 			convertAndAssignFinalFields(er, 0.001);
 			er.property_value_units_final = ExperimentalConstants.str_L_KG;
 		
@@ -513,7 +511,6 @@ public class UnitConverter {
 		} else if (er.property_value_units_original.equals(ExperimentalConstants.str_LOG_L_KG)) {
 			powAndAssignFinalFields(er);
 			er.property_value_units_final = ExperimentalConstants.str_L_KG;
-
 		} else if(er.property_value_units_original.equals("RA") ||
 				er.property_value_units_original.equals("--") ||
 				er.property_value_units_original.equals("NA")||
@@ -523,7 +520,6 @@ public class UnitConverter {
 			er.keep = false;
 			er.reason="Uncertain units";			
 			assignFinalFieldsWithoutConverting(er);
-		
 		} else {			
 			er.property_value_units_final = er.property_value_units_original;
 			er.keep = false;
@@ -531,9 +527,6 @@ public class UnitConverter {
 			assignFinalFieldsWithoutConverting(er);
 //			System.out.println("convertBCF: Need to handle "+er.property_value_units_original);	
 		}
-		
-		
-		
 	}
 
 	private void convertCACO2(ExperimentalRecord er) {
