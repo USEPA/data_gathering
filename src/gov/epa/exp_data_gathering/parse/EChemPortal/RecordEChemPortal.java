@@ -713,6 +713,7 @@ public class RecordEChemPortal {
 
 		for (RecordDegradation recBio:this.recordsDegradation) {
 			ExperimentalRecord er = createExperimentalRecord();
+					
 			setSamplingTimeDays(recBio);
 			setBiodegradationParameters(er, recBio);
 			Estimate estimate=EstimateParser.parse(recBio.degradationValue);

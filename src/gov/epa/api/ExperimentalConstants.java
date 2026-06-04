@@ -2,6 +2,11 @@ package gov.epa.api;
 
 public class ExperimentalConstants {
 
+	
+	public static final String strMethodKinetic="kinetic";
+	public static final String strMethodSteadyState="steady state";
+	public static final String strMethodOther="other";
+	
 	//Add list of property names here:
 	public static final String strWaterSolubility="Water solubility";
 	public static final String strDMSOSolubility="DMSO solubility";

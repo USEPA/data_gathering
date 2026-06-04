@@ -595,7 +595,7 @@ public class CompareExperimentalRecords {
 		 */
 		private void compareBCF() {
 
-			printChemicalsInCommon=false;
+			printChemicalsInCommon=true;
 			
 			List<Source>sources1=new ArrayList<>();
 			List<Source>sources2=new ArrayList<>();
@@ -612,17 +612,27 @@ public class CompareExperimentalRecords {
 			
 //			sources2.add(new Source("ECOTOX_2023_12_14",propertyName));
 
-			sources1.add(new Source("Arnot 2006",propertyName));
+//			sources1.add(new Source("Arnot 2006",propertyName));
 //			sources1.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
 
-			sources2.add(new Source("Arnot 2006",propertyName));
-			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
-			sources2.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
-			sources2.add(new Source("Burkhard",propertyName));//only 37 new
+//			sources2.add(new Source("Arnot 2006",propertyName));
+//			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
+//			sources2.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
+//			sources2.add(new Source("Burkhard",propertyName));//only 37 new
 //			sources2.add(new Source("OPERA2.8",null));//only has CAS not SID
 
 //			sources2.add(new Source("QSAR_Toolbox","BCF CEFIC//"+propertyName));
-
+			
+			sources1.add(new Source("Arnot 2006",propertyName));
+			
+//			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+//			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+//			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			
+			
+//			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
+			
 			String units="L/kg";
 			cm.compare(sources1, sources2, propertyName, units,"cas");
 //			cm.compare(sources1, sources2, propertyName, units,"sid");
@@ -1173,7 +1183,8 @@ public class CompareExperimentalRecords {
 
 //			boolean printValues=false;
 
-			if(printChemicalsInCommon) System.out.println("\nLogType\tkey\tLog10median_1\tLog10median_2\tdiff");
+//			if(printChemicalsInCommon) System.out.println("\nLogType\tkey\tLog10median_1\tLog10median_2\tdiff");
+			if(printChemicalsInCommon) System.out.println("key\tLog10median_1\tLog10median_2\tdiff");
 
 			List<Double>vals1=new ArrayList<>();
 			List<Double>vals2=new ArrayList<>();
@@ -1195,7 +1206,8 @@ public class CompareExperimentalRecords {
 					vals2.add(recs2.medianValue);
 
 					if(printChemicalsInCommon) {
-						System.out.println("took log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+//						System.out.println("took log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+						System.out.println(key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
 					}
 
 					
@@ -1802,6 +1814,8 @@ public class CompareExperimentalRecords {
 		// TODO Auto-generated method stub
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
 
+		c.c.compareBCF();
+
 //		c.c.compareOralRat();
 
 //		c.c.lookAtLLNA_MixtureVsNonMixtureNIEHS_ICE();//only 8?
@@ -1811,8 +1825,8 @@ public class CompareExperimentalRecords {
 		// c.c.compareRBiodeg_DebugOriginal();
 		// c.c.analyzeRBiodeg_BadRecords();
 		// c.c.analyzeRBiodeg_KeepFlag();
-		c.c.compareRBiodegFull();
-		//		c.c.compareBCF();
+//		c.c.compareRBiodegFull();
+		
 //		c.c.compareKoc();
 //		c.c.compareAquaticTox();
 //		c.c.compareWS();

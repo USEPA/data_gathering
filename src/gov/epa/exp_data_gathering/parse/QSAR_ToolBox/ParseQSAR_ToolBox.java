@@ -2,16 +2,22 @@ package gov.epa.exp_data_gathering.parse.QSAR_ToolBox;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.poi.util.IOUtils;
+
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -23,7 +29,9 @@ import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.ExperimentalR
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
+import gov.epa.exp_data_gathering.parse.JsonFieldChecker;
 import gov.epa.exp_data_gathering.parse.Parse;
+import gov.epa.exp_data_gathering.parse.TsvToExcel;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox.Species;
 
 public class ParseQSAR_ToolBox extends Parse {
@@ -34,9 +42,17 @@ public class ParseQSAR_ToolBox extends Parse {
 	public static String fileNameAcuteToxicityEchaReach="echa reach acute toxicity by test material.xlsx";
 	public static String fileNameSensitizationEchaReach="echa reach sensitization by test material.xlsx";
 	public static String fileNameSensitization="skin sensitization.xlsx";
-	public static String fileNameBCFCanada="Bioaccumulation Canada.xlsx";
-	public static String fileNameBCFCEFIC="Bioaccumulation Fish CEFIC LRI.xlsx";
-	public static String fileNameBCFNITE="Bioconcentration and LogKow NITE v2.xlsx";
+	
+//	public static String fileNameBCFCanada="Bioaccumulation Canada.xlsx";
+//	public static String fileNameBCFCEFIC="Bioaccumulation Fish CEFIC LRI.xlsx";
+//	public static String fileNameBCFNITE="Bioconcentration and LogKow NITE v2.xlsx";
+
+	
+	public static String fileNameBCF_Canada="bioaccumulation canada v.4.8.2 2026-06-02.xlsx";
+	public static String fileNameBCF_CEFIC="bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.xlsx";
+	public static String fileNameBCF_NITE="Bioconcentration and logKow NITE v.4.8.2 2026-06-02.xlsx";
+	public static String fileNameBCF_ECHA_REACH="bcfbaf echa reach v.4.8.2 2026-06-02.xlsx";//TODO
+	
 	public static String fileName96hrAcuteAquatic="96 hour aquatic toxicity.xlsx";
 	public static String fileNamePhyschem="echa reach physchem properties.xlsx";
 	
@@ -47,7 +63,6 @@ public class ParseQSAR_ToolBox extends Parse {
 //	static String fileName=fileNameAcuteToxicityDB;
 //	static String fileName=fileNameSensitizationEchaReach;
 //	static public String fileName=fileNameSensitization;
-//	static String fileName=fileNameBCFCEFIC;
 //	static String fileName=fileNameBCFCEFIC;
 //	static String fileName=fileNameBCFCanada;
 //	static String fileName=fileNameBCFNITE;
@@ -119,30 +134,14 @@ public class ParseQSAR_ToolBox extends Parse {
 //			original_source_name="ECHA Reach";
 			selectedEndpoints = Arrays.asList(ExperimentalConstants.strSkinSensitizationLLNA);
 			init("Sensitization");
-		} else if (fileName.equals(fileNameBCFCanada)) {
-			removeDuplicates=true;
-			original_source_name="Canada";
-			selectedEndpoints = Arrays.asList(propertyName);
-			mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName + File.separator+"BCF Canada";
-			mainFolder+=File.separator+propertyName;//output json/excel in subfolder
-			jsonFolder= mainFolder;
-			new File(mainFolder).mkdirs();
-		} else if (fileName.equals(fileNameBCFNITE)) {
-			removeDuplicates=true;
-			original_source_name="NITE";
-			selectedEndpoints = Arrays.asList(propertyName);
-			mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName + File.separator+"BCF NITE";
-			mainFolder+=File.separator+propertyName;//output json/excel in subfolder;
-			jsonFolder= mainFolder;
-			new File(mainFolder).mkdirs();
-		} else if (fileName.equals(fileNameBCFCEFIC)) {
-			removeDuplicates=true;
-			original_source_name="CEFIC";
-			selectedEndpoints = Arrays.asList(propertyName);
-			mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName + File.separator+"BCF CEFIC";
-			mainFolder+=File.separator+propertyName;//output json/excel in subfolder
-			jsonFolder= mainFolder;
-			new File(mainFolder).mkdirs();
+		} else if (fileName.equals(fileNameBCF_Canada)) {
+			init("bioaccumulation canada v.4.8.2");
+		} else if (fileName.equals(fileNameBCF_NITE)) {
+			init("Bioconcentration and logKow NITE v.4.8.2");
+		} else if (fileName.equals(fileNameBCF_CEFIC)) {
+			init("bioaccumulation fish CEFIC LRI v.4.8.2");
+		} else if (fileName.equals(fileNameBCF_ECHA_REACH)) {
+			init("BCFBAF ECHA REACH v.4.8.2");
 		} else if (fileName.equals(fileName96hrAcuteAquatic)) {
 			removeDuplicates=true;
 			original_source_name="ECHA REACH";
@@ -176,8 +175,11 @@ public class ParseQSAR_ToolBox extends Parse {
 		try {
 			
 			Type type = new TypeToken<Hashtable<String, List<RecordQSAR_ToolBox.Species>>>(){}.getType();
-			Hashtable<String, List<Species>> htSpecies=JsonUtilities.gsonPretty.fromJson(new FileReader("data\\experimental\\Arnot 2006\\htSuperCategory.json"), type);
-
+			Hashtable<String, List<Species>> htSpeciesByCommonName=JsonUtilities.gsonPretty.fromJson(new FileReader("data\\experimental\\Arnot 2006\\htSuperCategory.json"), type);
+			
+			Hashtable<String, Species> htSpeciesByBinomalName = getHashtableSpeciesByBinomialName(
+					htSpeciesByCommonName);
+			
 			File Folder=new File(jsonFolder);
 			
 			if(Folder.listFiles()==null) {
@@ -189,23 +191,45 @@ public class ParseQSAR_ToolBox extends Parse {
 			
 			for (RecordQSAR_ToolBox recordQSAR_ToolBox:tempRecords) {
 				
+				if(recordQSAR_ToolBox.Database==null) {//just skip, no usable data
+					continue;
+				}
+				
 				//Can only filter by whole body if filename is CEFIC
-				if(fileName.equals(fileNameBCFCEFIC)) {
+				if(fileName.equals(fileNameBCF_CEFIC)) {
+					if (!recordQSAR_ToolBox.Database.equals("Bioaccumulation fish CEFIC LRI")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;					
+					ExperimentalRecord erCEFIC=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(erCEFIC!=null)	recordsExperimental.add(erCEFIC);
+
+					//CEFIC doesnt have BAF data
 					
-					ExperimentalRecord erKinetic=recordQSAR_ToolBox.toExperimentalRecordBCF_NITE_Kinetic(propertyName, htSpecies);
-					if(erKinetic!=null)	recordsExperimental.add(erKinetic);
-	
-					ExperimentalRecord erSS=recordQSAR_ToolBox.toExperimentalRecordBCF_NITE_SS(propertyName, htSpecies);
-					if(erSS!=null)	recordsExperimental.add(erSS);
-					
-				} else if(fileName.equals(fileNameBCFCanada)) {
-					ExperimentalRecord erCanada=recordQSAR_ToolBox.toExperimentalRecordBCFCanada(propertyName);
+				} else if(fileName.equals(fileNameBCF_Canada)) {
+					if (!recordQSAR_ToolBox.Database.equals("Bioaccumulation Canada")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;					
+					ExperimentalRecord erCanada=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
 					if(erCanada!=null)	recordsExperimental.add(erCanada);
-				} else if(fileName.equals(fileNameBCFNITE)) {
-					ExperimentalRecord erNITE=recordQSAR_ToolBox.toExperimentalRecordBCFNITE(propertyName, htSpecies);
-					if(erNITE!=null)	recordsExperimental.add(erNITE);
+					
+					//Canada doesnt have BAF data
+					
+				} else if(fileName.equals(fileNameBCF_NITE)) {
+					if (!recordQSAR_ToolBox.Database.equals("Bioconcentration and logKow NITE")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;					
+					
+					ExperimentalRecord erBCF=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(erBCF!=null)	recordsExperimental.add(erBCF);
+					
+					//TODO- only data for 6 salts- not worth messing with:
+//					ExperimentalRecord erBAF=recordQSAR_ToolBox.toExperimentalRecordBAFNITE(propertyName, htSpecies);
+//					if(erBAF!=null)	recordsExperimental.add(erBCF);
+					
+				} else if(fileName.equals(fileNameBCF_ECHA_REACH)) {
+					if (!recordQSAR_ToolBox.Database.equals("ECHA REACH")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;
+					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(er!=null)	recordsExperimental.add(er);
 				} else if(fileName.equals(fileName96hrAcuteAquatic)) {
-					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordFishTox(propertyName, htSpecies);
+					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordFishTox(propertyName, htSpeciesByCommonName);
 					if(er!=null)	recordsExperimental.add(er);
 				} else if(fileName.equals(fileNameBiodegWaterScreening)) {
 					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecord(original_source_name);					
@@ -256,22 +280,32 @@ public class ParseQSAR_ToolBox extends Parse {
 			ex.printStackTrace();
 		}
 
-		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(ExperimentalConstants.strKOC, ExperimentalConstants.str_L_KG,true);
-//		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(ExperimentalConstants.str_g_L,true);
+		String propertyName=ExperimentalConstants.strBCF;
+		String units=ExperimentalConstants.str_L_KG;
+		Hashtable<String,ExperimentalRecords> htER = recordsExperimental.createExpRecordHashtableByCAS(propertyName, units,true);
 		boolean convertToLog=true;
-		boolean omitSingleton=false;
+		boolean omitSingleton=true;
 		ExperimentalRecords.calculateAvgStdDevOverAllChemicals(htER, convertToLog,omitSingleton);
 		
-		
 //		compareKoc(recordsExperimental);
-		
 //		System.out.println(gson.toJson(tm.get("soil")));
 		
 		
-		
-		
-		
 		return recordsExperimental;
+	}
+
+	private Hashtable<String, Species> getHashtableSpeciesByBinomialName(
+			Hashtable<String, List<Species>> htSpeciesByCommonName) {
+		Hashtable<String, Species> htSpeciesByBinomalName=new Hashtable<>();
+		for (String speciesCommon:htSpeciesByCommonName.keySet()) {
+			List<Species>speciesList=htSpeciesByCommonName.get(speciesCommon);
+			for (Species species:speciesList) {
+				if (species.species_scientific==null)
+					continue;
+				htSpeciesByBinomalName.put(species.species_scientific, species);
+			}
+		}
+		return htSpeciesByBinomalName;
 	}
 
 	private void compareKoc(ExperimentalRecords recordsExperimental) {
@@ -386,19 +420,20 @@ public class ParseQSAR_ToolBox extends Parse {
 	
 	static void runBCF() {
 		
-		fileName=fileNameBCFNITE;
-
-		List<String>properties=new ArrayList<>();
+//		findMissingFieldsInRecordClass();
 		
-		properties.add(ExperimentalConstants.strBCF);
-		properties.add(ExperimentalConstants.strFishBCF);		
-		if(!fileName.equals(fileNameBCFCanada))properties.add(ExperimentalConstants.strFishBCFWholeBody);
+//		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
+//		String [] filenames= {fileNameBCF_NITE};
+//		String [] filenames= {fileNameBCF_CEFIC};
+//		String [] filenames= {fileNameBCF_Canada};
+		String [] filenames= {fileNameBCF_ECHA_REACH};
 		
-		for (String propertyName:properties) {
-			System.out.println(propertyName);
-			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(propertyName);
-			p.generateOriginalJSONRecords=false;
-			p.removeDuplicates=true;
+		for (String filename:filenames) {
+			
+			ParseQSAR_ToolBox.fileName=filename;
+			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null);
+			p.generateOriginalJSONRecords=false;//*** set to true on first run
+			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
 			p.writeExcelFileByProperty=true;		
@@ -407,6 +442,21 @@ public class ParseQSAR_ToolBox extends Parse {
 			System.out.println("********************************************\n");
 		}
 		
+	}
+
+	private static void findMissingFieldsInRecordClass() {
+		String  [] folders={"bioaccumulation canada v.4.8.2","bioaccumulation fish CEFIC LRI v.4.8.2","Bioconcentration and logKow NITE v.4.8.2"};
+		Set<String> missingAll=new TreeSet<>();
+		for (String folder:folders) {
+			String filepath="data\\experimental\\QSAR_Toolbox\\"+folder+"\\QSAR_Toolbox Original Records.json";
+			Set<String> missing=JsonFieldChecker.findUnknownFields(filepath, RecordQSAR_ToolBox.class);
+//			System.out.println(folder+"\t"+JsonUtilities.gsonPretty.toJson(missing)+"\n");
+			missingAll.addAll(missing);
+		}
+		System.out.println("All\t"+JsonUtilities.gsonPretty.toJson(missingAll));
+		for (String missing:missingAll) {
+			System.out.println("public String "+missing+";");
+		}
 	}
 	
 	static void runPhyschem() {
@@ -519,16 +569,42 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 	}
 	
+	static void convertTsvFilesToExcel() {
+		
+		
+		String folder="data\\experimental\\QSAR_Toolbox\\text files\\";
+		String folderExcel="data\\experimental\\QSAR_Toolbox\\Excel files\\";
+		
+		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
+				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
+				"Bioconcentration and logKow NITE v.4.8.2 2026-06-02.tsv",
+				"bcfbaf echa reach.tsv"};
+		
+		boolean stopAtFirstBlankRow=true;
+		boolean detectNumerics=false;//keep as strings in excel
+		
+		for (String filename:filenames) {
+			String tsvPath = folder+filename;
+			
+			System.out.println(folder+filename+"\t"+new File(folder+filename).exists());
+			String xlsxPath = folderExcel+filename.replace(".tsv", ".xlsx");
+			TsvToExcel.tsvToExcel(tsvPath, xlsxPath, stopAtFirstBlankRow, detectNumerics);
+		}
+	}
+	
+	
 	
 	public static void main(String[] args) {
 
 //		UnitConverter.printMissingDensityCas=true;
 		
-//		runBCF();
+//		convertTsvFilesToExcel();
+		
+		runBCF();
 //		run96hrAcuteFishTox();
 //		runPhyschem();
 //		runKoc();
-		runBiodegWaterScreening();
+//		runBiodegWaterScreening();
 
 //******************************************************************************
 //		fileName=fileNameAcuteToxicityDB;

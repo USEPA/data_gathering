@@ -92,19 +92,6 @@ public class ParseBurkhard  {
 					if(er!=null) experimentalRecords.add(er);
 				}
 			}
-//			for (RecordBurkhard rb:recordsOriginal) {
-//
-//				counter++;
-//
-//				ExperimentalRecord erKinetic=rb.toExperimentalRecordBCF_Kinetic(propertyName, htSpecies);
-//				if(erKinetic!=null)	experimentalRecords.add(erKinetic);
-//
-//				ExperimentalRecord erSS=rb.toExperimentalRecordBCF_SS(propertyName, htSpecies);
-//				if(erSS!=null)	experimentalRecords.add(erSS);
-//
-//			}
-
-//		System.out.println(counter);
 
 
 			Hashtable<String, ExperimentalRecords> htER = experimentalRecords.createExpRecordHashtableBySID(ExperimentalConstants.str_L_KG);
@@ -152,6 +139,7 @@ public class ParseBurkhard  {
 		p.getBCF_ExperimentalRecords(ExperimentalConstants.strBAF);
 		p.getBCF_ExperimentalRecords(ExperimentalConstants.strFishBAF);
 		p.getBCF_ExperimentalRecords(ExperimentalConstants.strFishBAFWholeBody);
+		
 		
 	}
 

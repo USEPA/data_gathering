@@ -414,6 +414,10 @@ public class Parse {
 		Hashtable<String,ExperimentalRecords>ht=new Hashtable<>();
 		
 		for(ExperimentalRecord er:records) {
+			
+			if(er.property_name==null) 
+				continue;
+			
 			if(ht.get(er.property_name)!=null) {
 				ExperimentalRecords recs=ht.get(er.property_name);
 				recs.add(er);
@@ -440,6 +444,8 @@ public class Parse {
 	protected void writeOriginalRecordsToFile(Vector<?> records) {
 		try {
 			String jsonPath = jsonFolder + File.separator + fileNameJSON_Records;
+			
+			System.out.println(jsonPath);
 			
 //			System.out.println(records.size());
 			
