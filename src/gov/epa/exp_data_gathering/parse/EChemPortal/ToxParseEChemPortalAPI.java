@@ -49,7 +49,7 @@ public class ToxParseEChemPortalAPI extends ParseEChemPortalAPI {
 	 * Parses JSON entries in database to RecordPubChem objects, then saves them to a JSON file
 	 */
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if (downloadNew) { downloadAllDashboardToxResults(); }
 		String filePathDB=databaseFolder + File.separator + sourceName+"_raw_tox_json.db";
 		System.out.println(filePathDB);

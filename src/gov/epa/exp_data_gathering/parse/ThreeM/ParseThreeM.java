@@ -27,7 +27,7 @@ public class ParseThreeM extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordThreeM.parseRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

@@ -55,7 +55,7 @@ public class ParseEcotox extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 
 		if(generateOriginalJSONRecords) {
 			

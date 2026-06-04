@@ -155,7 +155,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			
 			if(fileName.contains(".xlsx")) {

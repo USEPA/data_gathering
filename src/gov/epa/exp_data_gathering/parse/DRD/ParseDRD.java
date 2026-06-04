@@ -29,7 +29,7 @@ public class ParseDRD extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordDRD.parseDRDRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

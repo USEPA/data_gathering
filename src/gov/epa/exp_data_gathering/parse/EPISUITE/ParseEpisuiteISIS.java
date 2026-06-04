@@ -25,7 +25,7 @@ public class ParseEpisuiteISIS extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<RecordEpisuiteISIS> records = RecordEpisuiteISIS.getRecordsFromSDFs();
 		
 		System.out.println(records.size());

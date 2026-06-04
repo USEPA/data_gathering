@@ -41,7 +41,7 @@ public class ParseOPERA extends Parse {
 
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		
 		if (!this.generateOriginalJSONRecords) return;
 		

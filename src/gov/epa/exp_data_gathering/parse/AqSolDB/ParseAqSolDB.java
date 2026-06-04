@@ -28,7 +28,7 @@ public class ParseAqSolDB extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordAqSolDB.parseAqSolDBRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

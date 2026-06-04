@@ -85,7 +85,7 @@ public class ParsePubChem extends Parse {
 	 * Parses JSON entries in database to RecordPubChem objects, then saves them to a JSON file
 	 */
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		
 		System.out.println("Enter createRecords");
 		

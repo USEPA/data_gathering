@@ -36,7 +36,7 @@ public class ParseNITE extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		List<RecordNITE>recordsOriginal=RecordNITE.parseRecordsFromExcel();
 		writeOriginalRecordsToFile(recordsOriginal);
 	}

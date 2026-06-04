@@ -32,7 +32,7 @@ public class ParseChemidplus extends Parse {
 	 * Parses JSON entries in database to RecordPubChem objects, then saves them to a JSON file
 	 */
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		
 		if(generateOriginalJSONRecords) {
 			

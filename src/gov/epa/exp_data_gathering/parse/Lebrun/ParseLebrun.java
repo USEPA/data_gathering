@@ -29,7 +29,7 @@ public class ParseLebrun extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordLebrun.parseLebrunRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

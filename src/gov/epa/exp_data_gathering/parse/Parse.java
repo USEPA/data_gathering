@@ -287,7 +287,7 @@ public class Parse {
 	 * 
 	 * Needs to be overridden
 	 */
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		System.out.println("Need to override createRecords()!");	
 	}
 	
@@ -325,7 +325,7 @@ public class Parse {
 				System.out.println("Parsing original file(s)");	
 			}
 
-			createRecords();
+			createOriginalRecords();
 		}
 
 		System.out.println("Going through original records...");

@@ -28,7 +28,7 @@ public class ParseCoMPAIT extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordCoMPAIT.parseRecordsFromExcel();
 		
 		System.out.println(gson.toJson(records));

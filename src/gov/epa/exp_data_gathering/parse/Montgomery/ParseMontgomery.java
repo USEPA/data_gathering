@@ -22,7 +22,7 @@ public class ParseMontgomery extends Parse {
 		this.init();
 	}
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 
 		if(generateOriginalJSONRecords) {
 			

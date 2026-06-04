@@ -38,7 +38,7 @@ public class ParseBagley extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordBagley.parseBagleyRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

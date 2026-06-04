@@ -29,7 +29,7 @@ public class ParseRIFM_2026_01 extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordRIFM_2026_01.parseRIFM_2026_01RecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

@@ -34,7 +34,7 @@ public class ParseHayashi extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordHayashi.parseHayashiRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

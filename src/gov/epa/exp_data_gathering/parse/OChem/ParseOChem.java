@@ -26,7 +26,7 @@ public class ParseOChem extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			RecordOChem r=new RecordOChem();
 			Vector<RecordOChem> records = r.parseOChemQueriesFromExcel();

@@ -34,7 +34,7 @@ public class ParseNIEHS_ICE_2024_08 extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			Vector<JsonObject> records = RecordNIEHS_ICE_2024_08.parseNIEHS_ICE_2024_08RecordsFromExcel(fileName,sheetName);
 			writeOriginalRecordsToFile(records);

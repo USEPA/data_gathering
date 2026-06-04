@@ -35,7 +35,7 @@ public class ParseKodithala extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordKodithala.parseKodithalaRecordsFromExcel();
 		writeOriginalRecordsToFile(records);
 	}

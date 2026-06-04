@@ -27,7 +27,7 @@ public class ParseToxCast extends Parse {
 	}
 
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		Vector<JsonObject> records = RecordToxCast.parseRecordsFromExcel();
 		
 		System.out.println(gson.toJson(records));

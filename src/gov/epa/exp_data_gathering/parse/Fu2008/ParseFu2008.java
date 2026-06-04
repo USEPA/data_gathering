@@ -28,7 +28,7 @@ public class ParseFu2008 extends Parse {
 	}
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			Vector<JsonObject> records = RecordFu2008.parseFu2008RecordsFromExcel(fileName, sourceName);
 			writeOriginalRecordsToFile(records);
