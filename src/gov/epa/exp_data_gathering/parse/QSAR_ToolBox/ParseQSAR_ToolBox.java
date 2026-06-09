@@ -2,7 +2,7 @@ package gov.epa.exp_data_gathering.parse.QSAR_ToolBox;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
+//import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -424,9 +424,9 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 //		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
 //		String [] filenames= {fileNameBCF_NITE};
-//		String [] filenames= {fileNameBCF_CEFIC};
+		String [] filenames= {fileNameBCF_CEFIC};
 //		String [] filenames= {fileNameBCF_Canada};
-		String [] filenames= {fileNameBCF_ECHA_REACH};
+//		String [] filenames= {fileNameBCF_ECHA_REACH};
 		
 		for (String filename:filenames) {
 			

@@ -13,6 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
 
+import org.checkerframework.checker.units.qual.s;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -187,7 +189,7 @@ public class RecordArnot2006 {
 	 * @param logBCF
 	 * @return
 	 */
-	double calcT80(double logKow) {
+	double calcT80(double logKow, Double T) {
 		
 		double W=0.002;
 		double Dox=7.1;
@@ -201,7 +203,7 @@ public class RecordArnot2006 {
 		double Lg=0.012;
 		double WCg=0.74;
 		double WCb=1-(Lb+NLOMb);
-		double T=21;
+		
 		
 		double Kow=Math.pow(10,logKow);
 		double Ed=1/(3e-7*Kow+2);
@@ -227,6 +229,8 @@ public class RecordArnot2006 {
 		return t80;
 		
 	}
+	
+
 	
 	public ExperimentalRecord toExperimentalRecordBCF(String propertyName, Hashtable<String, List<Species>> htSpecies) {
 
@@ -322,7 +326,7 @@ public class RecordArnot2006 {
 //		} else {
 //			er.experimental_parameters.put("Exposure Duration (in days or Lifetime)", exposure_duration_days);
 //		}
-		compareT80_To_Exposure_Duration();
+		compareT80_To_Exposure_Duration(er);
 	}
 
 
@@ -362,7 +366,7 @@ public class RecordArnot2006 {
 	}
 
 
-	private void compareT80_To_Exposure_Duration() {
+	private void compareT80_To_Exposure_Duration(ExperimentalRecord er) {
 
 //		if(LogBCF_WW_L_kg==null || LogKow1.equals("N/A")) return;
 		
@@ -375,12 +379,33 @@ public class RecordArnot2006 {
 //		}
 		
 //		double logBCF=Double.parseDouble(LogBCF_WW_L_kg);
-		double t80=this.calcT80(logKow);
+		
+		Double Tc=null;
+		
+		if(!temperature_mean_C.equals("N/A")) {
+			Tc=Double.parseDouble(temperature_mean_C);
+		} else {
+			Tc=21.0;
+		}
+		double t80=this.calcT80(logKow, Tc);
+		
+		String supercategory=null;
+		
+		if(er.experimental_parameters.containsKey("Species supercategory")) {
+			supercategory=er.experimental_parameters.get("Species supercategory")+"";
+		}
+		
+		
 
 		if(!exposure_duration_days.equals("L") && !exposure_duration_days.equals("N/A")) {
 			double duration=Double.parseDouble(exposure_duration_days);
 			//				System.out.println(exposure_duration_days+"\t"+t80);
 
+			
+			if(supercategory!=null && supercategory.equals("Fish"))
+				System.out.println(er.casrn+"\t"+calculation_method+"\t"+duration+"\t"+t80);
+			
+			
 			if(t80>duration) {
 
 				//	if(calculation_method!=null && calculation_method.equals("K1/K2")) {
@@ -464,6 +489,9 @@ public class RecordArnot2006 {
 
 	}
 
+	
+
+	
 
 	private void setChemAnalysisMethod(ExperimentalRecord er) {
 
@@ -1210,7 +1238,7 @@ public class RecordArnot2006 {
 		RecordArnot2006 r=new RecordArnot2006();
 		//		r.parseRecordsFromExcel();
 		r.getSpeciesSuperCategoryHashtable();
-		r.calcT80(5.34);
+//		r.calcT80(5.34, 21.0);
 		
 	}
 

@@ -27,9 +27,12 @@ import gov.epa.exp_data_gathering.parse.UnitConverter;
  */
 public class RecordEcotox {
 	
-	public static String sourceName=ExperimentalConstants.strSourceEcotox_2024_12_12;
-	public static String databasePath = "data\\experimental\\ECOTOX_2024_12_12\\ecotox_ascii_12_12_2024.db";
+//	public static String sourceName=ExperimentalConstants.strSourceEcotox_2024_12_12;
+//	public static String databasePath = "data\\experimental\\ECOTOX_2024_12_12\\ecotox_ascii_12_12_2024.db";
 
+	public static String sourceName=ExperimentalConstants.strSourceEcotox_2026_03_12;
+	public static String databasePath = "data\\experimental\\ECOTOX_2026_03_12\\ecotox_ascii_03_12_2026.db";
+	
 	public String property_name;
 	
 	public String test_id;
@@ -349,6 +352,12 @@ public class RecordEcotox {
 	public String variety;
 	public String ncbi_taxid;	
 	
+	//media_characteristics:
+	public String media_temperature_mean_op;
+	public String media_temperature_mean;
+	public String media_temperature_min;
+	public String media_temperature_max;
+	public String media_temperature_unit;
 	
 	
 	transient Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
@@ -683,12 +692,18 @@ public class RecordEcotox {
 //				+ "media_type, test_location, exposure_type,chem_analysis_method, s.common_name, s.latin_name,s.ecotox_group, rsc.description as 'response_site',\r\n"
 //				+ " author, publication_year, title,source from tests t\r\n"
 
-		String sql="select  * from tests t\r\n"
+//		String sql="select  * from tests t\r\n"
+				
+		String sql = "select t.*, r.*, c.*, r2.*, s.*, rsc.description, "
+				+ "mc.media_temperature_mean_op, mc.media_temperature_mean, "
+				+ "mc.media_temperature_min, mc.media_temperature_max, mc.media_temperature_unit\r\n" // listing desired media fields to avoid having to add a lot more fields
+				+ "from tests t\r\n"
 				+ "	join results r on t.test_id=r.test_id\r\n"
 				+ "	join chemicals c on c.cas_number=t.test_cas\r\n"
 				+ "	left join references_ r2 on r2.reference_number=t.reference_number\r\n"
 				+ "	left join species s on t.species_number=s.species_number\r\n"
-				+ "	left join response_site_codes rsc on rsc.code=r.response_site\r\n"
+				+ "	left join response_site_codes rsc on rsc.code=r.response_site\r\n" //gets tissue type
+				+ " left join media_characteristics mc on mc.result_id=r.result_id\r\n" // gets temperature
 				+ "	where bcf1_mean is not null and endpoint ='"+endpoint+"';";
 //				+ "	where bcf1_mean is not null and endpoint like '%"+endpoint+"%';";//this will allow BCFD (dry weight)
 		

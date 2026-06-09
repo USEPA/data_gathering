@@ -612,22 +612,25 @@ public class CompareExperimentalRecords {
 			
 //			sources2.add(new Source("ECOTOX_2023_12_14",propertyName));
 
-//			sources1.add(new Source("Arnot 2006",propertyName));
+			sources1.add(new Source("Arnot 2006",propertyName));
 //			sources1.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
 
 //			sources2.add(new Source("Arnot 2006",propertyName));
-//			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
+			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
 //			sources2.add(new Source("QSAR_Toolbox","BCF NITE//"+propertyName)); 
-//			sources2.add(new Source("Burkhard",propertyName));//only 37 new
+			sources2.add(new Source("Burkhard",propertyName));//only 37 new
 //			sources2.add(new Source("OPERA2.8",null));//only has CAS not SID
 
 //			sources2.add(new Source("QSAR_Toolbox","BCF CEFIC//"+propertyName));
 			
-			sources1.add(new Source("Arnot 2006",propertyName));
+//			sources1.add(new Source("Arnot 2006",propertyName));
 			
 //			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
-//			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+			
+			
+			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
 			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 			
 			

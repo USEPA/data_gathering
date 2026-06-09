@@ -44,6 +44,7 @@ import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class RecordQSAR_ToolBox {
 
+	public Integer Row;
 	public String Chemical_Number;
 	public String RecordNumber;
 	public String CAS_Number;

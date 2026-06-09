@@ -246,8 +246,8 @@ public class EcotoxDbCreator {
 //		String ECOTOX_ASCII_FOLDER_PATH = "data/experimental/ECOTOX/ecotox_ascii_03_15_2023";
 //		String ECOTOX_ASCII_FOLDER_PATH = "data/experimental/ECOTOX/ecotox_ascii_06_15_2023";
 //		String ECOTOX_ASCII_FOLDER_PATH = "data/experimental/ECOTOX/ecotox_ascii_12_14_2023";
-		String ECOTOX_ASCII_FOLDER_PATH = "data/experimental/ECOTOX_2024_12_12/ecotox_ascii_12_12_2024";
-		
+//		String ECOTOX_ASCII_FOLDER_PATH = "data/experimental/ECOTOX_2024_12_12/ecotox_ascii_12_12_2024";
+		String ECOTOX_ASCII_FOLDER_PATH = "data\\experimental\\ECOTOX_2026_03_12\\ecotox_ascii_03_12_2026";
 		
 		create(ECOTOX_ASCII_FOLDER_PATH);
 	}

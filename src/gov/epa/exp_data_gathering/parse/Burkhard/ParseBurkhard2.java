@@ -42,7 +42,7 @@ public class ParseBurkhard2 extends Parse {
 	
 	
 	@Override
-	protected void createRecords() {
+	protected void createOriginalRecords() {
 		if(generateOriginalJSONRecords) {
 			
 			Vector<JsonObject> records = RecordBurkhard.parseBurkhardRecordsFromExcel();

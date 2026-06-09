@@ -63,7 +63,7 @@ public class ParseEcotox extends Parse {
 
 			//Dont bother create duplicates for things like Fish BCF:
 			if(propertyName.equals(ExperimentalConstants.strBCF)) { 
-				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB("BCF");
+				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB("BCF");//Note if endpoint=BCFD have dry weight records
 			} else if(propertyName.equals(ExperimentalConstants.strBAF)) {
 				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB("BAF");
 			} else if(propertyName.equals(ExperimentalConstants.strAcuteAquaticToxicity)) {
@@ -853,10 +853,13 @@ public class ParseEcotox extends Parse {
 
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity,ExperimentalConstants.strChronicAquaticToxicity);
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strChronicAquaticToxicity);
-		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
+//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
 
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBAF,ExperimentalConstants.strBCF);
 
+		
+		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF);
+		
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF,ExperimentalConstants.strFishBCF,
 //				ExperimentalConstants.strFishBCFWholeBody);
 		
