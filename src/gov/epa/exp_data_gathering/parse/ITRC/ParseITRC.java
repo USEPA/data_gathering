@@ -116,7 +116,7 @@ public class ParseITRC extends Parse {
 		ParseITRC p = new ParseITRC("BAF");
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=true;
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
@@ -126,7 +126,7 @@ public class ParseITRC extends Parse {
 		ParseITRC p = new ParseITRC("BCF");
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=true;
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
@@ -136,6 +136,6 @@ public class ParseITRC extends Parse {
 	public static void main(String[] args) {
 		// runKoc();
 		runBAF();
-		// runBCF();
+		runBCF();
 	}
 }

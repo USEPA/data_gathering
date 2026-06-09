@@ -420,19 +420,20 @@ public class ParseQSAR_ToolBox extends Parse {
 	
 	static void runBCF() {
 		
-//		findMissingFieldsInRecordClass();
+		// findMissingFieldsInRecordClass();
 		
-//		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
-//		String [] filenames= {fileNameBCF_NITE};
-//		String [] filenames= {fileNameBCF_CEFIC};
-//		String [] filenames= {fileNameBCF_Canada};
-		String [] filenames= {fileNameBCF_ECHA_REACH};
+		// String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
+		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC};
+		// String [] filenames= {fileNameBCF_NITE};
+		// String [] filenames= {fileNameBCF_CEFIC};
+		// String [] filenames= {fileNameBCF_Canada};
+		// String [] filenames= {fileNameBCF_ECHA_REACH};
 		
 		for (String filename:filenames) {
 			
 			ParseQSAR_ToolBox.fileName=filename;
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null);
-			p.generateOriginalJSONRecords=false;//*** set to true on first run
+			p.generateOriginalJSONRecords=true;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
@@ -573,7 +574,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		
 		String folder="data\\experimental\\QSAR_Toolbox\\text files\\";
-		String folderExcel="data\\experimental\\QSAR_Toolbox\\Excel files\\";
+		String folderExcel="data\\experimental\\QSAR_Toolbox\\excel files\\";
 		
 		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
 				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
@@ -598,7 +599,7 @@ public class ParseQSAR_ToolBox extends Parse {
 
 //		UnitConverter.printMissingDensityCas=true;
 		
-//		convertTsvFilesToExcel();
+		// convertTsvFilesToExcel();
 		
 		runBCF();
 //		run96hrAcuteFishTox();

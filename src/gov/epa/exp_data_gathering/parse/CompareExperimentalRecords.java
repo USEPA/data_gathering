@@ -623,12 +623,14 @@ public class CompareExperimentalRecords {
 
 //			sources2.add(new Source("QSAR_Toolbox","BCF CEFIC//"+propertyName));
 			
-			sources1.add(new Source("Arnot 2006",propertyName));
+			// sources1.add(new Source("Arnot 2006","Bioconcentration factor"));
 			
 //			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
-			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			// sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sources1.add(new Source("Burkhard", "Bioconcentration factor"));
+			sources2.add(new Source("ITRC July 2023", "BCF ITRC"));
 			
 			
 //			sources2.add(new Source("ECOTOX_2024_12_12",propertyName));
