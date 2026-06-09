@@ -420,13 +420,19 @@ public class ParseQSAR_ToolBox extends Parse {
 	
 	static void runBCF() {
 		
-//		findMissingFieldsInRecordClass();
+		// findMissingFieldsInRecordClass();
 		
 //		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
 //		String [] filenames= {fileNameBCF_NITE};
 		String [] filenames= {fileNameBCF_CEFIC};
 //		String [] filenames= {fileNameBCF_Canada};
 //		String [] filenames= {fileNameBCF_ECHA_REACH};
+//		String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
+		// String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC};
+		// String [] filenames= {fileNameBCF_ECHA_REACH};
+		// String [] filenames= {fileNameBCF_Canada};
+		// String [] filenames= {fileNameBCF_CEFIC};
+		// String [] filenames= {fileNameBCF_NITE};
 		
 		for (String filename:filenames) {
 			
@@ -573,12 +579,12 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		
 		String folder="data\\experimental\\QSAR_Toolbox\\text files\\";
-		String folderExcel="data\\experimental\\QSAR_Toolbox\\Excel files\\";
+		String folderExcel="data\\experimental\\QSAR_Toolbox\\excel files\\";
 		
 		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
 				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
 				"Bioconcentration and logKow NITE v.4.8.2 2026-06-02.tsv",
-				"bcfbaf echa reach.tsv"};
+				"bcfbaf echa reach v.4.8.2 2026-06-02.tsv"};
 		
 		boolean stopAtFirstBlankRow=true;
 		boolean detectNumerics=false;//keep as strings in excel
@@ -598,7 +604,7 @@ public class ParseQSAR_ToolBox extends Parse {
 
 //		UnitConverter.printMissingDensityCas=true;
 		
-//		convertTsvFilesToExcel();
+		// convertTsvFilesToExcel();
 		
 		runBCF();
 //		run96hrAcuteFishTox();

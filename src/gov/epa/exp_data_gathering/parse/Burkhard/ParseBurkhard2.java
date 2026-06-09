@@ -113,7 +113,7 @@ public class ParseBurkhard2 extends Parse {
 
 		ParseBurkhard2 p = new ParseBurkhard2(ExperimentalConstants.strBCF);
 		
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;

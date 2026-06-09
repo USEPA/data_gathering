@@ -2636,6 +2636,7 @@ public class RecordQSAR_ToolBox {
 		setIdentifiers(er);
 
 //		er.property_name=propertyName;
+		er.experimental_parameters = new Hashtable<>();
 				
 		if (Endpoint==null) {
 			er.keep=false;
@@ -2651,10 +2652,9 @@ public class RecordQSAR_ToolBox {
 			System.out.println("Handle Endpoint="+Endpoint);
 		}
 
-		er.experimental_parameters = new Hashtable<>();
 
 		if (Calculation_basis != null) {
-			System.out.println(this.CAS_Number+"\t"+Endpoint + "\t" + this.Calculation_basis);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\t"+Endpoint + "\t" + this.Calculation_basis);
 			if (Calculation_basis.toLowerCase().contains("kinetic")) {
 				er.experimental_parameters.put("Measurement method", ExperimentalConstants.strMethodKinetic);
 			} else if (Calculation_basis.toLowerCase().contains("steady state")) {
@@ -2665,15 +2665,15 @@ public class RecordQSAR_ToolBox {
 		}
 		
 		if (Calculation_basis_other != null) {
-			System.out.println(this.CAS_Number+"\tCalculation_basis_other:"+Endpoint + "\t" + this.Calculation_basis_other);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tCalculation_basis_other:"+Endpoint + "\t" + this.Calculation_basis_other);
 		}
 		
 		if (Basis_for_the_BCF != null) {
-			System.out.println(this.CAS_Number+"\tBasis_for_the_BCF:"+Endpoint + "\t" + this.Basis_for_the_BCF);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF:"+Endpoint + "\t" + this.Basis_for_the_BCF);
 		}
 
 		if (Basis_for_the_BCF_other != null) {
-			System.out.println(this.CAS_Number+"\tBasis_for_the_BCF_other:"+Endpoint + "\t" + this.Basis_for_the_BCF_other);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF_other:"+Endpoint + "\t" + this.Basis_for_the_BCF_other);
 		}
 
 
@@ -2945,7 +2945,7 @@ public class RecordQSAR_ToolBox {
 						(Test_organisms_species.equals("Paratya Compressa Compressa"))) {
 					er.experimental_parameters.put("Species supercategory","Crustaceans");
 				} else {
-					System.out.println(Test_organisms_species+" not in species ht");
+					// System.out.println(Test_organisms_species+" not in species ht");
 					er.keep=false;
 					er.updateReason("Test_organisms_species not in species ht");
 				}
@@ -3007,11 +3007,11 @@ public class RecordQSAR_ToolBox {
 		} else if (species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
 			return "Flowers, trees, shrubs, ferns";
 		} else if (species.species_supercategory.contains("microorganisms")) {
-			return "microorganisms";
+			return "Microorganisms";
 		} else if (species.species_supercategory.contains("amphibians")) {
-			return "amphibians";
+			return "Amphibians";
 		} else if (species.species_supercategory.equals("omit")) {
-			return "omit";
+			return "Omit";
 		} else if (species.species_supercategory.equals("not specified")) {
 			return "not specified";
 		} else {
