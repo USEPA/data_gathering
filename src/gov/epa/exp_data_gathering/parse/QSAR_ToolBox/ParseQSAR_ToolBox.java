@@ -422,18 +422,18 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		// findMissingFieldsInRecordClass();
 		
-		// String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
-		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC};
-		// String [] filenames= {fileNameBCF_NITE};
-		// String [] filenames= {fileNameBCF_CEFIC};
-		// String [] filenames= {fileNameBCF_Canada};
+		String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
+		// String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC};
 		// String [] filenames= {fileNameBCF_ECHA_REACH};
+		// String [] filenames= {fileNameBCF_Canada};
+		// String [] filenames= {fileNameBCF_CEFIC};
+		// String [] filenames= {fileNameBCF_NITE};
 		
 		for (String filename:filenames) {
 			
 			ParseQSAR_ToolBox.fileName=filename;
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null);
-			p.generateOriginalJSONRecords=true;//*** set to true on first run
+			p.generateOriginalJSONRecords=false;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
@@ -579,7 +579,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
 				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
 				"Bioconcentration and logKow NITE v.4.8.2 2026-06-02.tsv",
-				"bcfbaf echa reach.tsv"};
+				"bcfbaf echa reach v.4.8.2 2026-06-02.tsv"};
 		
 		boolean stopAtFirstBlankRow=true;
 		boolean detectNumerics=false;//keep as strings in excel

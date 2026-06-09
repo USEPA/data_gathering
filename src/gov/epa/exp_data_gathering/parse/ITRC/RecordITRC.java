@@ -167,13 +167,13 @@ public class RecordITRC {
 						} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
 							return "Flowers, trees, shrubs, ferns";
 						} else if(species.species_supercategory.contains("microorganisms")) {
-							return "microorganisms";
+							return "Microorganisms";
 						} else if(species.species_supercategory.contains("amphibians")) {
-							return "amphibians";
+							return "Amphibians";
 						} else if(species.species_supercategory.equals("reptiles")) {
-							return "reptiles";
+							return "Reptiles";
 						} else if(species.species_supercategory.equals("omit")) {
-							return "omit";
+							return "Omit";
 						} else {
 							System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
 						}
@@ -197,13 +197,13 @@ public class RecordITRC {
 					} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
 						return "Flowers, trees, shrubs, ferns";
 					} else if(species.species_supercategory.contains("microorganisms")) {
-						return "microorganisms";
+						return "Microorganisms";
 					} else if(species.species_supercategory.contains("amphibians")) {
-						return "amphibians";
+						return "Amphibians";
 					} else if(species.species_supercategory.equals("reptiles")) {
-						return "reptiles";
+						return "Reptiles";
 					} else if(species.species_supercategory.equals("omit")) {
-						return "omit";
+						return "Omit";
 					} else {
 						System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
 					}
@@ -226,13 +226,13 @@ public class RecordITRC {
 					} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
 						return "Flowers, trees, shrubs, ferns";
 					} else if(species.species_supercategory.contains("microorganisms")) {
-						return "microorganisms";
+						return "Microorganisms";
 					} else if(species.species_supercategory.contains("amphibians")) {
-						return "amphibians";
+						return "Amphibians";
 					} else if(species.species_supercategory.equals("reptiles")) {
-						return "reptiles";
+						return "Reptiles";
 					} else if(species.species_supercategory.equals("omit")) {
-						return "omit";
+						return "Omit";
 					} else {
 						System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
 					}
