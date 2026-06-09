@@ -88,7 +88,7 @@ public class RecordITRC {
 		String Reference_Label;
 		String Reference_Citation;
 		String Reference_Url;
-		String Reference_Doi;
+		// String Reference_Doi;
 		String Reference_Author;
 		String Reference_Journal;
 		String Reference_Title;
@@ -103,22 +103,24 @@ public class RecordITRC {
 		}
 
 		private String getSpeciesSupercategory(Hashtable<String, List<Species>> htSpecies) {
+			Hashtable<String, Species> htSpeciesScientific = getSpeciesHashtableScientific(htSpecies);
+
+			// Catch edge cases where multiple species were used, but all belong to the same class of organism
+			if (Organism_Common_Name != null && Organism_Common_Name.equalsIgnoreCase("Hemigrapsus sanguineus, Sesarma pictum, Hemigrapsus penicillatus, Helice tridens tridens, and Philyra pisum")) {
+				return "Fish";
+			} else if (Organism_Common_Name != null && Organism_Common_Name.equalsIgnoreCase("Largemouth  and smallmouth bass")) {
+				return "Fish";
+			} else if (Organism_Common_Name != null && Organism_Common_Name.equalsIgnoreCase("Several species")) {
+				return "Fish";
+			} else if (Organism_Common_Name != null && Organism_Common_Name.equalsIgnoreCase("Turtles")) {
+				return "Reptiles";
+			}
 
 			if(Organism_Common_Name!=null && htSpecies.containsKey(Organism_Common_Name.toLowerCase())) {
 				
 					List<Species>speciesList=htSpecies.get(Organism_Common_Name.toLowerCase());
 
 					for(Species species:speciesList) {
-
-
-						//				if(species.species_scientific!=null) {
-						//					if (!species.species_scientific.toLowerCase().equals(this.scientific_name.toLowerCase())) {
-						//						System.out.println(this.scientific_name+"\t"+species.species_scientific+"\tmismatch");
-						//					}
-						//				} else {
-						////					System.out.println(Organism_Common_Name+"\tspecies has null scientific");
-						//				}
-
 						if(species.species_supercategory.contains("fish")) {
 							return "Fish";
 						} else if(species.species_supercategory.contains("algae")) {
@@ -143,22 +145,11 @@ public class RecordITRC {
 							return "Omit";
 						}
 					}
-	//		}
 				} else if(htSpecies.containsKey(Organism_Scientific_Name.toLowerCase())) {
 
 					List<Species>speciesList=htSpecies.get(Organism_Scientific_Name.toLowerCase());
 
 					for(Species species:speciesList) {
-
-
-						//				if(species.species_scientific!=null) {
-						//					if (!species.species_scientific.toLowerCase().equals(this.scientific_name.toLowerCase())) {
-						//						System.out.println(this.scientific_name+"\t"+species.species_scientific+"\tmismatch");
-						//					}
-						//				} else {
-						////					System.out.println(common_name+"\tspecies has null scientific");
-						//				}
-
 						if(species.species_supercategory.contains("fish")) {
 							return "Fish";
 						} else if(species.species_supercategory.contains("algae")) {
@@ -181,16 +172,73 @@ public class RecordITRC {
 							return "amphibians";
 						} else if(species.species_supercategory.equals("reptiles")) {
 							return "reptiles";
-						}else if(species.species_supercategory.equals("omit")) {
+						} else if(species.species_supercategory.equals("omit")) {
 							return "omit";
 						} else {
 							System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
 						}
 					}
+				} else if (Organism_Common_Name!=null && htSpeciesScientific.containsKey(Organism_Common_Name.toLowerCase())) {
+					Species species = htSpeciesScientific.get(Organism_Common_Name.toLowerCase());
+					if(species.species_supercategory.contains("fish")) {
+						return "Fish";
+					} else if(species.species_supercategory.contains("algae")) {
+						return "Algae";
+					} else if(species.species_supercategory.contains("crustaceans")) {
+						return "Crustaceans";
+					} else if(species.species_supercategory.contains("insects/spiders")) {
+						return "Insects/spiders";
+					} else if(species.species_supercategory.contains("molluscs")) {
+						return "Molluscs";
+					} else if(species.species_supercategory.contains("worms")) {
+						return "Worms";
+					} else if(species.species_supercategory.contains("invertebrates")) {
+						return "Invertebrates";
+					} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+						return "Flowers, trees, shrubs, ferns";
+					} else if(species.species_supercategory.contains("microorganisms")) {
+						return "microorganisms";
+					} else if(species.species_supercategory.contains("amphibians")) {
+						return "amphibians";
+					} else if(species.species_supercategory.equals("reptiles")) {
+						return "reptiles";
+					} else if(species.species_supercategory.equals("omit")) {
+						return "omit";
+					} else {
+						System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
+					}
+				} else if (htSpeciesScientific.containsKey(Organism_Scientific_Name.toLowerCase())) {
+					Species species = htSpeciesScientific.get(Organism_Scientific_Name.toLowerCase());
+					if(species.species_supercategory.contains("fish")) {
+						return "Fish";
+					} else if(species.species_supercategory.contains("algae")) {
+						return "Algae";
+					} else if(species.species_supercategory.contains("crustaceans")) {
+						return "Crustaceans";
+					} else if(species.species_supercategory.contains("insects/spiders")) {
+						return "Insects/spiders";
+					} else if(species.species_supercategory.contains("molluscs")) {
+						return "Molluscs";
+					} else if(species.species_supercategory.contains("worms")) {
+						return "Worms";
+					} else if(species.species_supercategory.contains("invertebrates")) {
+						return "Invertebrates";
+					} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
+						return "Flowers, trees, shrubs, ferns";
+					} else if(species.species_supercategory.contains("microorganisms")) {
+						return "microorganisms";
+					} else if(species.species_supercategory.contains("amphibians")) {
+						return "amphibians";
+					} else if(species.species_supercategory.equals("reptiles")) {
+						return "reptiles";
+					} else if(species.species_supercategory.equals("omit")) {
+						return "omit";
+					} else {
+						System.out.println("Handle\t"+Organism_Scientific_Name+"\t"+species.species_supercategory);	
+					}
 				} else {
 					System.out.println("missing in hashtable:\t"+"*"+Organism_Scientific_Name.toLowerCase()+"*");
 				}
-	//		}
 		return null;
 		}
 
@@ -206,7 +254,6 @@ public class RecordITRC {
 			String sql="select species_id, species_common, species_scientific, species_supercategory, habitat from species";
 
 			try {
-
 				Statement st = conn.createStatement();			
 				ResultSet rs = st.executeQuery(sql);
 
@@ -230,13 +277,24 @@ public class RecordITRC {
 					}
 				}
 
-
-				//			System.out.println(sql);
-
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			return htSpecies;
+		}
+
+		// TODO: Implement properly to handle other species supercategories
+		private Hashtable<String, Species> getSpeciesHashtableScientific(Hashtable<String, List<Species>> htSpeciesByCommonName) {
+			Hashtable<String, Species> htSpeciesByBinomalName=new Hashtable<>();
+			for (String speciesCommon:htSpeciesByCommonName.keySet()) {
+				List<Species>speciesList=htSpeciesByCommonName.get(speciesCommon);
+				for (Species species:speciesList) {
+					if (species.species_scientific==null)
+						continue;
+					htSpeciesByBinomalName.put(species.species_scientific, species);
+				}
+			}
+			return htSpeciesByBinomalName;
 		}
 	}
 
@@ -557,11 +615,11 @@ public class RecordITRC {
 		bioRecord.Reference_Journal = getCellStringValue(rowRef, htColsRefs.get("Journal")).trim();
 		bioRecord.Reference_Url = getCellStringValue(rowRef, htColsRefs.get("URL")).trim();
 
-		Pattern doiPattern = Pattern.compile("\\b10\\.\\d{4,9}/[-._;()/:A-Z0-9]+", Pattern.CASE_INSENSITIVE);
-		Matcher doiMatcher = doiPattern.matcher(bioRecord.Reference_Url);
-		if (doiMatcher.find()) {
-			bioRecord.Reference_Doi = doiMatcher.group(); // Regex match for DOI within the Reference URL
-		}
+		// Pattern doiPattern = Pattern.compile("\\b10\\.\\d{4,9}/[-._;()/:A-Z0-9]+", Pattern.CASE_INSENSITIVE);
+		// Matcher doiMatcher = doiPattern.matcher(bioRecord.Reference_Url);
+		// if (doiMatcher.find()) {
+		// 	bioRecord.Reference_Doi = doiMatcher.group(); // Regex match for DOI within the Reference URL
+		// }
 
 		Pattern yearPattern = Pattern.compile("\\d{4}\\w?");
 		Matcher yearMatcher = yearPattern.matcher(bioRecord.Reference_Label);
@@ -886,7 +944,7 @@ public class RecordITRC {
 		ls.citation = recordBio.Reference_Citation;
 		ls.name = recordBio.Reference_Label;
 		ls.url = recordBio.Reference_Url;
-		ls.doi = recordBio.Reference_Doi;
+		// ls.doi = recordBio.Reference_Doi;
 		ls.author = recordBio.Reference_Author;
 		ls.journal = recordBio.Reference_Journal;
 		ls.title = recordBio.Reference_Title;
@@ -902,18 +960,14 @@ public class RecordITRC {
 		er.source_name = sourceName;
 		
 		// Filter out records with data from undesired types of sources
-		// if (recordBio.Lab_Field_Model_Study != null && recordBio.Lab_Field_Model_Study.contains("Field")) {
-		// 	er.keep = false;
-		// 	er.reason = "Field measurement";
-		// }
 		if (recordBio.Lab_Field_Model_Study != null && recordBio.Lab_Field_Model_Study.contains("Model")) {
 			er.keep = false;
 			er.updateReason("Modeled data");
 		}
-		if (recordBio.Wet_Dry_Lipid_Basis != null && !recordBio.Wet_Dry_Lipid_Basis.equals("Wet")) {
-			er.keep = false;
-			er.updateReason("Non-wet basis");
-		}
+		// if (recordBio.Wet_Dry_Lipid_Basis != null && !recordBio.Wet_Dry_Lipid_Basis.equals("Wet")) {
+		// 	er.keep = false;
+		// 	er.updateReason("Non-wet basis");
+		// }
 
 		
 		return er;
