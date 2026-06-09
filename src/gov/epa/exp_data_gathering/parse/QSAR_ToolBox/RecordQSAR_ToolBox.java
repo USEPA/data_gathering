@@ -44,6 +44,7 @@ import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class RecordQSAR_ToolBox {
 
+	public Integer Row;
 	public String Chemical_Number;
 	public String RecordNumber;
 	public String CAS_Number;
@@ -2635,6 +2636,7 @@ public class RecordQSAR_ToolBox {
 		setIdentifiers(er);
 
 //		er.property_name=propertyName;
+		er.experimental_parameters = new Hashtable<>();
 				
 		if (Endpoint==null) {
 			er.keep=false;
@@ -2650,7 +2652,6 @@ public class RecordQSAR_ToolBox {
 			System.out.println("Handle Endpoint="+Endpoint);
 		}
 
-		er.experimental_parameters = new Hashtable<>();
 
 		if (Calculation_basis != null) {
 			System.out.println(this.CAS_Number+"\t"+Endpoint + "\t" + this.Calculation_basis);
