@@ -422,13 +422,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		// findMissingFieldsInRecordClass();
 		
-//		String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_ECHA_REACH};
-//		String [] filenames= {fileNameBCF_NITE};
-		String [] filenames= {fileNameBCF_CEFIC};
-//		String [] filenames= {fileNameBCF_Canada};
-//		String [] filenames= {fileNameBCF_ECHA_REACH};
-//		String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
-		// String [] filenames= {fileNameBCF_NITE, fileNameBCF_Canada, fileNameBCF_CEFIC};
+		String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
 		// String [] filenames= {fileNameBCF_ECHA_REACH};
 		// String [] filenames= {fileNameBCF_Canada};
 		// String [] filenames= {fileNameBCF_CEFIC};

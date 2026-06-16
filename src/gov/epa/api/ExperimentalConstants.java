@@ -353,6 +353,27 @@ public class ExperimentalConstants {
 	
 	public static final String strParameterSoilType = "Soil_Type";
 	
-	
+	// Experimental Parameter Names
+	public static final String expParamMediaType = "Media type";
+	public static final String expParamTestLocation = "Test location";
+	public static final String expParamWetDry = "Test specificity";
+	public static final String expParamWaterConcentration = "Water concentration";
+	public static final String expParamConcentrationType = "concentration_type";
+	public static final String expParamLipidPercent = "Lipid content percentage";
+	public static final String expParamSpeciesLatin = "Species latin";
+	public static final String expParamSpeciesCommon = "Species common";
+	public static final String expParamSpeciesSupercategory = "Species supercategory";
+	public static final String expParamMeasurementMethod = "Measurement method";
+	public static final String expParamExposureDuration = "Exposure duration";
+	public static final String expParamTissueType = "Response site";
+	public static final String expParamTemperature = "Temperature";
+	public static final String expParamExposureType = "exposure_type";
+	public static final String expParamPh = "pH";
+
+	// Data Source Names
+	public static final String sourceEcha = "ECHA REACH";
+	public static final String sourceNite = "Bioconcentration and logKow NITE";
+	public static final String sourceCanada = "Bioaccumulation Canada";
+	public static final String sourceCefic = "Bioaccumulation fish CEFIC LRI";
 
 }
