@@ -1405,13 +1405,89 @@ public class RecordEcotox {
 		}
 
 //		setExposureDuration(er);//we want the observation duration not the exposure duration
-		setObservationDuration(er,"Exposure duration");//to be consistent with Arnot 2006
+		setObservationDuration(er,"Observation duration");//to be consistent with Arnot 2006
 		
 		er.experimental_parameters.put("Test location", test_location);
 		er.experimental_parameters.put("exposure_type", exposure_type);
 		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
 
-		
+		// New parameters
+		// Temperature
+		if (media_temperature_mean != null || media_temperature_max != null || media_temperature_min != null) {
+
+			// System.out.println("Have water conc="+Exposure_concentration_MeanValue);
+
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = "Temperature";
+			pv.unit.abbreviation = media_temperature_unit;
+
+			if (media_temperature_mean != null) {
+				double mean = Double.parseDouble(media_temperature_mean);
+				pv.value_point_estimate = mean;
+			} else if (media_temperature_max != null || media_temperature_min != null) {
+				if (media_temperature_max != null) {
+					double max = Double.parseDouble(media_temperature_max);
+					pv.value_max = max;
+				}
+				if (media_temperature_min != null) {
+					double min = Double.parseDouble(media_temperature_min);
+					pv.value_min = min;
+				}
+			}
+
+			er.parameter_values.add(pv);
+		}
+
+		// Lipid Percentage
+		if (lipid_pct_mean != null || lipid_pct_max != null || lipid_pct_min != null) {
+			String lipidString = "";
+			if (lipid_pct_max != null && lipid_pct_min != null) {
+				lipidString = lipid_pct_min + " - " + lipid_pct_max;
+			} else if (lipid_pct_mean != null) {
+				lipidString = String.valueOf(lipid_pct_mean);
+			} else if (lipid_pct_max != null) {
+				lipidString = "< " + lipid_pct_max;
+			} else if (lipid_pct_min != null) {
+				lipidString = "> " + lipid_pct_min;
+			}
+			
+			er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
+		}
+
+		// Measurement Method (using measurement_comments)
+		if (measurement_comments != null && !measurement_comments.trim().isEmpty()) {
+			if (measurement_comments.toLowerCase().contains("steady state")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
+			} else if (measurement_comments.toLowerCase().contains("kinetic")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
+			} else if (measurement_comments.toLowerCase().contains("dynamic")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Dynamic");
+			} else if (measurement_comments.toLowerCase().contains("equilibrium")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
+			} else if (measurement_comments.toLowerCase().contains("non-equilibrium")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Equilibrium");
+			} else if (measurement_comments.toLowerCase().contains("non-steady state")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Steady State");
+			} else if (measurement_comments.toLowerCase().contains("other")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Other");
+			} else if (measurement_comments.toLowerCase().contains("unknown")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Unknown");
+			}
+		}
+
+		// Test Specificity (dry_wet)
+		if (dry_wet != null && !dry_wet.trim().isEmpty()) {
+			if (dry_wet.toLowerCase().contains("dry")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+			} else if (dry_wet.toLowerCase().contains("wet")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+			} else if (dry_wet.toLowerCase().contains("NC")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Classified");
+			} else if (dry_wet.toLowerCase().contains("NR")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Reported");
+			}
+		}
+
 //		if(er.keep)
 //			System.out.println(test_location);
 		
