@@ -659,6 +659,29 @@ public class CompareExperimentalRecords {
 			
 
 		}
+
+		private void compareMultipleBCF() {
+			printChemicalsInCommon=false;
+			
+			List<Source>sources1=new ArrayList<>();
+			List<Source>sources2=new ArrayList<>();
+			
+			String propertyName=ExperimentalConstants.strBCF;
+			String units="L/kg";
+			
+			sources1.add(new Source("Arnot 2006",propertyName));
+
+			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			for (Source source : sources2) {
+				List<Source> source3 = new ArrayList<>();
+				source3.add(source);
+				cm.compare(sources1, source3, propertyName, units,"cas");
+			}
+		}
 		
 		private void compareRBiodegFull() {
             String propertyName = ExperimentalConstants.strRBIODEG;
@@ -978,8 +1001,6 @@ public class CompareExperimentalRecords {
 			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
 			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
 			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
-			
-			
 			
 			compareChemicalsInCommon(tm1, tm2, units);
 
@@ -1541,7 +1562,7 @@ public class CompareExperimentalRecords {
 			//        fig.plot(x, y2, ":k", 3.0f, "BAC");  // plot(x,y2,':k','LineWidth',3);
 		
 			fig.RenderPlot();                    // First render plot before modifying
-			fig.title("Source1 vs. Source 2");    // title('Stock 1 vs. Stock 2');
+			fig.title("Source 1 vs. Source 2");    // title('Stock 1 vs. Stock 2');
 			//      fig.xlim(10, 100);                   // xlim([10 100]);
 			//      fig.ylim(200, 300);                  // ylim([200 300]);
 		
@@ -1830,7 +1851,8 @@ public class CompareExperimentalRecords {
 		// TODO Auto-generated method stub
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
 
-		c.c.compareBCF();
+		// c.c.compareBCF();
+		c.c.compareMultipleBCF();
 
 //		c.c.compareOralRat();
 
