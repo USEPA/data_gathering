@@ -719,7 +719,7 @@ public class CompareExperimentalRecords {
 				}
 				String sourceName2 = "All Others";
 
-				cm.compare(sources1, sources2, propertyName, units,"cas", sourceName1, sourceName2);
+				cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas");
 			}
 
 		}
@@ -1047,7 +1047,7 @@ public class CompareExperimentalRecords {
 
 		}
 
-		void compare(List<Source>sources1, List<Source>sources2, String propertyName,String units,String idType, String sourceName1, String sourceName2) {
+		void compare(String sourceName1, String sourceName2, List<Source>sources1, List<Source>sources2, String propertyName,String units,String idType) {
 
 			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
 			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
