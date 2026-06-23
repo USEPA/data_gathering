@@ -683,6 +683,47 @@ public class CompareExperimentalRecords {
 			}
 		}
 		
+		// TODO: Write a method to compare each individual BCF source against all others
+		private void compareBcf1vsAll() {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", "BCF ITRC"));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			for (Source source : sourcesAll) {
+				List<Source> sources1 = new ArrayList<>();
+				List<Source> sources2 = new ArrayList<>();
+
+				sources1.add(source);
+				for (Source otherSource : sourcesAll) {
+					if (!otherSource.equals(source)) {
+						sources2.add(otherSource);
+					}
+				}
+
+				String sourceName1 = source.sourceName;
+				if (source.subfolder != null && !source.subfolder.isEmpty()) {
+					sourceName1 += " - " + source.subfolder;
+				}
+				String sourceName2 = "All Others";
+
+				cm.compare(sources1, sources2, propertyName, units,"cas", sourceName1, sourceName2);
+			}
+
+		}
+
 		private void compareRBiodegFull() {
             String propertyName = ExperimentalConstants.strRBIODEG;
             String units = ExperimentalConstants.str_binary;
@@ -1005,6 +1046,41 @@ public class CompareExperimentalRecords {
 			compareChemicalsInCommon(tm1, tm2, units);
 
 		}
+
+		void compare(List<Source>sources1, List<Source>sources2, String propertyName,String units,String idType, String sourceName1, String sourceName2) {
+
+			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
+			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
+
+
+			if(idType.equals("sid")) {
+				recs1.addDtxsids();
+				recs2.addDtxsids();
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			System.out.println("sources1:"+ParseUtilities.gson.toJson(sources1));
+			System.out.println("sources2:"+ParseUtilities.gson.toJson(sources2));
+
+			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
+			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
+			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
+			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
+			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
+
+		}
 		
 		
 		public void compare(ExperimentalRecords allRecords, String sourceName1, String sourceName2, String propertyName,String units,String idType) {
@@ -1280,6 +1356,98 @@ public class CompareExperimentalRecords {
 			
 
 			createPlot(units, vals1, vals2);
+
+			MAE/=countInCommon;
+			System.out.println("Count in common="+countInCommon);
+			System.out.println("MAE="+MAE);
+			return MAE;
+
+		}
+
+		public double compareChemicalsInCommon(String sourceName1, String sourceName2, TreeMap<String,ExperimentalRecords>tm1,TreeMap<String,ExperimentalRecords>tm2, String units) {
+
+//			if(!units.toLowerCase().contains("log")) {
+//				System.out.println("Need to handle units="+units);
+//			}
+
+			int countInCommon=0;
+			double MAE=0;
+
+			DecimalFormat df=new DecimalFormat("0.00");
+
+//			boolean printValues=false;
+
+//			if(printChemicalsInCommon) System.out.println("\nLogType\tkey\tLog10median_1\tLog10median_2\tdiff");
+			if(printChemicalsInCommon) System.out.println("key\tLog10median_1\tLog10median_2\tdiff");
+
+			List<Double>vals1=new ArrayList<>();
+			List<Double>vals2=new ArrayList<>();
+
+
+			for (String key:tm1.keySet()) {
+				ExperimentalRecords recs1=tm1.get(key);
+
+				//			System.out.println(key);
+
+				if(!tm2.containsKey(key))continue;
+
+				ExperimentalRecords recs2=tm2.get(key);
+
+				if(recs1.medianValue!=null && recs2.medianValue!=null) {
+					
+					Double error=Math.abs(recs1.medianValue-recs2.medianValue);
+					vals1.add(recs1.medianValue);
+					vals2.add(recs2.medianValue);
+
+					if(printChemicalsInCommon) {
+//						System.out.println("took log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+						System.out.println(key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+					}
+
+					
+					//				System.out.println(casrn+"\t"+recs1.medianValue+"\t"+recs2.medianValue);	
+//					Double error=null;
+//					if(units.toLowerCase().contains("log")) {
+//						error=Math.abs(recs1.medianValue-recs2.medianValue);
+//						if(printValues) {
+//
+//							System.out.println("already log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+//						}
+//					} else {
+//						error=Math.abs(recs1.medianValue-recs2.medianValue);
+//						vals1.add(recs1.medianValue);
+//						vals2.add(recs2.medianValue);
+//						if(printValues) {
+//							System.out.println("took log\t"+key+"\t"+df.format(recs1.medianValue)+"\t"+df.format(recs2.medianValue)+"\t"+df.format(error));					
+//						}
+//					}
+					
+					//				if(error>0) {
+					//					System.out.println(casrn+"\t"+df.format(Math.log10(recs1.medianValue))+"\t"+df.format(Math.log10(recs2.medianValue))+"\t"+df.format(error));
+					//				}
+
+					MAE+=error;
+					countInCommon++;
+
+				} 
+			}
+			
+			
+			if(!units.contains("log"))units="log10("+units+")";
+
+			// String sourceName1 = "";
+			// String sourceName2 = "";
+
+			// for (String source : tm1.keySet()) {
+			// 	System.out.println(source);
+			// 	sourceName1 = sourceName1.concat(", " + source);
+			// }
+			// for (String source : tm2.keySet()) {
+			// 	sourceName2 = sourceName2.concat(", " + source);
+			// }
+			
+
+			createPlot(units, vals1, vals2, sourceName1, sourceName2);
 
 			MAE/=countInCommon;
 			System.out.println("Count in common="+countInCommon);
@@ -1852,7 +2020,8 @@ public class CompareExperimentalRecords {
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
 
 		// c.c.compareBCF();
-		c.c.compareMultipleBCF();
+		// c.c.compareMultipleBCF();
+		c.c.compareBcf1vsAll();
 
 //		c.c.compareOralRat();
 
