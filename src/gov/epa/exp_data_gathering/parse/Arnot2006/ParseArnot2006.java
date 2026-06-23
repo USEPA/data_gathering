@@ -159,7 +159,8 @@ public class ParseArnot2006 extends Parse {
 //				);
 		
 		
-		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strFishBCF);
+		// List<String>propertyNames=Arrays.asList(ExperimentalConstants.strFishBCF);
+		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF, ExperimentalConstants.strBAF);
 
 
 		for (String propertyName:propertyNames) {
@@ -167,7 +168,7 @@ public class ParseArnot2006 extends Parse {
 			System.out.println("\n**********************\n"+propertyName);
 			
 			ParseArnot2006 p = new ParseArnot2006(propertyName);
-			p.generateOriginalJSONRecords=true;
+			p.generateOriginalJSONRecords=false;
 			p.writeCheckingExcelFile=false;
 			p.removeDuplicates=false;
 
