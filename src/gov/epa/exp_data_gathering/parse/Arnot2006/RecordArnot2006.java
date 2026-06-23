@@ -279,12 +279,53 @@ public class RecordArnot2006 {
 		setExposureMedia(er);
 		setCriteria(er);
 		
-		er.experimental_parameters.put("Lipid content percentage", this.lipid_content_percentage);
-		
-		
-		if(!temperature_mean_C.equals("N/A")) er.temperature_C=Double.parseDouble(temperature_mean_C);
-		if(!ph_mean.equals("N/A")) er.pH=ph_mean;
-		
+		if (lipid_content_percentage != null && !lipid_content_percentage.equals("N/A")) {
+			er.experimental_parameters.put("Lipid content percentage", this.lipid_content_percentage);
+		}
+
+		// if(!temperature_mean_C.equals("N/A")) er.temperature_C=Double.parseDouble(temperature_mean_C);
+		// if(!ph_mean.equals("N/A")) er.pH=ph_mean;
+		if (!temperature_mean_C.equals("N/A")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, Double.parseDouble(temperature_mean_C));
+		}
+		if (!ph_mean.equals("N/A")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamPh, Double.parseDouble(ph_mean));
+		}
+
+		// TODO: Take look at paper to see if wet weight BCF was corrected for using lipid fraction
+
+		if ((LogBAF_WW_L_kg != null && !LogBAF_WW_L_kg.equals("N/A")) || (LogBCF_WW_L_kg != null && !LogBCF_WW_L_kg.equals("N/A"))) {
+			if ((comments != null && comments.toLowerCase().contains("dry")) || (tissue_analyzed != null && tissue_analyzed.toLowerCase().contains("dry")) || (criterion_other_major_source_comment != null && criterion_other_major_source_comment.toLowerCase().contains("dry"))) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			}
+		} else {
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+		}
+
+		if (er.property_name.equals(ExperimentalConstants.strBCF)) {
+			if (comments != null && comments.toLowerCase().contains("field")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
+			}
+		} else if (er.property_name.equals(ExperimentalConstants.strBAF)) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
+		}
+
+		if (criterion_exposure_duration_comment != null && criterion_exposure_duration_comment.toLowerCase().contains("dry")) {
+			if (criterion_exposure_duration_comment.toLowerCase().contains("steady state")) {
+				if (criterion_exposure_duration_comment.toLowerCase().contains("insufficient")) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
+				} else {
+					er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
+				}
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
+			}
+		}
+
 		er.property_value_units_original=ExperimentalConstants.str_LOG_L_KG;
 		er.property_value_string=strPropertyValue + " "+er.property_value_units_original;
 
@@ -307,12 +348,14 @@ public class RecordArnot2006 {
 
 	private void setExposureDuration(ExperimentalRecord er) {
 		if(exposure_duration_days.equals("L") || exposure_duration_days.equals("N/A")) {
+			// TODO: Handle lifetime (L) exposure
+			// Set duration 9999 days and updateNote to report that duration is Lifetime
 //			exposure_duration_days=exposure_duration_days.replace("L", "9999");
 			return;
 		}
 
 		ParameterValue pv=new ParameterValue();
-		pv.parameter.name="Exposure duration";
+		pv.parameter.name="Observation duration";
 //		pv.parameter.name="Observation duration";//to be consistent with ecotox
 		
 		pv.unit.abbreviation="days";
@@ -340,8 +383,10 @@ public class RecordArnot2006 {
 			tissue_analyzed=tissue_analyzed.replace("Gonad", "Gonad(s)");
 		}
 
-		er.experimental_parameters.put("Response site", tissue_analyzed);
-		
+		if (tissue_analyzed != null && !tissue_analyzed.equals("N/A")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed);
+		}
+
 		if(limitToWholeBody && (tissue_analyzed==null || !tissue_analyzed.equals("Whole body"))) {
 			er.keep=false;
 			er.reason="Not whole body";
@@ -631,7 +676,7 @@ public class RecordArnot2006 {
 		} else if(exposure_type.equals("Lotic")) {
 			exposure_type="Lotic";
 		} else if(exposure_type.equals("N/A")) {
-			//leave null
+			exposure_type = null;
 		} else {
 			System.out.println("Handle exposure_type="+exposure_type);
 		}
@@ -848,7 +893,7 @@ public class RecordArnot2006 {
 		putEntryCommon(htSuperCategory, "clams", "molluscs");
 		putEntryCommon(htSuperCategory, "tadpole", "amphibians");
 		putEntryCommon(htSuperCategory, "algae, algal mat", "algae");
-		putEntryCommon(htSuperCategory, "schizothrix calcicola", "omit");
+		putEntryCommon(htSuperCategory, "schizothrix calcicola", "algae");
 		putEntryCommon(htSuperCategory, "buzzer midge", "insects/spiders");
 		putEntryCommon(htSuperCategory, "narrowleaf cattail", "flowers, trees, shrubs, ferns");
 		putEntryCommon(htSuperCategory, "northern leopard frog", "amphibians");
@@ -1093,7 +1138,7 @@ public class RecordArnot2006 {
 		putEntryLatin(htSuperCategory, "rasbora heteromorpha", "fish");
 		putEntryLatin(htSuperCategory, "lymnaea stagnalis", "molluscs");
 		putEntryLatin(htSuperCategory, "nitocra spinipes", "omit");
-		putEntryLatin(htSuperCategory, "crangon crangon", "omit");
+		putEntryLatin(htSuperCategory, "crangon crangon", "crustaceans");
 		putEntryLatin(htSuperCategory, "gammarus pulex", "omit");
 		putEntryLatin(htSuperCategory, "palaemonetes pugio", "omit");
 		putEntryLatin(htSuperCategory, "sarotherodon mossambicus", "fish");
