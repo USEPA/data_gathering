@@ -908,36 +908,47 @@ public class RecordITRC {
 		// Set experimental parameters from RecordBio
 		er.experimental_parameters = new TreeMap<>();
 		if (recordBio.Lab_Field_Model_Study != null) {
-			er.experimental_parameters.put("Study Type", recordBio.Lab_Field_Model_Study);
+			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, recordBio.Lab_Field_Model_Study);
 		}
+		
 		if (recordBio.Location != null) {
 			er.experimental_parameters.put("Location", recordBio.Location);
 		}
+
 		if (recordBio.Freshwater_Marine_Estuary != null) {
-			er.experimental_parameters.put("Environment Type", recordBio.Freshwater_Marine_Estuary);
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, recordBio.Freshwater_Marine_Estuary);
 		}
+
 		if (recordBio.Organism_Common_Name != null || recordBio.Organism_Scientific_Name != null) {
-			er.experimental_parameters.put("Species Supercategory", recordBio.getSpeciesSupercategory(htSpecies));
+			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, recordBio.getSpeciesSupercategory(htSpecies));
 			if (recordBio.Organism_Common_Name != null) {
-				er.experimental_parameters.put("Organism Common Name", recordBio.Organism_Common_Name);
+				er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, recordBio.Organism_Common_Name);
 			}
 			if (recordBio.Organism_Scientific_Name != null) {
-				er.experimental_parameters.put("Organism Scientific Name", recordBio.Organism_Scientific_Name);
+				er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, recordBio.Organism_Scientific_Name);
 			}
 		}
+
 		if (recordBio.Tissue_Type != null) {
-			er.experimental_parameters.put("Tissue Type", recordBio.Tissue_Type);
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, recordBio.Tissue_Type);
 		}
+
 		if (recordBio.Wet_Dry_Lipid_Basis != null) {
-			er.experimental_parameters.put("Basis", recordBio.Wet_Dry_Lipid_Basis);
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, recordBio.Wet_Dry_Lipid_Basis);
 		}
+
 		if (recordBio.Reviewer_Notes != null) {
 			// er.experimental_parameters.put("Reviewer Notes", recordBio.Reviewer_Notes);
 			er.updateNote(recordBio.Reviewer_Notes);
 		}
-		if (recordBio.Waterbody_Description != null) {
-			er.experimental_parameters.put("Waterbody Description", recordBio.Waterbody_Description);
-		}
+
+		// if (recordBio.Waterbody_Description != null) {
+		// 	if (recordBio.Waterbody_Description.toLowerCase().contains("lab")) {
+		// 		er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
+		// 	} else {
+		// 		er.experimental_parameters.put("Waterbody Description", "Field");
+		// 	}
+		// }
 		
 		// Set source information from parent RecordITRC
 		LiteratureSource ls = new LiteratureSource();

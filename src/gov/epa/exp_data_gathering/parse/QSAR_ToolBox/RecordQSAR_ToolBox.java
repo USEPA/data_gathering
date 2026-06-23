@@ -2410,9 +2410,9 @@ public class RecordQSAR_ToolBox {
 		// Test location (lab vs field)
 		if (this.Test_type != null && !this.Test_type.isEmpty()) {
 			if (this.Test_type.equalsIgnoreCase("Field Study")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field Study");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
 			} else {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab Study");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
 				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, this.Test_type);
 			}
 		}
@@ -2426,30 +2426,30 @@ public class RecordQSAR_ToolBox {
 			Boolean dryWetBoolean = false;
 			if (this.Basis_for_the_BCF != null) {
 				if (this.Basis_for_the_BCF.toLowerCase().contains("w.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 					dryWetBoolean = true;
 				} else if (this.Basis_for_the_BCF.toLowerCase().contains("d.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 					dryWetBoolean = true;
 				}
 			}
 
 			if (!dryWetBoolean && this.Basis_for_the_BCF_other != null) {
 				if (this.Basis_for_the_BCF_other.toLowerCase().contains("w.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 					dryWetBoolean = true;
 				} else if (this.Basis_for_the_BCF_other.toLowerCase().contains("d.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 					dryWetBoolean = true;
 				}
 			}
 
 			if (!dryWetBoolean && this.Details_on_results != null) {
 				if (this.Details_on_results.toLowerCase().contains("dry") && !this.Details_on_results.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 					dryWetBoolean = true;
 				} else if (this.Details_on_results.toLowerCase().contains("wet") && !this.Details_on_results.toLowerCase().contains("dry")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 					dryWetBoolean = true;
 				} else if (this.Details_on_results.toLowerCase().contains("dry") && this.Details_on_results.toLowerCase().contains("wet")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
@@ -2459,10 +2459,10 @@ public class RecordQSAR_ToolBox {
 
 			if (!dryWetBoolean && this.Conclusions != null) {
 				if (this.Conclusions.toLowerCase().contains("dry") && !this.Conclusions.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 					dryWetBoolean = true;
 				} else if (this.Conclusions.toLowerCase().contains("wet") && !this.Conclusions.toLowerCase().contains("dry")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 					dryWetBoolean = true;
 				} else if (this.Conclusions.toLowerCase().contains("dry") && this.Conclusions.toLowerCase().contains("wet")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
@@ -2540,14 +2540,25 @@ public class RecordQSAR_ToolBox {
 		}
 		
 		// Tissue type (whole body, organ, lipid) TODO
+		String tissueType = null;
 		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, this.Basis_for_the_BCF);
+			tissueType = this.Basis_for_the_BCF;
 		} else if (this.Basis_for_the_BCF_other != null && !this.Basis_for_the_BCF_other.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, this.Basis_for_the_BCF_other);
+			tissueType = this.Basis_for_the_BCF_other;
 		} else if (this.Tissue_analyzed != null && !this.Tissue_analyzed.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, this.Tissue_analyzed);
+			tissueType = this.Tissue_analyzed;
 		} else if (this.Organ != null && !this.Organ.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, this.Organ);
+			tissueType = this.Organ;
+		}
+
+		if (tissueType != null && !tissueType.isEmpty()) {
+			if (tissueType.toLowerCase().contains("whole body")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "Whole Body");
+			} else if (tissueType.toLowerCase().contains("organ")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "Organ");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType);
+			}
 		}
 		
 		// Water temperature (temperature) TODO (handle identically to Temperature column)

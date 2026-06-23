@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -1438,7 +1439,8 @@ public class RecordEcotox {
 			er.parameter_values.add(pv);
 		}
 
-		// Lipid Percentage
+		// Lipid Percentage (using lipid_pct_*)
+		Boolean foundLipidPct = false;
 		if (lipid_pct_mean != null || lipid_pct_max != null || lipid_pct_min != null) {
 			String lipidString = "";
 			if (lipid_pct_max != null && lipid_pct_min != null) {
@@ -1451,27 +1453,51 @@ public class RecordEcotox {
 				lipidString = "> " + lipid_pct_min;
 			}
 			
+			foundLipidPct = true;
 			er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
 		}
 
 		// Measurement Method (using measurement_comments)
 		if (measurement_comments != null && !measurement_comments.trim().isEmpty()) {
 			if (measurement_comments.toLowerCase().contains("steady state")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
 			} else if (measurement_comments.toLowerCase().contains("kinetic")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
 			} else if (measurement_comments.toLowerCase().contains("dynamic")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Dynamic");
-			} else if (measurement_comments.toLowerCase().contains("equilibrium")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
 			} else if (measurement_comments.toLowerCase().contains("non-equilibrium")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Equilibrium");
+			} else if (measurement_comments.toLowerCase().contains("equilib")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
+			} else if (measurement_comments.toLowerCase().contains("equlibrium")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
 			} else if (measurement_comments.toLowerCase().contains("non-steady state")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Steady State");
 			} else if (measurement_comments.toLowerCase().contains("other")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Other");
 			} else if (measurement_comments.toLowerCase().contains("unknown")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Unknown");
+			}
+
+			// Lipid Percentage (using measurement_comments)
+			if (!foundLipidPct) {
+				Pattern pattern = Pattern.compile("lipid.*percentage", Pattern.CASE_INSENSITIVE);
+				Pattern pattern2 = Pattern.compile("lipid.*content", Pattern.CASE_INSENSITIVE);
+				Pattern pattern3 = Pattern.compile("%.*lipid", Pattern.CASE_INSENSITIVE);
+
+				Pattern patternNumber = Pattern.compile("(\\d+\\.?\\d*)\\s?%");
+
+				Matcher matcher = pattern.matcher(measurement_comments);
+				Matcher matcher2 = pattern2.matcher(measurement_comments);
+				Matcher matcher3 = pattern3.matcher(measurement_comments);
+
+				Matcher matcherNumber = patternNumber.matcher(measurement_comments);
+
+				if ((matcher.find() || matcher2.find() || matcher3.find()) && matcherNumber.find()) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, matcherNumber.group(1));
+				} else if (matcher.find() || matcher2.find() || matcher3.find()) {
+					System.out.println("Matcher found for lipid percentage but no number found in: " + measurement_comments);
+				}
 			}
 		}
 
@@ -1481,9 +1507,9 @@ public class RecordEcotox {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
 			} else if (dry_wet.toLowerCase().contains("wet")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
-			} else if (dry_wet.toLowerCase().contains("NC")) {
+			} else if (dry_wet.toLowerCase().contains("nc")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Classified");
-			} else if (dry_wet.toLowerCase().contains("NR")) {
+			} else if (dry_wet.toLowerCase().contains("nr")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Reported");
 			}
 		}
