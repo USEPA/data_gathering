@@ -1500,6 +1500,44 @@ public Hashtable<String, ExperimentalRecords> createExpRecordHashtableByCAS(Stri
 		
 		return records;
 	}
+
+	public static ExperimentalRecords getExperimentalRecords(String sourceName, String subfolder,String charset, Boolean printStatements) {
+		String folder="data\\experimental\\"+sourceName+"\\";
+		if(subfolder!=null) folder+=subfolder+"\\";
+		
+		File Folder=new File(folder);
+		
+		if(!Folder.exists()) {
+			System.out.println(folder+" doesnt exist");
+		}
+
+		if (printStatements) {
+			System.out.println("\n"+folder);
+		}
+		
+		ExperimentalRecords records=new ExperimentalRecords();
+		
+		//TODO need to flag case where we accidentally have both numbered and non numbered jsons due to multiple parse runs with diff code
+		
+		for(File file:Folder.listFiles()) {
+			if(!file.getName().contains("Experimental Records")) continue;
+			if(!file.getName().contains(".json")) continue;
+			if(file.getName().contains("Bad")) continue;
+			if(file.getName().toLowerCase().contains("original records")) continue;
+			
+//			System.out.println(file.getAbsolutePath());
+			
+			ExperimentalRecords experimentalRecords=ExperimentalRecords.loadFromJSON(file.getAbsolutePath(),charset);
+
+			if (printStatements) {
+				System.out.println("\t"+sourceName+"\t"+file.getName()+"\t"+subfolder+"\t"+experimentalRecords.size());
+			}
+			records.addAll(experimentalRecords);
+		}
+		
+		
+		return records;
+	}
 	
 	public static ExperimentalRecords getExperimentalRecordsBad(String sourceName, String subfolder,String charset) {
 		String folder="data\\experimental\\"+sourceName+"\\";

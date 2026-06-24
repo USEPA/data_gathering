@@ -60,7 +60,7 @@ public class CompareExperimentalRecords {
 		public ExperimentalRecords getAllExperimentalRecords(List<Source> sources,String propertyName) {
 			ExperimentalRecords recsAll=new ExperimentalRecords();
 			for(Source source:sources) {
-				ExperimentalRecords recs=ExperimentalRecords.getExperimentalRecords(source.sourceName, source.subfolder);
+				ExperimentalRecords recs=ExperimentalRecords.getExperimentalRecords(source.sourceName, source.subfolder, "UTF-8", false);
 				
 				for (ExperimentalRecord er:recs) {
 					if(!er.property_name.contentEquals(propertyName)) continue;
@@ -1127,8 +1127,9 @@ public class CompareExperimentalRecords {
 				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
 			}
 
-			System.out.println("sources1:"+ParseUtilities.gson.toJson(sources1));
-			System.out.println("sources2:"+ParseUtilities.gson.toJson(sources2));
+			System.out.println("\n***************************\n");
+			System.out.println("sources1: "+sourceName1);
+			System.out.println("sources2: "+sourceName2);
 
 			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
 			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
