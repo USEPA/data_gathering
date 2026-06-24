@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.JFrame;
 
@@ -682,8 +683,10 @@ public class CompareExperimentalRecords {
 				cm.compare(sources1, source3, propertyName, units,"cas");
 			}
 		}
-		
-		// TODO: Write a method to compare each individual BCF source against all others
+
+		/**
+		 *  compares each individual BCF source against all others
+		 */
 		private void compareBcf1vsAll() {
 			printChemicalsInCommon = false;
 			
@@ -723,6 +726,61 @@ public class CompareExperimentalRecords {
 			}
 
 		}
+		
+		/**
+		 * Compares unique text parameter values from multiple sources
+		 */
+		private void compareUniqueParameterValues() {
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", "BCF ITRC"));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			ExperimentalRecords recs=rm.getAllExperimentalRecords(sourcesAll,propertyName);
+			TreeSet<String>hsParams=new TreeSet<>();
+
+			for (ExperimentalRecord er:recs) {
+
+				String source=null;
+				if(er.publicSourceOriginal!=null) {
+					source=er.publicSourceOriginal.name;
+				} else if (er.original_source_name!=null) {
+					source=er.original_source_name;
+				} else if (er.publicSource!=null) {
+					source=er.publicSource.name;
+				} else {
+					source=er.source_name;
+				}
+
+				if(er.parameter_values!=null) {
+					for(ParameterValue pv:er.parameter_values) {
+						if(pv.value_text!=null) {
+							hsParams.add(pv.parameter.name+"\t"+pv.value_text+"\t"+source);	
+						}
+					}
+				}
+				
+				if(er.experimental_parameters!=null) {
+					
+					for (String parameterName:er.experimental_parameters.keySet()) {
+						hsParams.add(parameterName+"\t"+er.experimental_parameters.get(parameterName)+"\t"+source);	
+					}
+				}
+			}
+			
+			for (String item:hsParams) {
+				System.out.println(item);
+			}
+		}
+		
 
 		private void compareRBiodegFull() {
             String propertyName = ExperimentalConstants.strRBIODEG;
@@ -2021,7 +2079,9 @@ public class CompareExperimentalRecords {
 
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
-		c.c.compareBcf1vsAll();
+//		c.c.compareBcf1vsAll();
+		
+		c.c.compareUniqueParameterValues();
 
 //		c.c.compareOralRat();
 
