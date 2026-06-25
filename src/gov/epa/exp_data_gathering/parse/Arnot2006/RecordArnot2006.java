@@ -280,16 +280,32 @@ public class RecordArnot2006 {
 		setCriteria(er);
 		
 		if (lipid_content_percentage != null && !lipid_content_percentage.equals("N/A")) {
-			er.experimental_parameters.put("Lipid content percentage", this.lipid_content_percentage);
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+			double wc = Double.parseDouble(lipid_content_percentage);
+			pv.value_point_estimate = wc;
+			er.parameter_values.add(pv);
+			// er.experimental_parameters.put("Lipid content percentage", this.lipid_content_percentage);
 		}
 
 		// if(!temperature_mean_C.equals("N/A")) er.temperature_C=Double.parseDouble(temperature_mean_C);
 		// if(!ph_mean.equals("N/A")) er.pH=ph_mean;
 		if (!temperature_mean_C.equals("N/A")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, Double.parseDouble(temperature_mean_C));
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamTemperature;
+			pv.unit.abbreviation = "C";
+			pv.value_point_estimate = Double.parseDouble(temperature_mean_C);
+			er.parameter_values.add(pv);
+			// er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, Double.parseDouble(temperature_mean_C));
 		}
 		if (!ph_mean.equals("N/A")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamPh, Double.parseDouble(ph_mean));
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamPh;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+			pv.value_point_estimate = Double.parseDouble(ph_mean);
+			er.parameter_values.add(pv);
+			// er.experimental_parameters.put(ExperimentalConstants.expParamPh, Double.parseDouble(ph_mean));
 		}
 
 		// TODO: Take look at paper to see if wet weight BCF was corrected for using lipid fraction
@@ -347,10 +363,14 @@ public class RecordArnot2006 {
 	
 
 	private void setExposureDuration(ExperimentalRecord er) {
-		if(exposure_duration_days.equals("L") || exposure_duration_days.equals("N/A")) {
-			// TODO: Handle lifetime (L) exposure
-			// Set duration 9999 days and updateNote to report that duration is Lifetime
-//			exposure_duration_days=exposure_duration_days.replace("L", "9999");
+		if(exposure_duration_days.equals("N/A")) {
+			return;
+		} else if (exposure_duration_days.equals("L")) {
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = "Observation duration";
+			pv.unit.abbreviation = "days";
+			pv.value_text = "Lifetime";
+			er.parameter_values.add(pv);
 			return;
 		}
 
@@ -384,10 +404,10 @@ public class RecordArnot2006 {
 		}
 
 		if (tissue_analyzed != null && !tissue_analyzed.equals("N/A")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed);
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase());
 		}
 
-		if(limitToWholeBody && (tissue_analyzed==null || !tissue_analyzed.equals("Whole body"))) {
+		if(limitToWholeBody && (tissue_analyzed==null || !tissue_analyzed.toLowerCase().equals("whole body"))) {
 			er.keep=false;
 			er.reason="Not whole body";
 		}
@@ -644,11 +664,11 @@ public class RecordArnot2006 {
 	private void setExposureMedia(ExperimentalRecord er) {
 		if(exposure_media!=null) {
 			if(exposure_media.contains("FW")) {
-				exposure_media=exposure_media.replace("FW","Fresh water");
+				exposure_media=exposure_media.replace("FW","Freshwater");
 			} else if(exposure_media.contains("Fresh")) {
-				exposure_media=exposure_media.replace("Fresh","Fresh water");
+				exposure_media=exposure_media.replace("Fresh","Freshwater");
 			} else if(exposure_media.contains("SW")) {
-				exposure_media=exposure_media.replace("SW","Salt water");
+				exposure_media=exposure_media.replace("SW","Saltwater");
 			} else if(exposure_media.contains("N/A")) {
 				exposure_media=null;
 			} else if(exposure_media.contains("Synthetic") || exposure_media.contains("Humic water") || exposure_media.contains("Brackish"))  {
@@ -657,7 +677,7 @@ public class RecordArnot2006 {
 			}
 		}
 
-		if(exposure_media!=null) er.experimental_parameters.put("Media type",exposure_media);
+		if(exposure_media!=null) er.experimental_parameters.put("Media type",exposure_media.toLowerCase().trim());
 
 	}
 

@@ -910,13 +910,13 @@ public class RecordITRC {
 		if (recordBio.Lab_Field_Model_Study != null) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, recordBio.Lab_Field_Model_Study);
 		}
-		
+
 		if (recordBio.Location != null) {
 			er.experimental_parameters.put("Location", recordBio.Location);
 		}
 
 		if (recordBio.Freshwater_Marine_Estuary != null) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, recordBio.Freshwater_Marine_Estuary);
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, recordBio.Freshwater_Marine_Estuary.toLowerCase().trim());
 		}
 
 		if (recordBio.Organism_Common_Name != null || recordBio.Organism_Scientific_Name != null) {
@@ -930,7 +930,11 @@ public class RecordITRC {
 		}
 
 		if (recordBio.Tissue_Type != null) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, recordBio.Tissue_Type);
+			String tissueType = recordBio.Tissue_Type;
+			if (tissueType.toLowerCase().contains("whole")) {
+				tissueType = "whole body";
+			}
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType);
 		}
 
 		if (recordBio.Wet_Dry_Lipid_Basis != null) {

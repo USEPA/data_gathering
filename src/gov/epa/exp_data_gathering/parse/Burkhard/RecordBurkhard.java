@@ -11,6 +11,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.text.WordUtils;
+import org.apache.http.annotation.Experimental;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -231,11 +234,13 @@ public class RecordBurkhard {
 		if(Log_BAF_units!=null && Log_BAF_units.toLowerCase().contains("kg-ww")) {
 			Log_BAF_units=Log_BAF_units.toLowerCase().replace("l/kg-ww", "L/kg");
 			er.updateNote("value based on wet weight");
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 		}
 		
 		if(Log_BAF_units!=null && Log_BAF_units.toLowerCase().contains("kg-dw")) {
 			Log_BAF_units=Log_BAF_units.toLowerCase().replace("l/kg-dw", "L/kg");
 			er.updateNote("value based on dry weight");
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 		}	
 
 		if (Log_BAF_arithmetic_or_logarithmic!=null && Log_BAF_arithmetic_or_logarithmic.toLowerCase().contains("arithmetic")) {
@@ -363,14 +368,21 @@ public class RecordBurkhard {
 		ExperimentalRecord er=new ExperimentalRecord();
 		er.experimental_parameters=new Hashtable<>();
 		er.experimental_parameters.put("Reliability", Study_Quality_BCF);
-		er.experimental_parameters.put("Measurement method",method);
+		if (method != null && !method.trim().isEmpty()) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(method));
+		}
 		er.property_name = propertyName;
 		er.parameter_values=new ArrayList<>();
 		
 		if(Log_BCF_units.contains("kg-ww")) {
 			Log_BCF_units=Log_BCF_units.replace("kg-ww", "kg");
 			er.updateNote("value based on wet weight");
-		}		
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+		} else if (Log_BCF_units.contains("kg-dw")) {
+			Log_BCF_units = Log_BCF_units.replace("kg-dw", "kg");
+			er.updateNote("value based on dry weight");
+			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+		}
 		
 		if (Log_BCF_arithmetic_or_logarithmic!=null && Log_BCF_arithmetic_or_logarithmic.toLowerCase().contains("arithmetic")) {
 			er.property_value_units_original = Log_BCF_units;
@@ -388,11 +400,11 @@ public class RecordBurkhard {
 			}
 		}
 		
-		if (Location == null
-				|| !Location.equals("laboratory")) {
-			er.keep = false;
-			er.reason = "Test location not in laboratory";
-		}
+		// if (Location == null
+		// 		|| !Location.equals("laboratory")) {
+		// 	er.keep = false;
+		// 	er.reason = "Test location not in laboratory";
+		// }
 		
 		try {
 			String property_value = Log_BCF_mean;
@@ -534,17 +546,21 @@ public class RecordBurkhard {
 					} else if(species.species_supercategory.contains("flowers, trees, shrubs, ferns")) {
 						return "Flowers, trees, shrubs, ferns";
 					} else if(species.species_supercategory.contains("microorganisms")) {
-						return "microorganisms";
+						return "Microorganisms";
 					} else if(species.species_supercategory.contains("amphibians")) {
-						return "amphibians";
+						return "Amphibians";
 					} else if(species.species_supercategory.equals("reptiles")) {
-						return "reptiles";
+						return "Reptiles";
 					}else if(species.species_supercategory.equals("omit")) {
-						return "omit";
+						return "Omit";
 					} else {
 						System.out.println("Handle\t"+Species_Latin_Name+"\t"+species.species_supercategory);	
 					}
 				}
+			} else if (Common_Name != null && Common_Name.toLowerCase().equals("lepidotrigla microptera günther")) {
+				return "Fish";
+			} else if (Species_Latin_Name != null && Species_Latin_Name.toLowerCase().equals("lepidotrigla microptera günther")) {
+				return "Fish";
 			} else {
 				System.out.println("missing in hashtable:\t"+"*"+Species_Latin_Name.toLowerCase()+"*");
 			}
@@ -654,18 +670,32 @@ public class RecordBurkhard {
 		
 		setWaterConcentration(er);
 //		er.experimental_parameters.put("Exposure concentration",Exposure_Concentrations);
-		er.experimental_parameters.put("Response site",Tissue);
-		er.experimental_parameters.put("Media type",Marine_Brackish_Freshwater);
-		er.experimental_parameters.put("Test location",Location);
+		er.experimental_parameters.put("Response site",Tissue.toLowerCase());
+		er.experimental_parameters.put("Media type",Marine_Brackish_Freshwater.toLowerCase().trim());
+		if (Location != null && Location.toLowerCase().contains("lab")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
+		} else if (Location != null && Location.toLowerCase().contains("field")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
+		} else if (Location != null && Location.toLowerCase().contains("mesocosm")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Mesocosm");
+		}
 //		er.experimental_parameters.put("Class taxonomy",class_taxonomy);
 		if(days_of_uptake!=null) {
 			days_of_uptake=days_of_uptake.replace("24 hr", "1");
 			ParameterValue pv=new ParameterValue();
-			pv.parameter.name="Exposure duration";
+			pv.parameter.name="Observation duration";
 //			pv.parameter.name="Observation duration";//to be consisent with ecotox
 			pv.unit.abbreviation="days";
 			pv.value_point_estimate=Double.parseDouble(days_of_uptake);
 			er.parameter_values.add(pv);
+		}
+
+		if (OECD_305 != null) {
+			if (OECD_305.toLowerCase().equals("yes")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "OECD 305");
+			} else if (OECD_305.toLowerCase().equals("no")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not OECD 305");
+			}
 		}
 		
 	}

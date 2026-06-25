@@ -369,6 +369,8 @@ public class ExperimentalConstants {
 	public static final String expParamTemperature = "Temperature";
 	public static final String expParamExposureType = "exposure_type";
 	public static final String expParamPh = "pH";
+	public static final String expParamGuideline = "Test guideline";
+	public static final String expParamObservationDuration = "Observation duration";
 
 	// Data Source Names
 	public static final String sourceEcha = "ECHA REACH";

@@ -1380,9 +1380,9 @@ public class RecordEcotox {
 //			System.out.println(gson.toJson(this));
 		} else {
 			if(description.contains("Whole organism")) {
-				er.experimental_parameters.put("Response site", "Whole body");	
+				er.experimental_parameters.put("Response site", "whole body");	
 			} else {
-				er.experimental_parameters.put("Response site", description);
+				er.experimental_parameters.put("Response site", description.toLowerCase());
 			} 
 		}
 		if(limitToWholeBody && (description==null || !description.equals("Whole organism")))  {
@@ -1396,13 +1396,13 @@ public class RecordEcotox {
 			er.reason="Not a standard test species";
 		}
 		
-		er.experimental_parameters.put("Media type", media_type);
+		er.experimental_parameters.put("Media type", media_type.toLowerCase().trim());
 		
 		if (media_type.contains("water")) {
 			setWaterConcentration(er);			
-		} else {
-			er.keep=false;
-			er.reason="Not in water";
+		// } else {
+		// 	er.keep=false;
+		// 	er.reason="Not in water";
 		}
 
 //		setExposureDuration(er);//we want the observation duration not the exposure duration
@@ -1442,19 +1442,23 @@ public class RecordEcotox {
 		// Lipid Percentage (using lipid_pct_*)
 		Boolean foundLipidPct = false;
 		if (lipid_pct_mean != null || lipid_pct_max != null || lipid_pct_min != null) {
-			String lipidString = "";
-			if (lipid_pct_max != null && lipid_pct_min != null) {
-				lipidString = lipid_pct_min + " - " + lipid_pct_max;
-			} else if (lipid_pct_mean != null) {
-				lipidString = String.valueOf(lipid_pct_mean);
-			} else if (lipid_pct_max != null) {
-				lipidString = "< " + lipid_pct_max;
-			} else if (lipid_pct_min != null) {
-				lipidString = "> " + lipid_pct_min;
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+
+			if (lipid_pct_mean != null) {
+				pv.value_point_estimate = lipid_pct_mean;
 			}
+			if (lipid_pct_max != null) {
+				pv.value_max = Double.parseDouble(lipid_pct_max);
+			}
+			if (lipid_pct_min != null) {
+				pv.value_min = Double.parseDouble(lipid_pct_min);
+			}
+
+			er.parameter_values.add(pv);
 			
 			foundLipidPct = true;
-			er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
 		}
 
 		// Measurement Method (using measurement_comments)
@@ -1485,7 +1489,7 @@ public class RecordEcotox {
 				Pattern pattern2 = Pattern.compile("lipid.*content", Pattern.CASE_INSENSITIVE);
 				Pattern pattern3 = Pattern.compile("%.*lipid", Pattern.CASE_INSENSITIVE);
 
-				Pattern patternNumber = Pattern.compile("(\\d+\\.?\\d*)\\s?%");
+				Pattern patternNumber = Pattern.compile("(\\d+\\.?\\d*)\\s*%");
 
 				Matcher matcher = pattern.matcher(measurement_comments);
 				Matcher matcher2 = pattern2.matcher(measurement_comments);
@@ -1494,7 +1498,13 @@ public class RecordEcotox {
 				Matcher matcherNumber = patternNumber.matcher(measurement_comments);
 
 				if ((matcher.find() || matcher2.find() || matcher3.find()) && matcherNumber.find()) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, matcherNumber.group(1));
+					ParameterValue pv = new ParameterValue();
+					pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+					pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+					double wc = Double.parseDouble(matcherNumber.group(1));
+					pv.value_point_estimate = wc;
+					er.parameter_values.add(pv);
+					// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, matcherNumber.group(1));
 				} else if (matcher.find() || matcher2.find() || matcher3.find()) {
 					System.out.println("Matcher found for lipid percentage but no number found in: " + measurement_comments);
 				}
@@ -1504,14 +1514,30 @@ public class RecordEcotox {
 		// Test Specificity (dry_wet)
 		if (dry_wet != null && !dry_wet.trim().isEmpty()) {
 			if (dry_wet.toLowerCase().contains("dry")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry Weight");
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
 			} else if (dry_wet.toLowerCase().contains("wet")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet Weight");
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 			} else if (dry_wet.toLowerCase().contains("nc")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Classified");
 			} else if (dry_wet.toLowerCase().contains("nr")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Reported");
 			}
+		}
+
+		// Test Guideline (test_method and test_method_comments)
+		if (test_method != null && !test_method.trim().isEmpty()) {
+			String guideline;
+			if (test_method.equals("NR")) {
+				guideline = "Not reported";
+			} else {
+				guideline = test_method;
+			}
+
+			if (test_method_comments != null && !test_method_comments.trim().isEmpty()) {
+				guideline += " - " + test_method_comments;
+			}
+
+			er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, guideline);
 		}
 
 //		if(er.keep)

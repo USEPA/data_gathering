@@ -434,6 +434,7 @@ public class RecordQSAR_ToolBox {
 
 	public static transient Set<String> toms_other = new HashSet<>();
 	public static transient Set<String> poms_other = new HashSet<>();
+	public static transient Set<String> printedHandleMessages = new HashSet<>();
 
 	public static final String[] fieldNames = { "RecordNumber", "CAS_Number", "Chemical_name_s", "SMILES",
 			"Molecular_formula", "Predefined_substance_type", "Additional_Ids", "Identity", "CAS_SMILES_relation",
@@ -499,6 +500,16 @@ public class RecordQSAR_ToolBox {
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 	static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues()
 			.create();
+
+	private static void logUniqueHandle(String message) {
+		if (message == null || message.isBlank()) {
+			return;
+		}
+		if (!printedHandleMessages.contains(message)) {
+			printedHandleMessages.add(message);
+			System.out.println(message);
+		}
+	}
 
 	private static transient final Set<String> L_PER_KG_UNITS = Set.of("l/kg", "ml/g", "dm3/kg", "(ml/g)", "cm3/g",
 			"cm^3/g", "cm3.g-1", "cm3g-1", "mlg^-1");
@@ -1423,10 +1434,18 @@ public class RecordQSAR_ToolBox {
 			double dbl_pH = Double.parseDouble(PH_MeanValue);
 
 			if (dbl_pH <= 14) {
-				er.pH = dbl_pH + "";
+				// er.pH = dbl_pH + "";
+				// if (PH_Qualifier != null) {
+				// 	er.pH = PH_Qualifier.replace("ca.", "~") + " " + er.pH;
+				// }
+				ParameterValue pv = new ParameterValue();
+				pv.parameter.name = ExperimentalConstants.expParamPh;
+				pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+				pv.value_point_estimate = dbl_pH;
 				if (PH_Qualifier != null) {
-					er.pH = PH_Qualifier.replace("ca.", "~") + " " + er.pH;
+					pv.value_qualifier = PH_Qualifier.replace("ca.", "~");
 				}
+				er.parameter_values.add(pv);
 			} else {
 				// System.out.println("bad pH="+PH_MeanValue);
 			}
@@ -1457,41 +1476,102 @@ public class RecordQSAR_ToolBox {
 			// pv.valueMax=Double.parseDouble(PH_MaxValue);
 			// er.parameter_values.add(pv);
 
-			if (PH_MinValue != null && PH_MaxValue != null) {
-				er.pH = PH_MinValue + "-" + PH_MaxValue;
-			} else if (PH_MinValue != null) {
-				er.pH = " >" + PH_MinValue;
-			} else if (PH_MaxValue != null) {
-				er.pH = " <" + PH_MaxValue;
+			// if (PH_MinValue != null && PH_MaxValue != null) {
+			// 	er.pH = PH_MinValue + "-" + PH_MaxValue;
+			// } else if (PH_MinValue != null) {
+			// 	er.pH = " >" + PH_MinValue;
+			// } else if (PH_MaxValue != null) {
+			// 	er.pH = " <" + PH_MaxValue;
+			// }
+
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamPh;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+			if (PH_MinValue != null) {
+				pv.value_min = Double.parseDouble(PH_MinValue);
 			}
+			if (PH_MaxValue != null) {
+				pv.value_max = Double.parseDouble(PH_MaxValue);
+			}
+			if (PH_Qualifier != null) {
+				pv.value_qualifier = PH_Qualifier.replace("ca.", "~");
+			}
+			er.parameter_values.add(pv);
 
 			// System.out.println(gson.toJson(pv));
 
+		} else if (pH != null && !pH.isEmpty()) {
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamPh;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+
+			if (pH.contains("-")) {
+				String[] pHRange = pH.split("-");
+				pv.value_min = Double.parseDouble(pHRange[0]);
+				pv.value_max = Double.parseDouble(pHRange[1]);
+			} else {
+				Pattern phPattern = Pattern.compile("\\d+");
+				Matcher phMatcher = phPattern.matcher(pH);
+				if (phMatcher.find()) {
+					pv.value_point_estimate = Double.parseDouble(phMatcher.group());
+				}
+			}
+
+			if (PH_Qualifier != null) {
+				pv.value_qualifier = PH_Qualifier.replace("ca.", "~");
+			}
+
+			if (pv.value_point_estimate != null || pv.value_min != null || pv.value_max != null) {
+				er.parameter_values.add(pv);
+			}
 		}
 
 		// System.out.println("pH:\t"+er.pH);
 
 		if (Temperature_MeanValue != null) {
-
+			String temperatureMean = null;
 			if (Temperature_Unit != null) {
-				if (Temperature_Unit.equals("°C")) {
-					er.temperature_C = Double.parseDouble(Temperature_MeanValue);
-				} else if (Temperature_Unit.equals("°F")) {
-					er.temperature_C = 5 / 9 * (Double.parseDouble(Temperature_MeanValue) - 32);
-					er.temperature_C = Double.parseDouble(Temperature_MeanValue);
-					// System.out.println(er.temperature_C+"C\tFrom F");
+				if (Temperature_Unit.contains("C")) {
+					temperatureMean = Temperature_MeanValue;
+				} else if (Temperature_Unit.contains("F")) {
+					temperatureMean = String.valueOf(5 / 9 * (Double.parseDouble(Temperature_MeanValue) - 32));
+					// temperatureMean = Double.parseDouble(Temperature_MeanValue);
+					// System.out.println(temperatureMean+"C\tFrom F");
 				} else if (Temperature_Unit.equals("K")) {
-					er.temperature_C = Double.parseDouble(Temperature_MeanValue) - 273.15;
+					temperatureMean = String.valueOf(Double.parseDouble(Temperature_MeanValue) - 273.15);
 				} else {
-					System.out.println("Handle temp unit=" + Temperature_Unit);
+					logUniqueHandle("Handle temp unit=" + Temperature_Unit);
 				}
 			} else {
 				// System.out.println("null temp units for "+Temperature_MeanValue);
-				er.temperature_C = Double.parseDouble(Temperature_MeanValue);
+				temperatureMean = Temperature_MeanValue;
 				er.updateNote("°C assumed for temperature");
 
 			}
 
+			if (temperatureMean != null && !temperatureMean.isEmpty()) {
+				ParameterValue pv = new ParameterValue();
+				pv.parameter.name = ExperimentalConstants.expParamTemperature;
+				pv.unit.abbreviation = "C";
+				Pattern tempPattern = Pattern.compile("\\d+");
+				Matcher tempMatcher = tempPattern.matcher(temperatureMean);
+				if (tempMatcher.find()) {
+					pv.value_point_estimate = Double.parseDouble(tempMatcher.group());
+				}
+				er.parameter_values.add(pv);
+			}
+
+		} else if (Temperature != null && !Temperature.isEmpty()) {
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamTemperature;
+			pv.unit.abbreviation = "C";
+			Pattern tempPattern = Pattern.compile("\\d+");
+				Matcher tempMatcher = tempPattern.matcher(Temperature);
+				if (tempMatcher.find()) {
+					pv.value_point_estimate = Double.parseDouble(tempMatcher.group());
+				}
+			er.parameter_values.add(pv);
+			er.updateNote("°C assumed for temperature");
 		}
 		if (Temperature_Qualifier != null) {
 			System.out.println("Temperature_Qualifier=" + Temperature_Qualifier);
@@ -1702,7 +1782,7 @@ public class RecordQSAR_ToolBox {
 			}
 
 		} else if (Database.equals("ECHA REACH")) {
-			System.out.println("Handle ECHA REACH");
+			logUniqueHandle("Handle ECHA REACH");
 			// TODO: Doesnt look like it exports usable data
 
 		}
@@ -2397,7 +2477,7 @@ public class RecordQSAR_ToolBox {
 
 			return String.valueOf(valueDouble);
 		} else {
-			return "";
+			return value;
 		}
 	}
 
@@ -2417,10 +2497,16 @@ public class RecordQSAR_ToolBox {
 			}
 		}
 
-		// Wet/Dry measurement (Wet vs Dry) TODO
+		// Wet/Dry measurement (Wet vs Dry)
 		if (this.Database != null && List.of(ExperimentalConstants.sourceNite, ExperimentalConstants.sourceCefic, ExperimentalConstants.sourceCanada).contains(this.Database)) {
 			if (this.Test_specificity != null && !this.Test_specificity.isEmpty()) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, WordUtils.capitalizeFully(this.Test_specificity));
+				if (this.Test_specificity.toLowerCase().contains("wet") && !this.Test_specificity.toLowerCase().contains("dry")) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+				} else if (this.Test_specificity.toLowerCase().contains("dry") && !this.Test_specificity.toLowerCase().contains("wet")) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+				} else if (this.Test_specificity.toLowerCase().contains("wet") && this.Test_specificity.toLowerCase().contains("dry")) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
+				}
 			}
 		} else if (this.Database != null && List.of(ExperimentalConstants.sourceEcha).contains(this.Database)) {
 			Boolean dryWetBoolean = false;
@@ -2477,53 +2563,84 @@ public class RecordQSAR_ToolBox {
 
 		// Water concentration (Quantitative water concentration) TODO (Check in NITE if need to handle max/min pairs)
 		if (this.Exposure_concentration_MeanValue != null && !this.Exposure_concentration_MeanValue.isEmpty() && this.Exposure_concentration_Unit != null && !this.Exposure_concentration_Unit.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamWaterConcentration, (String)this.Exposure_concentration_MeanValue + " " + (String)this.Exposure_concentration_Unit);
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamWaterConcentration;
+			pv.unit.abbreviation = this.Exposure_concentration_Unit;
+			pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue);
+			er.parameter_values.add(pv);
 		}
 
 		// Concentration type (Measured) TODO
 		
 		// Lipid concentration (% lipid)
+		String lipidContentMax = null;
+		String lipidContentMin = null;
+		String lipidContentMean = null;
+		String lipidContentUnit = null;
 		if (this.Lipid_content_Unit != null && !this.Lipid_content_Unit.isEmpty() && !this.Lipid_content_Unit.equalsIgnoreCase("Published Data")) {
-			String lipidContentMax = this.Lipid_content_MaxValue;
-			String lipidContentMin = this.Lipid_content_MinValue;
-			String lipidContentMean = this.Lipid_content_MeanValue;
-			String lipidContentUnit = this.Lipid_content_Unit;
+			lipidContentMax = this.Lipid_content_MaxValue;
+			lipidContentMin = this.Lipid_content_MinValue;
+			lipidContentMean = this.Lipid_content_MeanValue;
+			lipidContentUnit = this.Lipid_content_Unit;
 
-			if (lipidContentMax != null && !lipidContentMax.isEmpty() && lipidContentMin != null && !lipidContentMin.isEmpty()) {
-				String lipidContentString = convertLipidUnits(lipidContentMin, lipidContentUnit) + " - " + convertLipidUnits(lipidContentMax, lipidContentUnit);
-				er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
-			} else if (lipidContentMean != null && !lipidContentMean.isEmpty()) {
-				String lipidContentString = convertLipidUnits(lipidContentMean, lipidContentUnit);
-				er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
-			}
+			// if (lipidContentMax != null && !lipidContentMax.isEmpty() && lipidContentMin != null && !lipidContentMin.isEmpty()) {
+			// 	String lipidContentString = convertLipidUnits(lipidContentMin, lipidContentUnit) + " - " + convertLipidUnits(lipidContentMax, lipidContentUnit);
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
+			// } else if (lipidContentMean != null && !lipidContentMean.isEmpty()) {
+			// 	String lipidContentString = convertLipidUnits(lipidContentMean, lipidContentUnit);
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
+			// }
 		} else if (this.Lipid_Unit != null && !this.Lipid_Unit.isEmpty()) {
-			String lipidContentMax = this.Lipid_MaxValue;
-			String lipidContentMin = this.Lipid_MinValue;
-			String lipidContentMean = this.Lipid_MeanValue;
-			String lipidContentUnit = this.Lipid_Unit;
+			lipidContentMax = this.Lipid_MaxValue;
+			lipidContentMin = this.Lipid_MinValue;
+			lipidContentMean = this.Lipid_MeanValue;
+			lipidContentUnit = this.Lipid_Unit;
 
-			if (lipidContentMax != null && !lipidContentMax.isEmpty() && lipidContentMin != null && !lipidContentMin.isEmpty()) {
-				String lipidContentString = convertLipidUnits(lipidContentMin, lipidContentUnit) + " - " + convertLipidUnits(lipidContentMax, lipidContentUnit);
-				er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
-			} else if (lipidContentMean != null && !lipidContentMean.isEmpty()) {
-				String lipidContentString = convertLipidUnits(lipidContentMean, lipidContentUnit);
-				er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
-			}
+			// if (lipidContentMax != null && !lipidContentMax.isEmpty() && lipidContentMin != null && !lipidContentMin.isEmpty()) {
+			// 	String lipidContentString = convertLipidUnits(lipidContentMin, lipidContentUnit) + " - " + convertLipidUnits(lipidContentMax, lipidContentUnit);
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
+			// } else if (lipidContentMean != null && !lipidContentMean.isEmpty()) {
+			// 	String lipidContentString = convertLipidUnits(lipidContentMean, lipidContentUnit);
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidContentString);
+			// }
 		} else if (this.Database.equals(ExperimentalConstants.sourceCanada)) {
 			// Handle Canada-specific logic
 			if (this.Comments != null && this.Comments.toLowerCase().contains("lipid content")) {
-				Pattern lipidPattern = Pattern.compile("([0-9]+(?:\\.[0-9]+)?)\\s*%");
+				Pattern lipidPattern = Pattern.compile("(\\d+\\.?\\d*)\\s*%");
+				// Pattern lipidPattern = Pattern.compile("([0-9]+(?:\\.[0-9]+)?)\\s*%");
 				Matcher lipidMatcher = lipidPattern.matcher(this.Comments);
 				if (lipidMatcher.find()) {
-					String lipidString = lipidMatcher.group(1);
-					er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
+					lipidContentMean = lipidMatcher.group(1);
+					lipidContentUnit = "%";
+					// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
 				}
 			}
+		}
+		if (lipidContentMax != null || lipidContentMin != null || lipidContentMean != null) {
+			lipidContentMax = convertLipidUnits(lipidContentMax, lipidContentUnit);
+			lipidContentMin = convertLipidUnits(lipidContentMin, lipidContentUnit);
+			lipidContentMean = convertLipidUnits(lipidContentMean, lipidContentUnit);
+
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+
+			if (lipidContentMax != null && !lipidContentMax.isEmpty()) {
+				pv.value_max = Double.parseDouble(lipidContentMax);
+			}
+			if (lipidContentMin != null && !lipidContentMin.isEmpty()) {
+				pv.value_min = Double.parseDouble(lipidContentMin);
+			}
+			if (lipidContentMean != null && !lipidContentMean.isEmpty()) {
+				pv.value_point_estimate = Double.parseDouble(lipidContentMean);
+			}
+
+			er.parameter_values.add(pv);
 		}
 		
 		// Method (SS vs kinetic)
 		if (this.Calculation_basis != null && !this.Calculation_basis.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, this.Calculation_basis);
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(this.Calculation_basis));
 		}
 		
 		// Exposure duration (Quantiative exposure duration)
@@ -2562,16 +2679,19 @@ public class RecordQSAR_ToolBox {
 		}
 		
 		// Water temperature (temperature) TODO (handle identically to Temperature column)
-		if (this.Temperature_MeanValue != null && !this.Temperature_MeanValue.isEmpty() && this.Temperature_Unit != null && !this.Temperature_Unit.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, (String)this.Temperature_MeanValue + " " + (String)this.Temperature_Unit);
-		} else if (this.Temperature != null && !this.Temperature.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, this.Temperature);
-		}
+		// if (this.Temperature_MeanValue != null && !this.Temperature_MeanValue.isEmpty() && this.Temperature_Unit != null && !this.Temperature_Unit.isEmpty()) {
+		// 	er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, (String)this.Temperature_MeanValue + " " + (String)this.Temperature_Unit);
+		// } else if (this.Temperature != null && !this.Temperature.isEmpty()) {
+		// 	er.experimental_parameters.put(ExperimentalConstants.expParamTemperature, this.Temperature);
+		// }
 
 		// pH
-		if (this.pH != null && !this.pH.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamPh, this.pH);
-		}
+		// if (this.pH != null && !this.pH.isEmpty()) {
+		// 	er.experimental_parameters.put(ExperimentalConstants.expParamPh, this.pH);
+		// }
+
+		// Temperature and pH
+		setExperimentalParameters(er);
 
 		// Exposure type (static, flow-through, renewal)
 		// Handled elsewhere
@@ -2585,7 +2705,7 @@ public class RecordQSAR_ToolBox {
 		} else if (Database.equals("Bioaccumulation fish CEFIC LRI")) {
 			setObservationDuration(er);
 
-			if (this.Reliability_score == null || this.Reliability_score.contains("3")
+			if (this.Reliability_score.contains("3")
 					|| this.Reliability_score.contains("4")) {
 				er.keep = false;
 				er.reason = "Insufficient reliability";
@@ -2596,7 +2716,7 @@ public class RecordQSAR_ToolBox {
 				er.note = Comments;
 			}
 			er.reference = Reference_source;
-			er.experimental_parameters.put("Media type", Water_type);
+			er.experimental_parameters.put("Media type", Water_type.toLowerCase().trim());
 			// er.experimental_parameters.put("Tissue", Organ);
 			er.experimental_parameters.put("Species latin", Test_organisms_species);
 			er.experimental_parameters.put("Species common", Species_common_name);
@@ -2705,7 +2825,7 @@ public class RecordQSAR_ToolBox {
 
 			if (Tissue_analyzed != null) {
 				er.experimental_parameters.put("Media type", Water_type);
-				er.experimental_parameters.put("Response site", Tissue_analyzed);
+				er.experimental_parameters.put("Response site", Tissue_analyzed.toLowerCase());
 				er.note = Statistics;
 			}
 		} else if (Database.equals("ECHA REACH")) {
@@ -2740,21 +2860,21 @@ public class RecordQSAR_ToolBox {
 
 		if (Test_guideline != null) {
 			if (Test_guideline.toLowerCase().contains("other test guideline")) {
-				er.experimental_parameters.put("Test guideline", Test_guideline_other);
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline_other);
 				// System.out.println(gson.toJson(jo));
 				// if(Test_guideline_other.contains("not reported")) return;
 				// System.out.println("Test_guideline_other="+Test_guideline_other);
 			} else {
-				er.experimental_parameters.put("Test guideline", Test_guideline);
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline);
 				// System.out.println("Test_guideline="+Test_guideline);
 			}
 		} else {
 			if (Test_guideline_0 != null) {
 				if (Test_guideline_0.toLowerCase().contains("other test guideline")) {
-					er.experimental_parameters.put("Test guideline", Test_guideline_other_0);
+					er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline_other_0);
 					// System.out.println("Test_guideline_other_0="+Test_guideline_other_0);
 				} else {
-					er.experimental_parameters.put("Test guideline", Test_guideline_0);
+					er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline_0);
 					// System.out.println("Test_guideline_0="+Test_guideline_0);
 				}
 			} else {
@@ -2889,7 +3009,7 @@ public class RecordQSAR_ToolBox {
 		} else if (Endpoint.equals("BAF")) {
 			er.property_name = ExperimentalConstants.strBAF;
 		} else {
-			System.out.println("Handle Endpoint="+Endpoint);
+			logUniqueHandle("Handle Endpoint=" + Endpoint);
 		}
 
 
@@ -2937,10 +3057,14 @@ public class RecordQSAR_ToolBox {
 			return er;
 		} else if(Value_Unit.equals("log(L/kg)")) {
 			er.property_value_units_original=ExperimentalConstants.str_LOG_L_KG;
-		} else if(Value_Unit.equals("dimensionless")) {
+		} else if(Value_Unit.equals("dimensionless") || Value_Unit.equals("whole body w.w.") || Value_Unit.equals("%") || Value_Unit.equals("BCF: bioconcentration factor") || Value_Unit.equals("L/Kg ww")) {
 			er.property_value_units_original=ExperimentalConstants.str_L_KG;
+		} else if (Value_Unit.toLowerCase().equals("folds") || Value_Unit.toLowerCase().equals("x") || Value_Unit.toLowerCase().equals("kg/d") || Value_Unit.toLowerCase().contains("conc.")) {
+			er.keep = false;
+			er.updateReason("Units are invalid");
+			return er;
 		} else {
-			System.out.println("Handle Value_Unit="+Value_Unit);
+			logUniqueHandle("Handle Value_Unit=" + Value_Unit);
 		}
 		
 		if (er.property_name!=null)
@@ -3137,9 +3261,9 @@ public class RecordQSAR_ToolBox {
 				
 				if(species.species_supercategory!=null) {
 					String supercategory=standardizeSupercategory(species);
-					if (supercategory==null || supercategory.equals("omit") || supercategory.equals("not specified")) {
+					if (supercategory==null || supercategory.equals("not specified")) {
 						er.keep=false;
-						er.updateReason("invalid supercategory");
+						er.updateReason("unspecified supercategory");
 					} 
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, supercategory);
 				} else {
@@ -3219,7 +3343,7 @@ public class RecordQSAR_ToolBox {
 		} else if (species.species_supercategory.equals("not specified")) {
 			return "not specified";
 		} else {
-			System.out.println("Handle\t" + Species_common_name + "\t" + species.species_supercategory);
+			logUniqueHandle("Handle\t" + Species_common_name + "\t" + species.species_supercategory);
 			return null;
 		}
 	}
@@ -3310,7 +3434,7 @@ public class RecordQSAR_ToolBox {
 						&& !Test_organisms_species.contains("see below")
 						&& !Test_organisms_species.contains("not specified") && !Test_organisms_species.equals("Other")
 						&& !Test_organisms_species.contains("no data")) {
-					System.out.println("Handle\t" + Test_organisms_species + "\t" + species.species_supercategory);
+					logUniqueHandle("Handle\t" + Test_organisms_species + "\t" + species.species_supercategory);
 				}
 			}
 		} else if (Test_organisms_species != null && !Test_organisms_species.toLowerCase().contains("other")) {
