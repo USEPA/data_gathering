@@ -730,7 +730,7 @@ public class CompareExperimentalRecords {
 		/**
 		 * Compares unique text parameter values from multiple sources
 		 */
-		private void compareUniqueParameterValues() {
+		private void compareUniqueParameterValues(List<String> parameterNames) {
 			
 			List<Source> sourcesAll = new ArrayList<>();
 			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
@@ -762,7 +762,7 @@ public class CompareExperimentalRecords {
 
 				if(er.parameter_values!=null) {
 					for(ParameterValue pv:er.parameter_values) {
-						if(pv.value_text!=null) {
+						if(pv.value_text!=null && parameterNames.contains(pv.parameter.name)) {
 							hsParams.add(pv.parameter.name+"\t"+pv.value_text+"\t"+source);	
 						}
 					}
@@ -771,7 +771,9 @@ public class CompareExperimentalRecords {
 				if(er.experimental_parameters!=null) {
 					
 					for (String parameterName:er.experimental_parameters.keySet()) {
-						hsParams.add(parameterName+"\t"+er.experimental_parameters.get(parameterName)+"\t"+source);	
+						if (parameterName != null && parameterNames.contains(parameterName)) {
+							hsParams.add(parameterName+"\t"+er.experimental_parameters.get(parameterName)+"\t"+source);	
+						}
 					}
 				}
 			}
@@ -2080,9 +2082,23 @@ public class CompareExperimentalRecords {
 
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
-//		c.c.compareBcf1vsAll();
+		// c.c.compareBcf1vsAll();
 		
-		c.c.compareUniqueParameterValues();
+		List<String> parameterNames = List.of(
+			ExperimentalConstants.expParamGuideline,
+			ExperimentalConstants.expParamMediaType,
+			ExperimentalConstants.expParamTestLocation,
+			ExperimentalConstants.expParamWetDry,
+			ExperimentalConstants.expParamWaterConcentration,
+			ExperimentalConstants.expParamLipidPercent,
+			ExperimentalConstants.expParamSpeciesSupercategory,
+			ExperimentalConstants.expParamMeasurementMethod,
+			ExperimentalConstants.expParamObservationDuration,
+			ExperimentalConstants.expParamTissueType,
+			ExperimentalConstants.expParamTemperature,
+			ExperimentalConstants.expParamExposureType
+		);
+		c.c.compareUniqueParameterValues(parameterNames);
 
 //		c.c.compareOralRat();
 
