@@ -42,6 +42,7 @@ import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
+import gov.epa.exp_data_gathering.parse.TextUtilities;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
 import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
@@ -1917,6 +1918,12 @@ public class RecordQSAR_ToolBox {
 
 	private void setPropertyValues(ExperimentalRecord er) {
 		
+		//2026-06-26, for some reason the character encoding is now causing problems so quick fix:
+		Value_MeanValue = TextUtilities.fixMojibake(Value_MeanValue);
+		Value_MinValue = TextUtilities.fixMojibake(Value_MinValue);
+		Value_MaxValue = TextUtilities.fixMojibake(Value_MaxValue);
+		Qualifier = TextUtilities.fixMojibake(Qualifier);
+
 		String infStr = "\u221E";  
 		
 		if (this.Value_MinValue != null && this.Original_value_MaxValue != null) {
@@ -1961,6 +1968,7 @@ public class RecordQSAR_ToolBox {
 
 		} else if (this.Value_MeanValue != null) {
 
+			
 			if (Value_MeanValue.contains(infStr)) {
 				er.keep = false;
 				er.reason = "Infinite property value";
@@ -1979,9 +1987,19 @@ public class RecordQSAR_ToolBox {
 				return;
 			}
 
-			er.property_value_point_estimate_original = Double.parseDouble(this.Value_MeanValue);
-
+			
+			try {
+				er.property_value_point_estimate_original = Double.parseDouble(this.Value_MeanValue);
+			} catch (Exception ex) {
+				System.out.println("Row "+Row+", error parsing Value_MeanValue: "+Value_MeanValue);
+				er.keep=false;
+				er.reason="Could not parse Value_MeanValue";
+				return;
+			}
+			
 			er.property_value_string = "";
+
+			
 
 			if (this.Qualifier != null) {
 
@@ -2008,7 +2026,14 @@ public class RecordQSAR_ToolBox {
 					er.property_value_numeric_qualifier = "\u2265"; // ≥
 
 				} else {
-					System.out.println("Unhandled qualifier:\t" + this.Qualifier);
+					System.out.println("Row "+this.Row+", Unhandled qualifier:\t" + this.Qualifier);
+					
+					System.out.println("Qualifier = [" + Qualifier + "]");
+					Qualifier.codePoints().forEach(cp ->
+					    System.out.printf("U+%04X ", cp)
+					);
+					System.out.println();
+					
 				}
 
 				// System.out.println("here:"+er.property_value_numeric_qualifier);
@@ -3051,6 +3076,7 @@ public class RecordQSAR_ToolBox {
 
 		addNewExperimentalParameters(er);
 		
+			
 		if(Value_Unit==null) {
 			er.keep=false;
 			er.updateReason("Units are null");
@@ -3069,6 +3095,27 @@ public class RecordQSAR_ToolBox {
 		
 		if (er.property_name!=null)
 			unitConverter.convertRecord(er);
+		
+		
+//		if(er.experimental_parameters.get(ExperimentalConstants.expParamWetDry)!=null) {
+//			if (er.experimental_parameters.get(ExperimentalConstants.expParamWetDry).equals("Dry")) {
+//				
+//				if(er.property_value_point_estimate_final!=null) {
+////					System.out.println("Row "+Row+", corrected dry to wet");
+//					er.property_value_point_estimate_final*=0.2;
+//				}
+//
+//				if(er.property_value_min_final!=null) {
+//					er.property_value_min_final*=0.2;
+//				}
+//				
+//				if(er.property_value_max_final!=null) {
+//					er.property_value_max_final*=0.2;
+//				}
+//
+//			}
+//		}
+
 
 		if (!er.hasNumericFinalValue()) {
 			er.keep = false;
@@ -3248,7 +3295,11 @@ public class RecordQSAR_ToolBox {
 
 	private void setSpeciesParameters(Hashtable<String, Species> htSpeciesByBinomialName, ExperimentalRecord er) {
 		if (Test_organisms_species != null) {
-			if(htSpeciesByBinomialName.containsKey(Test_organisms_species.toLowerCase())) {
+			
+			if (Test_organisms_species.equalsIgnoreCase("Other Test Organisms (species)")) {
+				er.keep=false;
+				er.updateReason("Test_organisms_species is missing");
+			} else if(htSpeciesByBinomialName.containsKey(Test_organisms_species.toLowerCase())) {
 				Species species=htSpeciesByBinomialName.get(Test_organisms_species.toLowerCase());
 				
 				if (species.species_common!=null) {
@@ -3274,15 +3325,19 @@ public class RecordQSAR_ToolBox {
 			} else {
 				
 				if (Test_organisms_species.equals("Gnathopogon Coerulescens")||
+						Test_organisms_species.equals("Ictalurus Nebulosus") ||
 						Test_organisms_species.equals("Chasmichthys Gulosus")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, "Fish");
+				
 				} else if (Test_organisms_species.equals("Asellus Brevicaudus") || 
-						(Test_organisms_species.equals("Paratya Compressa Compressa"))) {
+						Test_organisms_species.equals("Porcellus Scaber") ||
+						Test_organisms_species.equals("Paratya Compressa Compressa")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, "Crustaceans");
 				} else {
 					// System.out.println(Test_organisms_species+" not in species ht");
 					er.keep=false;
 					er.updateReason("Test_organisms_species not in species ht");
+					System.out.println(Test_organisms_species+" not in species ht");
 				}
 			}
 		} else {

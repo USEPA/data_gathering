@@ -694,7 +694,7 @@ public class RecordBurkhard {
 			if (OECD_305.toLowerCase().equals("yes")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "OECD 305");
 			} else if (OECD_305.toLowerCase().equals("no")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not OECD 305");
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not reported");
 			}
 		}
 		

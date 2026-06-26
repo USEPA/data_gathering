@@ -489,12 +489,12 @@ public class RecordEcotox {
 		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
 		er.experimental_parameters.put("concentration_type", getConcentrationType(conc_type));
 
-		if(ParseEcotox.onlyExposureTypeSFR) {
-			if(!exposure_type.equals("Static") && !exposure_type.equals("Flow-through") &&!exposure_type.equals("Renewal")) {
-				er.keep=false;
-				er.reason="Invalid exposure type";
-			}
-		}
+//		if(onlyExposureTypeSFR) {
+//			if(!exposure_type.equals("Static") && !exposure_type.equals("Flow-through") &&!exposure_type.equals("Renewal")) {
+//				er.keep=false;
+//				er.reason="Invalid exposure type";
+//			}
+//		}
 		
 		
 		if(er.property_name.equals(ExperimentalConstants.strAcuteAquaticToxicity)
@@ -1304,10 +1304,11 @@ public class RecordEcotox {
 
 		if(propertyName.toLowerCase().contains("bioconcentration")) {
 			er.property_category="bioconcentration";
-			if(!test_location.equals("Lab")) {
-				er.keep=false;
-				er.reason="Test location not in Lab";
-			}
+			
+//			if(!test_location.equals("Lab")) {
+//				er.keep=false;
+//				er.reason="Test location not in Lab";
+//			}
 		} else if (propertyName.toLowerCase().contains("bioaccumulation")) {
 			er.property_category="bioaccumulation";
 //			System.out.println("BAF test_location:"+test_location);
@@ -1315,7 +1316,6 @@ public class RecordEcotox {
 
 //		System.out.println(er.property_name);
 		setChemicalIdentifiers(er);
-		
 		
 		
 //		System.out.println(cas_number+"\t"+er.casrn);
@@ -1407,6 +1407,11 @@ public class RecordEcotox {
 
 //		setExposureDuration(er);//we want the observation duration not the exposure duration
 		setObservationDuration(er,"Observation duration");//to be consistent with Arnot 2006
+		
+//		if(!test_location.equals("Lab")) {
+//			er.keep=false;
+//			er.reason="Not lab";
+//		}
 		
 		er.experimental_parameters.put("Test location", test_location);
 		er.experimental_parameters.put("exposure_type", exposure_type);

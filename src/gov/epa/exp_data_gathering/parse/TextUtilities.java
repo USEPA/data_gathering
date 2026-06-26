@@ -23,6 +23,12 @@ public class TextUtilities {
 		}
 
 	}
+	
+	public static String fixMojibake(String s) {
+	    if (s == null) return null;
+	    return new String(s.getBytes(java.nio.charset.StandardCharsets.ISO_8859_1),
+	                      java.nio.charset.StandardCharsets.UTF_8);
+	}
 
 	public static double[] extractAltFormatRangeFromString(String str,int end) throws Exception {
 		Matcher anyRangeMatcher = Pattern.compile(">[=]?[ ]?([-]?[ ]?[0-9]*\\.?[0-9]+)[ ]?<[=]?[ ]?([-]?[ ]?[0-9]*\\.?[0-9]+)").matcher(str.substring(0,end));

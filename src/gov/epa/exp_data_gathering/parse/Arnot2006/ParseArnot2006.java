@@ -27,18 +27,14 @@ public class ParseArnot2006 extends Parse {
 	String propertyName;
 	
 	public ParseArnot2006(String propertyName) {
-		
 		this.propertyName=propertyName;
 		sourceName = RecordArnot2006.sourceName; 
-		this.init();
+		this.init();//if pass propertyName to init, then it will make duplicate copy of original records in each output folder
 		
 		mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName;
 		jsonFolder= mainFolder;
-		
 		mainFolder+=File.separator+propertyName;//output json/excel in subfolder
-
 		new File(mainFolder).mkdirs();
-
 	}
 	
 	@Override

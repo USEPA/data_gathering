@@ -73,8 +73,11 @@ public class ParseQSAR_ToolBox extends Parse {
 	String original_source_name;
 	List<String>selectedEndpoints;
 	
-	public ParseQSAR_ToolBox(String propertyName) {
+	public ParseQSAR_ToolBox(String propertyName,String filename) {
 		this.propertyName=propertyName;
+		this.fileName=filename;
+		
+		
 		sourceName = RecordQSAR_ToolBox.sourceName; // TODO Consider creating ExperimentalConstants.strSourceQSAR_ToolBox instead.
 		this.init();
 //		mainFolder = "Data" + File.separator + "Experimental" + File.separator + sourceName;
@@ -429,10 +432,8 @@ public class ParseQSAR_ToolBox extends Parse {
 		// String [] filenames= {fileNameBCF_NITE};
 		
 		for (String filename:filenames) {
-			
-			ParseQSAR_ToolBox.fileName=filename;
-			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null);
-			p.generateOriginalJSONRecords=false;//*** set to true on first run
+			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null, filename);
+			p.generateOriginalJSONRecords=true;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
@@ -462,17 +463,13 @@ public class ParseQSAR_ToolBox extends Parse {
 	static void runPhyschem() {
 		
 		IOUtils.setByteArrayMaxOverride(200000000);
-		
-		fileName=fileNamePhyschem;
-
-		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null);
+		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null, fileNamePhyschem);
 		
 //		ExcelSourceReader.encoding="ISO-8859-1";//gets degrees but not <=
 //		ExcelSourceReader.encoding="UTF-16";//no
 //		ExcelSourceReader.encoding="UTF-8";
 //		ExcelSourceReader.encoding="ASCII";//no
 		
-
 		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=true;
 		p.writeJsonExperimentalRecordsFile=true;
@@ -480,25 +477,18 @@ public class ParseQSAR_ToolBox extends Parse {
 		p.writeExcelFileByProperty=true;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 		p.createFiles();
-		
-		
 	}
 	
 
 	static void runKoc() {
 		
 		IOUtils.setByteArrayMaxOverride(200000000);
-		
-		fileName=fileNameKoc;
-
-		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null);
+		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null, fileNameKoc);
 		
 //		ExcelSourceReader.encoding="ISO-8859-1";//gets degrees but not <=
 //		ExcelSourceReader.encoding="UTF-16";//no
 //		ExcelSourceReader.encoding="UTF-8";
 //		ExcelSourceReader.encoding="ASCII";//no
-		
-
 //		System.out.println("5 ≤ 10");
 //		JsonObject jsonObject = new JsonObject();
 //        jsonObject.addProperty("qualifier", "≤");
@@ -522,16 +512,12 @@ public class ParseQSAR_ToolBox extends Parse {
 	static void runBiodegWaterScreening() {
 		
 		IOUtils.setByteArrayMaxOverride(200000000);
-		
-		fileName=fileNameBiodegWaterScreening;
-
-		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null);
+		ParseQSAR_ToolBox p=new ParseQSAR_ToolBox(null, fileNameBiodegWaterScreening);
 		
 //		ExcelSourceReader.encoding="ISO-8859-1";//gets degrees but not <=
 		ExcelSourceReader.encoding="UTF-16";//no
 //		ExcelSourceReader.encoding="UTF-8";
 //		ExcelSourceReader.encoding="ASCII";//no
-		
 
 //		System.out.println("5 ≤ 10");
 //		JsonObject jsonObject = new JsonObject();
@@ -546,19 +532,11 @@ public class ParseQSAR_ToolBox extends Parse {
 		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 		p.createFiles();
-		
-		
-		
 	}
 	
 	static void run96hrAcuteFishTox() {
 		
-		String propertyName=ExperimentalConstants.strAcuteAquaticToxicity;
-		
-		fileName=fileName96hrAcuteAquatic;
-		
-		ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(propertyName);
-		
+		ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(ExperimentalConstants.strAcuteAquaticToxicity, fileName96hrAcuteAquatic);
 		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=true;
 		p.writeJsonExperimentalRecordsFile=true;
@@ -566,7 +544,6 @@ public class ParseQSAR_ToolBox extends Parse {
 		p.writeExcelFileByProperty=true;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 		p.createFiles();
-		
 	}
 	
 	static void convertTsvFilesToExcel() {
