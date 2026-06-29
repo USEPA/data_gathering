@@ -670,7 +670,15 @@ public class RecordBurkhard {
 		
 		setWaterConcentration(er);
 //		er.experimental_parameters.put("Exposure concentration",Exposure_Concentrations);
-		er.experimental_parameters.put("Response site",Tissue.toLowerCase());
+		if (Tissue != null) {
+			if (Tissue.toLowerCase().contains("whole body w/o liver")) {
+				er.experimental_parameters.put("Response site", "whole body minus liver");
+			} else if (Tissue.toLowerCase().contains("whole body w/o liver and gi tract")) {
+				er.experimental_parameters.put("Response site", "whole body minus liver and gi tract");
+			} else {
+				er.experimental_parameters.put("Response site", Tissue.toLowerCase());
+			}
+		}
 		er.experimental_parameters.put("Media type",Marine_Brackish_Freshwater.toLowerCase().trim());
 		if (Location != null && Location.toLowerCase().contains("lab")) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
@@ -693,6 +701,26 @@ public class RecordBurkhard {
 		if (OECD_305 != null) {
 			if (OECD_305.toLowerCase().equals("yes")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "OECD 305");
+				// Reasonable assumptions if guideline OECD 305 was followed
+				// Guideline is intended to use flow-through exposure (semi-static is permissible)
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Flow-through");
+				// Guideline is supposed to normalize to 5% lipid content
+				ParameterValue pv = new ParameterValue();
+				pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+				pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+				pv.value_point_estimate = 5.0;
+				er.parameter_values.add(pv);
+				er.updateNote("Exposure type and lipid content set based on OECD 305 guideline standards");
+				// Guideline is supposed to normalize to wet-weight, might be set elsewhere
+				if (er.experimental_parameters.get(ExperimentalConstants.expParamWetDry) == null) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+					er.updateNote("Wet-weight assumed based on OECD 305 guideline standards");
+				}
+				// Guideline is supposed to used kinetic BCF values, might be set elsewhere
+				if (er.experimental_parameters.get(ExperimentalConstants.expParamMeasurementMethod) == null) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
+					er.updateNote("Kinetic measurement method assumed based on OECD 305 guideline standards");
+				}
 			} else if (OECD_305.toLowerCase().equals("no")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not OECD 305");
 			}

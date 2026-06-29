@@ -2085,18 +2085,18 @@ public class CompareExperimentalRecords {
 		// c.c.compareBcf1vsAll();
 		
 		List<String> parameterNames = List.of(
-			ExperimentalConstants.expParamGuideline,
-			ExperimentalConstants.expParamMediaType,
-			ExperimentalConstants.expParamTestLocation,
-			ExperimentalConstants.expParamWetDry,
-			ExperimentalConstants.expParamWaterConcentration,
-			ExperimentalConstants.expParamLipidPercent,
-			ExperimentalConstants.expParamSpeciesSupercategory,
-			ExperimentalConstants.expParamMeasurementMethod,
-			ExperimentalConstants.expParamObservationDuration,
-			ExperimentalConstants.expParamTissueType,
-			ExperimentalConstants.expParamTemperature,
-			ExperimentalConstants.expParamExposureType
+			ExperimentalConstants.expParamGuideline
+			// ExperimentalConstants.expParamMediaType,
+			// ExperimentalConstants.expParamTestLocation,
+			// ExperimentalConstants.expParamWetDry,
+			// ExperimentalConstants.expParamWaterConcentration,
+			// ExperimentalConstants.expParamLipidPercent,
+			// ExperimentalConstants.expParamSpeciesSupercategory,
+			// ExperimentalConstants.expParamMeasurementMethod,
+			// ExperimentalConstants.expParamObservationDuration,
+			// ExperimentalConstants.expParamTissueType,
+			// ExperimentalConstants.expParamTemperature,
+			// ExperimentalConstants.expParamExposureType
 		);
 		c.c.compareUniqueParameterValues(parameterNames);
 

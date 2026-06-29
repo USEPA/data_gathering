@@ -626,7 +626,7 @@ public class RecordQSAR_ToolBox {
 		if (this.Details_on_results != null)
 			er.experimental_parameters.put("Biodegradation records", this.Details_on_results);
 		if (this.Endpoint != null)
-			er.experimental_parameters.put("Measurement method", this.Endpoint);
+			er.experimental_parameters.put("Measurement method", WordUtils.capitalizeFully(this.Endpoint));
 
 		addNewExperimentalParameters(er);
 
@@ -2484,7 +2484,7 @@ public class RecordQSAR_ToolBox {
 	private void addNewExperimentalParameters(ExperimentalRecord er) {
 		// Water type (freshwater vs saltwater)
 		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type.toLowerCase().trim());
 		}
 
 		// Test location (lab vs field)
@@ -2493,7 +2493,11 @@ public class RecordQSAR_ToolBox {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
 			} else {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, this.Test_type);
+				if (Test_type.toLowerCase().contains("semi")) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Semi-Static");
+				} else {
+					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, WordUtils.capitalizeFully(Test_type));
+				}
 			}
 		}
 
@@ -2670,11 +2674,11 @@ public class RecordQSAR_ToolBox {
 
 		if (tissueType != null && !tissueType.isEmpty()) {
 			if (tissueType.toLowerCase().contains("whole body")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "Whole Body");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body");
 			} else if (tissueType.toLowerCase().contains("organ")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "Organ");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "organ");
 			} else {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType);
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType.toLowerCase().trim());
 			}
 		}
 		
@@ -2824,8 +2828,8 @@ public class RecordQSAR_ToolBox {
 			er.publicSourceOriginal.description = "National Institute of Technology and Evaluation (Japan)";
 
 			if (Tissue_analyzed != null) {
-				er.experimental_parameters.put("Media type", Water_type);
-				er.experimental_parameters.put("Response site", Tissue_analyzed.toLowerCase());
+				er.experimental_parameters.put("Media type", Water_type.toLowerCase().trim());
+				er.experimental_parameters.put("Response site", Tissue_analyzed.toLowerCase().trim());
 				er.note = Statistics;
 			}
 		} else if (Database.equals("ECHA REACH")) {
@@ -3005,7 +3009,7 @@ public class RecordQSAR_ToolBox {
 			er.property_name = ExperimentalConstants.strBCF;	
 		} else if (Endpoint.equals("BCFss")) {
 			er.property_name = ExperimentalConstants.strBCF;	
-			er.experimental_parameters.put("Measurement method", ExperimentalConstants.strMethodSteadyState);
+			er.experimental_parameters.put("Measurement method", WordUtils.capitalizeFully(ExperimentalConstants.strMethodSteadyState));
 		} else if (Endpoint.equals("BAF")) {
 			er.property_name = ExperimentalConstants.strBAF;
 		} else {
@@ -3136,7 +3140,11 @@ public class RecordQSAR_ToolBox {
 			er.keep = false;
 			er.reason = "Missing exposure type";
 		} else {
-			er.experimental_parameters.put("exposure_type", Test_type);
+			if (Test_type.toLowerCase().contains("semi")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Semi-Static");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, Test_type);
+			}
 			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static")) {
 				er.keep = false;
 				er.reason = "Invalid exposure type";

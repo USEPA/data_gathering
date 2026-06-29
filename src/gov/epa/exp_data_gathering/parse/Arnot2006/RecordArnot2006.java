@@ -404,7 +404,13 @@ public class RecordArnot2006 {
 		}
 
 		if (tissue_analyzed != null && !tissue_analyzed.equals("N/A")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase());
+			if (tissue_analyzed.toLowerCase().contains("whole body - gonads")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus gonads");
+			} else if (tissue_analyzed.toLowerCase().contains("whole body without viscera")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus viscera");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase().trim());
+			}
 		}
 
 		if(limitToWholeBody && (tissue_analyzed==null || !tissue_analyzed.toLowerCase().equals("whole body"))) {

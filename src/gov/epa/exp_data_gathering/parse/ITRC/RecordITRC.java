@@ -934,7 +934,7 @@ public class RecordITRC {
 			if (tissueType.toLowerCase().contains("whole")) {
 				tissueType = "whole body";
 			}
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType);
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType.toLowerCase().trim());
 		}
 
 		if (recordBio.Wet_Dry_Lipid_Basis != null) {

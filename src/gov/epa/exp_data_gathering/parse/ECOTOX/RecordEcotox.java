@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.text.WordUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -1381,8 +1383,14 @@ public class RecordEcotox {
 		} else {
 			if(description.contains("Whole organism")) {
 				er.experimental_parameters.put("Response site", "whole body");	
+			} else if (description.toLowerCase().contains("multiple tissue/organ")) {
+				er.experimental_parameters.put("Response site", "multiple tissue/organs");
+			} else if (description.toLowerCase().contains("muscle+bone")) {
+				er.experimental_parameters.put("Response site", "muscle and bone");
+			} else if (description.toLowerCase().contains("root + stem")) {
+				er.experimental_parameters.put("Response site", "root and stem");
 			} else {
-				er.experimental_parameters.put("Response site", description.toLowerCase());
+				er.experimental_parameters.put("Response site", description.toLowerCase().trim());
 			} 
 		}
 		if(limitToWholeBody && (description==null || !description.equals("Whole organism")))  {
@@ -1396,7 +1404,15 @@ public class RecordEcotox {
 			er.reason="Not a standard test species";
 		}
 		
-		er.experimental_parameters.put("Media type", media_type.toLowerCase().trim());
+		if (media_type != null) {
+			if (media_type.toLowerCase().contains("fresh")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, "freshwater");
+			} else if (media_type.toLowerCase().contains("salt")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, "saltwater");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, media_type.toLowerCase().trim());
+			}
+		}
 		
 		if (media_type.contains("water")) {
 			setWaterConcentration(er);			
@@ -1409,7 +1425,7 @@ public class RecordEcotox {
 		setObservationDuration(er,"Observation duration");//to be consistent with Arnot 2006
 		
 		er.experimental_parameters.put("Test location", test_location);
-		er.experimental_parameters.put("exposure_type", exposure_type);
+		er.experimental_parameters.put("exposure_type", WordUtils.capitalizeFully(exposure_type));
 		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
 
 		// New parameters
