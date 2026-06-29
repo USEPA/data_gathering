@@ -735,7 +735,7 @@ public class CompareExperimentalRecords {
 			List<Source> sourcesAll = new ArrayList<>();
 			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 			sourcesAll.add(new Source("Arnot 2006", propertyName));
-			sourcesAll.add(new Source("ITRC July 2023", "BCF ITRC"));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
 			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
 			sourcesAll.add(new Source("Burkhard", propertyName));
 
@@ -746,6 +746,11 @@ public class CompareExperimentalRecords {
 
 			ExperimentalRecords recs=rm.getAllExperimentalRecords(sourcesAll,propertyName);
 			TreeSet<String>hsParams=new TreeSet<>();
+			
+			Hashtable<String,String>htFilter=new Hashtable<>();
+			
+			htFilter.put("Species supercategory", "Fish");
+			
 
 			for (ExperimentalRecord er:recs) {
 
@@ -770,11 +775,29 @@ public class CompareExperimentalRecords {
 				
 				if(er.experimental_parameters!=null) {
 					
+					boolean skip=false;
+					for (String parameterName :htFilter.keySet()) {
+						
+						String parameterValueFilter=htFilter.get(parameterName);
+						String parameterValue=(String)er.experimental_parameters.get(parameterName);
+						
+						if(!parameterValueFilter.equals(parameterValue)) {
+							skip=true;
+							break;
+						}						
+					}
+					
+					if(skip)
+						continue;
+					
 					for (String parameterName:er.experimental_parameters.keySet()) {
 						if (parameterName != null && parameterNames.contains(parameterName)) {
 							hsParams.add(parameterName+"\t"+er.experimental_parameters.get(parameterName)+"\t"+source);	
 						}
 					}
+					
+					
+					
 				}
 			}
 			

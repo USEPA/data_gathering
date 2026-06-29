@@ -34,24 +34,21 @@ public class ParseEcotox extends Parse {
 	String filepathWSexpLookup=folder+"WS_query_to_get_median_logWS_g_L.json";
 	String filepathWSpred=folder+"WS pred xgb.json";
 	
-	static String propertyName;
+	public String propertyName;
 	static Double durationDays;
 	static 	Integer species_number;
 	
-	static boolean excludeByExposureType=false;
-	static boolean excludeSaltWater=false;
-	static boolean includeConc2=false;
-	static boolean onlyExposureTypeSFR=true;
+	boolean excludeByExposureType=false;
+	boolean excludeSaltWater=false;
+	boolean includeConc2=false;
+	boolean onlyExposureTypeSFR=true;
 	
 //	boolean excludeSaltWater=false;
 
 //
 	public ParseEcotox() {
 		sourceName = RecordEcotox.sourceName; 
-		
 //		System.out.println("in init propertyName="+propertyName);
-		
-		this.init(propertyName);
 	}
 	
 	@Override
@@ -829,17 +826,20 @@ public class ParseEcotox extends Parse {
 		
 		RecordEcotox.uc.debug=true;
 		
-//		SetVars.setFatheadMinnow();
 //		SetVars.setBluegill();
 //		SetVars.setRainbowTrout();
 		
 		ParseEcotox p = new ParseEcotox();
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;//cant delete duplicates because experimental params might be different but still have same number value
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;
 		p.writeExcelFileByProperty=true;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
+
+		
+		SetVars sv=p.new SetVars();
+		sv.setFatheadMinnow();
 
 		
 //		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF, ExperimentalConstants.strFishBCF,
@@ -866,8 +866,8 @@ public class ParseEcotox extends Parse {
 //		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF);
 		
 		for (String propertyName:propertyNames) {
-			ParseEcotox.propertyName=propertyName;
 			p.init(propertyName);
+			p.propertyName=propertyName;
 			p.createFiles();		
 		}
 		
@@ -890,14 +890,12 @@ public class ParseEcotox extends Parse {
 	}
 
 
-	class SetVars {
+	public class SetVars {
 		
 		//TODO just filter the Acute aquatic toxicity experimentalRecords when creating dataset
-		
-
 		//the species specific properties could be avoided by just loading acute aquatic toxicity and then filtering by species and observation time
 		
-		static void setFatheadMinnow() {
+		void setFatheadMinnow() {
 			excludeByExposureType=true;
 			includeConc2=false;
 			propertyName=ExperimentalConstants.strNINETY_SIX_HOUR_FATHEAD_MINNOW_LC50;
@@ -905,7 +903,7 @@ public class ParseEcotox extends Parse {
 			durationDays=4.0;
 		}
 
-		static  void setBluegill() {
+		void setBluegill() {
 			excludeByExposureType=true;
 			includeConc2=false;
 			propertyName=ExperimentalConstants.strNINETY_SIX_HOUR_BLUEGILL_LC50;
@@ -913,7 +911,7 @@ public class ParseEcotox extends Parse {
 			durationDays=4.0;
 		}
 
-		static void setDaphniaMagnaData() {
+		void setDaphniaMagnaData() {
 			excludeByExposureType=true;
 			includeConc2=false;
 			propertyName=ExperimentalConstants.strFORTY_EIGHT_HR_DAPHNIA_MAGNA_LC50;
@@ -921,7 +919,7 @@ public class ParseEcotox extends Parse {
 			durationDays=2.0;
 		}
 
-		static void setRainbowTrout() {
+		void setRainbowTrout() {
 			excludeByExposureType=true;
 			includeConc2=false;
 			propertyName=ExperimentalConstants.strNINETY_SIX_HOUR_RAINBOW_TROUT_LC50;
@@ -929,7 +927,7 @@ public class ParseEcotox extends Parse {
 			durationDays=4.0;
 		}
 		
-		static void setScud() {
+		void setScud() {
 			excludeByExposureType=true;
 			includeConc2=false;
 			propertyName=ExperimentalConstants.strNINETY_SIX_HOUR_SCUD_LC50;

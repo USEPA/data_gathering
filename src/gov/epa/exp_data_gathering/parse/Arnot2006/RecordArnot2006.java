@@ -239,7 +239,7 @@ public class RecordArnot2006 {
 
 		String strPropertyValue=null;
 		if(propertyName.toLowerCase().contains("bioconcentration factor")) {
-			if(!endpoint_sorting_category.equals("2.0")) return null;
+			if(!endpoint_sorting_category.equals("2.0") && !endpoint_sorting_category.equals("3.0")) return null;
 			strPropertyValue=LogBCF_WW_L_kg;
 			er.property_category="bioconcentration";//so that unit converter can handle various BCF endpoints
 		} else if(propertyName.toLowerCase().contains("bioaccumulation factor")) {
@@ -270,6 +270,12 @@ public class RecordArnot2006 {
 		er.experimental_parameters=new LinkedHashMap<>();//keeps insertion order
 		er.parameter_values=new ArrayList<>();
 
+		if (endpoint_sorting_category.equals("2.0")) {
+			er.experimental_parameters.put("Water concentration type", "total");
+		} else if (endpoint_sorting_category.equals("3.0")) {
+			er.experimental_parameters.put("Water concentration type", "freely dissolved");
+		}
+		
 		setSpeciesParameters(htSpecies, limitToFish, er);
 		setResponseSite(limitToWholeBody, er);//Criterion 5
 		setWaterConcentration(er);//Criterion 3
@@ -472,22 +478,17 @@ public class RecordArnot2006 {
 			double duration=Double.parseDouble(exposure_duration_days);
 			//				System.out.println(exposure_duration_days+"\t"+t80);
 
-			
-			if(supercategory!=null && supercategory.equals("Fish"))
-				System.out.println(er.casrn+"\t"+calculation_method+"\t"+duration+"\t"+t80);
-			
+//			if(supercategory!=null && supercategory.equals("Fish"))
+//				System.out.println(er.casrn+"\t"+calculation_method+"\t"+duration+"\t"+t80);
 			
 			if(t80>duration) {
-
 				//	if(calculation_method!=null && calculation_method.equals("K1/K2")) {
 				//		System.out.println("Failed t80 but k1/k2");
 				//		countDurationOK++;
 				//	} else {
 				//		countDurationNotOK++;	
 				//	}
-
 				countDurationNotOK++;
-
 				//	if(logKow>6)					
 				//		System.out.println(chemical_name+"\t"+logKow+"\t"+exposure_duration_days+"\t"+t80);
 			} else {
@@ -496,8 +497,6 @@ public class RecordArnot2006 {
 				countDurationOK++;
 			}
 		}
-
-
 	}
 
 

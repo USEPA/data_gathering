@@ -7,9 +7,12 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.math3.analysis.function.Exp;
+
 import com.google.gson.reflect.TypeToken;
 
 import gov.epa.QSAR.utilities.JsonUtilities;
+import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
@@ -29,21 +32,23 @@ public class ParseITRC extends Parse {
 	String fileName="todo";
 	static final String filenameKoc = "PhysChemProp_Table_July2023-FINAL.xlsx";
 	static final String filenameBio = "ITRC_PFAS_-BCF-BAF_compilation_Table5-1_Oct2021.xlsx";
-	String valueType="todo";
+//	String valueType="todo";
+	String propertyName;
 
-	public ParseITRC(String valueType) {
+	public ParseITRC(String propertyName) {
 		sourceName = RecordITRC.sourceName;
-		this.valueType = valueType;
-		if (valueType.equals("KOC")) {
+		
+		if (propertyName.equals(ExperimentalConstants.strKOC)) {
 			this.fileName = filenameKoc;
-			this.init("KOC ITRC");
-		} else if (valueType.equals("BAF")) {
+		} else if (propertyName.equals(ExperimentalConstants.strBAF)) {
 			this.fileName = filenameBio;
-			this.init("BAF ITRC");
-		} else if (valueType.equals("BCF")) {
+		} else if (propertyName.equals(ExperimentalConstants.strBCF)) {
 			this.fileName = filenameBio;
-			this.init("BCF ITRC");
 		}
+		
+		this.init(propertyName);
+		this.propertyName=propertyName;
+
 	}
 
 	@Override
@@ -90,7 +95,7 @@ public class ParseITRC extends Parse {
 				
 				// Handle BAF/BCF records
 				if(r.RecordsBio != null && r.RecordsBio.size() > 0) {
-					List<ExperimentalRecord> bafRecords = r.toExperimentalRecordsBio(valueType, htSpecies);
+					List<ExperimentalRecord> bafRecords = r.toExperimentalRecordsBio(propertyName, htSpecies);
 					recordsExperimental.addAll(bafRecords);
 				}
 			}
@@ -116,7 +121,7 @@ public class ParseITRC extends Parse {
 		ParseITRC p = new ParseITRC("BAF");
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
@@ -126,7 +131,7 @@ public class ParseITRC extends Parse {
 		ParseITRC p = new ParseITRC("BCF");
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();

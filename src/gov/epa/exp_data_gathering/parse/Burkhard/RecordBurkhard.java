@@ -722,7 +722,7 @@ public class RecordBurkhard {
 					er.updateNote("Kinetic measurement method assumed based on OECD 305 guideline standards");
 				}
 			} else if (OECD_305.toLowerCase().equals("no")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not OECD 305");
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not reported");
 			}
 		}
 		

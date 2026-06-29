@@ -858,20 +858,20 @@ public class RecordITRC {
 		return records;
 	}
 
-	public List<ExperimentalRecord> toExperimentalRecordsBio(String valueType, Hashtable<String, List<Species>> htSpecies) {
+	public List<ExperimentalRecord> toExperimentalRecordsBio(String propertyName, Hashtable<String, List<Species>> htSpecies) {
 		List<ExperimentalRecord> records = new ArrayList<>();
 		
 		if (RecordsBio == null) return records;
 		
 		for (RecordBio recordBio : RecordsBio) {
 			// Create record for the specified property type if value exists
-			if ("BCF".equals(valueType) && recordBio.BCF != null && !recordBio.BCF.isBlank()) {
+			if (propertyName.equals(ExperimentalConstants.strBCF) && recordBio.BCF != null && !recordBio.BCF.isBlank()) {
 				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BCF", htSpecies);
 				records.add(er);
 			}
 			
 			// Create record for BAF if value exists
-			if ("BAF".equals(valueType) && recordBio.BAF != null && !recordBio.BAF.isBlank()) {
+			if (propertyName.equals(ExperimentalConstants.strBAF) && recordBio.BAF != null && !recordBio.BAF.isBlank()) {
 				ExperimentalRecord er = createExperimentalRecordFromBio(this, recordBio, "BAF", htSpecies);
 				records.add(er);
 			}
