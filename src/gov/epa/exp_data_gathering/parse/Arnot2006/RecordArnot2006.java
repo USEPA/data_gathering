@@ -308,7 +308,7 @@ public class RecordArnot2006 {
 		if (!ph_mean.equals("N/A")) {
 			ParameterValue pv = new ParameterValue();
 			pv.parameter.name = ExperimentalConstants.expParamPh;
-			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+			pv.unit.abbreviation = ExperimentalConstants.str_LOG_UNITS;
 			pv.value_point_estimate = Double.parseDouble(ph_mean);
 			er.parameter_values.add(pv);
 			// er.experimental_parameters.put(ExperimentalConstants.expParamPh, Double.parseDouble(ph_mean));

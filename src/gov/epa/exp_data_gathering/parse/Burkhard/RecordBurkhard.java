@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
@@ -212,7 +213,7 @@ public class RecordBurkhard {
 		er.parameter_values=new ArrayList<>();
 		
 		if(Study_Quality_BAF!=null) {
-			er.experimental_parameters.put("Reliability", Study_Quality_BAF);
+			er.experimental_parameters.put(ExperimentalConstants.expParamReliability, Study_Quality_BAF);
 		}
 //		er.reliability=Study_Quality_BAF;
 
@@ -248,10 +249,7 @@ public class RecordBurkhard {
 		} else {
 			er.property_value_units_original = Log_BAF_units;
 			er.property_value_units_original="log10("+er.property_value_units_original+")";
-		}
-		
-//		er.experimental_parameters.put("study quality",Study_Quality_BAF);
-		
+		}		
 		
 		if(Log_BAF_mean!=null && Log_BAF_min!=null && Log_BAF_max!=null ) {
 			if(Log_BAF_mean.equals(Log_BAF_min) && Log_BAF_mean.equals(Log_BAF_max)) {
@@ -367,7 +365,7 @@ public class RecordBurkhard {
 		
 		ExperimentalRecord er=new ExperimentalRecord();
 		er.experimental_parameters=new Hashtable<>();
-		er.experimental_parameters.put("Reliability", Study_Quality_BCF);
+		er.experimental_parameters.put(ExperimentalConstants.expParamReliability, Study_Quality_BCF);
 		if (method != null && !method.trim().isEmpty()) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(method));
 		}
@@ -391,7 +389,6 @@ public class RecordBurkhard {
 			er.property_value_units_original="log10("+er.property_value_units_original+")";
 		}
 				
-//		er.experimental_parameters.put("study quality",Study_Quality_BCF);
 		setSpeciesParameters(htSpecies, limitToFish, er);	
 		if(limitToWholeBody) {
 			if (Tissue == null || !Tissue.toLowerCase().contains("whole body")) {
@@ -637,12 +634,12 @@ public class RecordBurkhard {
 	
 	private void setSpeciesParameters(Hashtable<String, List<Species>> htSpecies, boolean limitToFish, ExperimentalRecord er) {
 		
-		er.experimental_parameters.put("Species latin",Species_Latin_Name);
+		er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, Species_Latin_Name);
 		if(Common_Name!=null) {
-			er.experimental_parameters.put("Species common",Common_Name);
+			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, Common_Name);
 		}
 		String supercategory=getSpeciesSupercategory(htSpecies);
-		if(supercategory!=null)	er.experimental_parameters.put("Species supercategory", supercategory);
+		if(supercategory!=null)	er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, supercategory);
 		
 		if(limitToFish && supercategory!=null) {
 			if(!supercategory.equals("Fish")) {
@@ -669,17 +666,17 @@ public class RecordBurkhard {
 		Marine_Brackish_Freshwater=Marine_Brackish_Freshwater.toLowerCase();
 		
 		setWaterConcentration(er);
-//		er.experimental_parameters.put("Exposure concentration",Exposure_Concentrations);
+
 		if (Tissue != null) {
 			if (Tissue.toLowerCase().contains("whole body w/o liver")) {
-				er.experimental_parameters.put("Response site", "whole body minus liver");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus liver");
 			} else if (Tissue.toLowerCase().contains("whole body w/o liver and gi tract")) {
-				er.experimental_parameters.put("Response site", "whole body minus liver and gi tract");
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus liver and gi tract");
 			} else {
-				er.experimental_parameters.put("Response site", Tissue.toLowerCase());
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, Tissue.toLowerCase());
 			}
 		}
-		er.experimental_parameters.put("Media type",Marine_Brackish_Freshwater.toLowerCase().trim());
+		er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Marine_Brackish_Freshwater.toLowerCase().trim());
 		if (Location != null && Location.toLowerCase().contains("lab")) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
 		} else if (Location != null && Location.toLowerCase().contains("field")) {
@@ -687,7 +684,7 @@ public class RecordBurkhard {
 		} else if (Location != null && Location.toLowerCase().contains("mesocosm")) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Mesocosm");
 		}
-//		er.experimental_parameters.put("Class taxonomy",class_taxonomy);
+
 		if(days_of_uptake!=null) {
 			days_of_uptake=days_of_uptake.replace("24 hr", "1");
 			ParameterValue pv=new ParameterValue();
@@ -700,29 +697,11 @@ public class RecordBurkhard {
 
 		if (OECD_305 != null) {
 			if (OECD_305.toLowerCase().equals("yes")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "OECD 305");
-				// Reasonable assumptions if guideline OECD 305 was followed
-				// Guideline is intended to use flow-through exposure (semi-static is permissible)
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Flow-through");
-				// Guideline is supposed to normalize to 5% lipid content
-				ParameterValue pv = new ParameterValue();
-				pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
-				pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
-				pv.value_point_estimate = 5.0;
-				er.parameter_values.add(pv);
-				er.updateNote("Exposure type and lipid content set based on OECD 305 guideline standards");
-				// Guideline is supposed to normalize to wet-weight, might be set elsewhere
-				if (er.experimental_parameters.get(ExperimentalConstants.expParamWetDry) == null) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-					er.updateNote("Wet-weight assumed based on OECD 305 guideline standards");
-				}
-				// Guideline is supposed to used kinetic BCF values, might be set elsewhere
-				if (er.experimental_parameters.get(ExperimentalConstants.expParamMeasurementMethod) == null) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
-					er.updateNote("Kinetic measurement method assumed based on OECD 305 guideline standards");
-				}
+				String raw = ExperimentalConstants.guidelineOecd305;
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, BCFUtilities.TestGuidelineFormatter.normalizeTestGuideline(raw));
+				BCFUtilities.setOecd305Parameters(er);
 			} else if (OECD_305.toLowerCase().equals("no")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not reported");
+				// er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, "Not reported");
 			}
 		}
 		

@@ -35,6 +35,7 @@ public class ParseEcotox extends Parse {
 	String filepathWSpred=folder+"WS pred xgb.json";
 	
 	public String propertyName;
+	private String bcfEndpoint = "BCF";
 	static Double durationDays;
 	static 	Integer species_number;
 	
@@ -60,7 +61,7 @@ public class ParseEcotox extends Parse {
 
 			//Dont bother create duplicates for things like Fish BCF:
 			if(propertyName.equals(ExperimentalConstants.strBCF)) { 
-				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB("BCF");//Note if endpoint=BCFD have dry weight records
+				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB(bcfEndpoint);
 			} else if(propertyName.equals(ExperimentalConstants.strBAF)) {
 				recordsOriginal=RecordEcotox.get_BCF_Records_From_DB("BAF");
 			} else if(propertyName.equals(ExperimentalConstants.strAcuteAquaticToxicity)) {
@@ -745,6 +746,7 @@ public class ParseEcotox extends Parse {
 					recordsOriginal.add(recordEcotox);
 					
 					if(Folder.getName().equals(ExperimentalConstants.strBCF) || 
+							Folder.getName().equalsIgnoreCase("BCFD") ||
 							Folder.getName().equals(ExperimentalConstants.strBAF)) {
 						ExperimentalRecord er=recordEcotox.toExperimentalRecordBCF(propertyName);
 						if(er!=null) recordsExperimental.add(er);
@@ -838,8 +840,8 @@ public class ParseEcotox extends Parse {
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 
 		
-		SetVars sv=p.new SetVars();
-		sv.setFatheadMinnow();
+		// SetVars sv=p.new SetVars();
+		// sv.setFatheadMinnow();
 
 		
 //		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF, ExperimentalConstants.strFishBCF,
@@ -858,7 +860,7 @@ public class ParseEcotox extends Parse {
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBAF,ExperimentalConstants.strBCF);
 
 		
-		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF);
+		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF, "BCFD");
 		
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF,ExperimentalConstants.strFishBCF,
 //				ExperimentalConstants.strFishBCFWholeBody);
@@ -866,9 +868,10 @@ public class ParseEcotox extends Parse {
 //		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF);
 		
 		for (String propertyName:propertyNames) {
-			p.init(propertyName);
-			p.propertyName=propertyName;
-			p.createFiles();		
+			p.init(propertyName.equals("BCFD") ? "BCFD" : propertyName);
+			p.propertyName=ExperimentalConstants.strBCF;
+			p.bcfEndpoint=propertyName.equals("BCFD") ? "BCFD" : "BCF";
+			p.createFiles();
 		}
 		
 //		p.getAcuteAquaticToxicityData();

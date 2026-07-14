@@ -108,7 +108,7 @@ public class ParseITRC extends Parse {
 	}
 
 	static void runKoc() {
-		ParseITRC p = new ParseITRC("KOC");
+		ParseITRC p = new ParseITRC(ExperimentalConstants.strKOC);
 		
 		String specialCharString = "Character with code 177: \u00B1";
 		p.generateOriginalJSONRecords=true;
@@ -118,20 +118,20 @@ public class ParseITRC extends Parse {
 	}
 
 	static void runBAF() {
-		ParseITRC p = new ParseITRC("BAF");
+		ParseITRC p = new ParseITRC(ExperimentalConstants.strBAF);
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=true;
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
 	}
 
 	static void runBCF() {
-		ParseITRC p = new ParseITRC("BCF");
+		ParseITRC p = new ParseITRC(ExperimentalConstants.strBCF);
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=true;
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
