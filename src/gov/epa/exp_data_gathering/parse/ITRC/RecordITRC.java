@@ -359,8 +359,20 @@ public class RecordITRC {
 			 
 			Sheet sheetKoc=wb.getSheet("Log Koc");
 			Sheet sheetReferences=wb.getSheet("References");
-			
-			Hashtable<Integer,String>htCitations=getCitations(sheetReferences);
+
+			if (sheetKoc == null) {
+				System.out.println("Warning: sheet 'Log Koc' not found in " + filePath + " - skipping KOC parsing");
+				wb.close();
+				fis.close();
+				return recs;
+			}
+            
+			Hashtable<Integer,String>htCitations=new Hashtable<>();
+			if (sheetReferences != null) {
+				htCitations=getCitations(sheetReferences);
+			} else {
+				System.out.println("Warning: sheet 'References' not found in " + filePath + " - citation lookups disabled");
+			}
 			
 			String name=null;
 			String acronym=null;
@@ -439,9 +451,21 @@ public class RecordITRC {
 			FileInputStream fis = new FileInputStream(new File(filePath));
 			Workbook wb = WorkbookFactory.create(fis);
 			Sheet sheetBAF = wb.getSheet("BCF-BAF Database");
-			
+			if (sheetBAF == null) {
+				System.out.println("Warning: sheet 'BCF-BAF Database' not found in " + filePath + " - skipping bio parsing");
+				wb.close();
+				fis.close();
+				return recs;
+			}
+
 			// Build hashtable to map column headers
 			Row headerRow = sheetBAF.getRow(6);
+			if (headerRow == null) {
+				System.out.println("Warning: header row missing in 'BCF-BAF Database' sheet - skipping bio parsing");
+				wb.close();
+				fis.close();
+				return recs;
+			}
 			Hashtable<String, Integer> htCols = new Hashtable<>();
 			for (int i = 0; i < headerRow.getLastCellNum(); i++) {
 				String colName = headerRow.getCell(i).getStringCellValue();
@@ -450,9 +474,19 @@ public class RecordITRC {
 
 			// Handle reference information
 			Sheet sheetRef = wb.getSheet("BCF-BAF Log");
+			if (sheetRef == null) {
+				System.out.println("Warning: sheet 'BCF-BAF Log' not found in " + filePath + " - reference lookups disabled");
+			}
 
 			// Build hashtable to map column headers for references
-			Row headerRowRefs = sheetRef.getRow(5);
+			Row headerRowRefs = null;
+			if (sheetRef != null) {
+				headerRowRefs = sheetRef.getRow(5);
+				if (headerRowRefs == null) {
+					System.out.println("Warning: header row missing in 'BCF-BAF Log' sheet - reference lookups disabled");
+					sheetRef = null;
+				}
+			}
 			Hashtable<String, Integer> htColsRefs = new Hashtable<>();
 			for (int i = 0; i < headerRowRefs.getLastCellNum(); i++) {
 				String colName = headerRowRefs.getCell(i).getStringCellValue();
@@ -460,7 +494,10 @@ public class RecordITRC {
 			}
 
 			// TODO: Finish implementation of reference information, need to use ref number column
-			Hashtable<String,Integer>htRefsRows=getCitationsBio(sheetRef);
+			Hashtable<String,Integer>htRefsRows=new Hashtable<>();
+			if (sheetRef != null) {
+				htRefsRows=getCitationsBio(sheetRef);
+			}
 			
 			// Use HashMap to group RecordBio by unique PFAS_Name (chemical identifier)
 			java.util.HashMap<String, RecordITRC> chemicalMap = new java.util.HashMap<>();
@@ -912,7 +949,8 @@ public class RecordITRC {
 		}
 
 		if (recordBio.Location != null) {
-			er.experimental_parameters.put("Location", recordBio.Location);
+			// er.experimental_parameters.put("Location", recordBio.Location);
+			er.updateNote("Reported geographic location: " + recordBio.Location);
 		}
 
 		if (recordBio.Freshwater_Marine_Estuary != null) {
@@ -934,7 +972,7 @@ public class RecordITRC {
 			if (tissueType.toLowerCase().contains("whole")) {
 				tissueType = "whole body";
 			}
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType);
+			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType.toLowerCase().trim());
 		}
 
 		if (recordBio.Wet_Dry_Lipid_Basis != null) {

@@ -354,17 +354,24 @@ public class Parse {
 		
 		if (writeExcelExperimentalRecordsFile) {
 
-			System.out.println("Writing Excel file(s) for chemical records");
-
-			if(writeExcelFileByProperty) {
-				writeExcelRecordsByProperty(records);
+			if (records == null || records.size() == 0) {
+				System.out.println("No records to write to Excel, skipping Excel output");
 			} else {
-				records.toExcel_File_Split(mainFolder+File.separator+fileNameExcelExperimentalRecords,maxExcelRows);
+				System.out.println("Writing Excel file(s) for chemical records");
+
+				if(writeExcelFileByProperty) {
+					writeExcelRecordsByProperty(records);
+				} else {
+					records.toExcel_File_Split(mainFolder+File.separator+fileNameExcelExperimentalRecords,maxExcelRows);
+				}
 			}
-			
 		}
 		if (writeCheckingExcelFile) {
-			records.createCheckingFile(records, mainFolder+File.separator+fileNameExcelExperimentalRecordsCheck,maxExcelRows);
+			if (records == null || records.size() == 0) {
+				System.out.println("No records to create checking Excel file, skipping");
+			} else {
+				records.createCheckingFile(records, mainFolder+File.separator+fileNameExcelExperimentalRecordsCheck,maxExcelRows);
+			}
 		}
 		
 		ExperimentalRecords recordsBad = records.dumpBadRecords();

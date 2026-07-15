@@ -308,7 +308,7 @@ public class RecordArnot2006 {
 		if (!ph_mean.equals("N/A")) {
 			ParameterValue pv = new ParameterValue();
 			pv.parameter.name = ExperimentalConstants.expParamPh;
-			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+			pv.unit.abbreviation = ExperimentalConstants.str_LOG_UNITS;
 			pv.value_point_estimate = Double.parseDouble(ph_mean);
 			er.parameter_values.add(pv);
 			// er.experimental_parameters.put(ExperimentalConstants.expParamPh, Double.parseDouble(ph_mean));
@@ -410,7 +410,13 @@ public class RecordArnot2006 {
 		}
 
 		if (tissue_analyzed != null && !tissue_analyzed.equals("N/A")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase());
+			if (tissue_analyzed.toLowerCase().contains("whole body - gonads")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus gonads");
+			} else if (tissue_analyzed.toLowerCase().contains("whole body without viscera")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus viscera");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase().trim());
+			}
 		}
 
 		if(limitToWholeBody && (tissue_analyzed==null || !tissue_analyzed.toLowerCase().equals("whole body"))) {

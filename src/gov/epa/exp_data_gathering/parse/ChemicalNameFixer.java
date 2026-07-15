@@ -3,7 +3,7 @@ package gov.epa.exp_data_gathering.parse;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import org.apache.commons.text.StringEscapeUtils;
 /**
  * @author TMARTI02
  */
@@ -152,12 +152,62 @@ public class ChemicalNameFixer {
 		};
 	}
 
-	public static String fixName(String name) {
-		if (name == null)
-			return null;
-		String fixed = QUOTE_LIKE.matcher(name).replaceAll("'");
-		return greekEntitiesToNames(fixed);
+//	public static String fixName(String name) {
+//		if (name == null)
+//			return null;
+//		String fixed = QUOTE_LIKE.matcher(name).replaceAll("'");
+//		return greekEntitiesToNames(fixed);
+//	}
+	
+	
+	public static String replaceCommonHtmlEntities(String s) {
+	    if (s == null) return null;
+
+	    return s
+	        .replace("&rsquo;", "'")
+	        .replace("&rsquo", "'")
+	        .replace("&lsquo;", "'")
+	        .replace("&lsquo", "'")
+	        .replace("&quot;", "\"")
+	        .replace("&quot", "\"")
+	        .replace("&amp;", "&")
+	        .replace("&amp", "&")
+	        .replace("&nbsp;", " ")
+	        .replace("&nbsp", " ")
+	        .replace("&sup1;", "1")
+	        .replace("&sup1", "1")
+	        .replace("&sup2;", "2")
+	        .replace("&sup2", "2")
+	        .replace("&sup3;", "3")
+	        .replace("&sup3", "3")
+	        .replace("&lt;", "<")
+	        .replace("&lt", "<")
+	        .replace("&gt;", ">")
+	        .replace("&gt", ">")
+	        .replace("&plusmn;", "±")
+	        .replace("&plusmn", "±")
+	        .replace("&prime;", "'")
+	        .replace("&prime", "'")
+	        .replace("&ndash;", "-")
+	        .replace("&ndash", "-")
+	        .replace("&auml;", "ä")
+	        .replace("&auml", "ä")
+	        .replace("&szlig;", "ß")
+	        .replace("&szlig", "ß")
+	        .replace("&reg;", "®")
+	        .replace("&reg", "®");
 	}
+	
+	
+	public static String fixName(String name) {
+	    if (name == null)
+	        return null;
+
+	    String fixed = replaceCommonHtmlEntities(name);
+	    fixed = QUOTE_LIKE.matcher(fixed).replaceAll("'");
+	    return greekEntitiesToNames(fixed);
+	}
+	
 
 	private static String appendDashIfMissing(String replacement, String original, int endIdx) {
 		if (replacement.equals(" "))

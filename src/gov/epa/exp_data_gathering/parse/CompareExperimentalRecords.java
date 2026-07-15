@@ -696,7 +696,7 @@ public class CompareExperimentalRecords {
 			String units = "L/kg";
 			
 			sourcesAll.add(new Source("Arnot 2006", propertyName));
-			sourcesAll.add(new Source("ITRC July 2023", "BCF ITRC"));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
 			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
 			sourcesAll.add(new Source("Burkhard", propertyName));
 
@@ -726,6 +726,96 @@ public class CompareExperimentalRecords {
 			}
 
 		}
+
+		private void compareBcfWetDryWithinSource() {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			for (Source source : sourcesAll) {
+				List<Source> sourcesWet = new ArrayList<>();
+				List<Source> sourcesDry = new ArrayList<>();
+
+				sourcesWet.add(source);
+				sourcesDry.add(source);
+
+				String sourceName = source.sourceName;
+				if (source.subfolder != null && !source.subfolder.isEmpty()) {
+					sourceName += " - " + source.subfolder;
+				}
+				// String sourceNameWet = sourceName + " (Wet)";
+				// String sourceNameDry = sourceName + " (Dry)";
+				String sourceNameWet = sourceName + " Wet";
+				String sourceNameDry = "Dry";
+
+				cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+			}
+		}
+
+		private void compareBcfWetDryAllSources() {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			List<Source> sourcesWet = sourcesAll;
+			List<Source> sourcesDry = sourcesAll;
+
+			String sourceName = "All Sources";
+			// String sourceNameWet = sourceName + " (Wet)";
+			// String sourceNameDry = sourceName + " (Dry)";
+			String sourceNameWet = sourceName + " Wet";
+			String sourceNameDry = "Dry";
+
+			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+		}
+
+		private void compareEcotoxBcfWetDry() {
+			printChemicalsInCommon = false;
+						
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+
+			List<Source> sourcesWet = new ArrayList<>();
+			List<Source> sourcesDry = new ArrayList<>();
+			
+			sourcesWet.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesDry.add(new Source("ECOTOX_2026_03_12", "BCFD"));
+
+			String sourceName = "ECOTOX";
+			// String sourceNameWet = sourceName + " (Wet)";
+			// String sourceNameDry = sourceName + " (Dry)";
+			String sourceNameWet = sourceName + " BCF";
+			String sourceNameDry = "BCFD";
+
+			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas");
+			// cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+		}
 		
 		/**
 		 * Compares unique text parameter values from multiple sources
@@ -735,7 +825,7 @@ public class CompareExperimentalRecords {
 			List<Source> sourcesAll = new ArrayList<>();
 			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 			sourcesAll.add(new Source("Arnot 2006", propertyName));
-			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
 			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
 			sourcesAll.add(new Source("Burkhard", propertyName));
 
@@ -1165,6 +1255,86 @@ public class CompareExperimentalRecords {
 			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
 
 		}
+
+
+		void compare(String sourceName1, String sourceName2, List<Source>sources1, List<Source>sources2, String propertyName, String units, String idType, String filterParameterName, String filterParameterValueString) {
+
+			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
+			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
+
+			rm.removeByParameter(filterParameterName, filterParameterValueString, recs1);
+			rm.removeByParameter(filterParameterName, filterParameterValueString, recs2);
+
+
+			if(idType.equals("sid")) {
+				recs1.addDtxsids();
+				recs2.addDtxsids();
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			System.out.println("\n***************************\n");
+			System.out.println("sources1: "+sourceName1);
+			System.out.println("sources2: "+sourceName2);
+
+			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
+			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
+			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
+			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
+			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
+
+		}
+
+
+		void compare(String sourceName1, String sourceName2, List<Source>sources1, List<Source>sources2, String propertyName, String units, String idType, String filterParameterName, String filterParameterValueString1, String filterParameterValueString2) {
+
+			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
+			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
+
+			rm.removeByParameter(filterParameterName, filterParameterValueString1, recs1);
+			rm.removeByParameter(filterParameterName, filterParameterValueString2, recs2);
+
+
+			if(idType.equals("sid")) {
+				recs1.addDtxsids();
+				recs2.addDtxsids();
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			System.out.println("\n***************************\n");
+			System.out.println("sources1: "+sourceName1);
+			System.out.println("sources2: "+sourceName2);
+
+			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
+			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
+			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
+			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
+			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
+
+		}
 		
 		
 		public void compare(ExperimentalRecords allRecords, String sourceName1, String sourceName2, String propertyName,String units,String idType) {
@@ -1367,6 +1537,72 @@ public class CompareExperimentalRecords {
 
 		}
 
+		private double calculateR2(List<Double> vals1, List<Double> vals2) {
+			if (vals1.size() != vals2.size() || vals1.isEmpty()) {
+				return Double.NaN;
+			}
+
+			double mean1 = 0;
+			double mean2 = 0;
+			for (int i = 0; i < vals1.size(); i++) {
+				mean1 += vals1.get(i);
+				mean2 += vals2.get(i);
+			}
+			mean1 /= vals1.size();
+			mean2 /= vals2.size();
+
+			double sumSq1 = 0;
+			double sumSq2 = 0;
+			double sumCross = 0;
+			for (int i = 0; i < vals1.size(); i++) {
+				double diff1 = vals1.get(i) - mean1;
+				double diff2 = vals2.get(i) - mean2;
+				sumSq1 += diff1 * diff1;
+				sumSq2 += diff2 * diff2;
+				sumCross += diff1 * diff2;
+			}
+
+			if (sumSq1 == 0 || sumSq2 == 0) {
+				return Double.NaN;
+			}
+
+			double correlation = sumCross / Math.sqrt(sumSq1 * sumSq2);
+			return correlation * correlation;
+		}
+
+		private double calculateCorrelation(List<Double> vals1, List<Double> vals2) {
+			if (vals1.size() != vals2.size() || vals1.isEmpty()) {
+				return Double.NaN;
+			}
+
+			double mean1 = 0;
+			double mean2 = 0;
+			for (int i = 0; i < vals1.size(); i++) {
+				mean1 += vals1.get(i);
+				mean2 += vals2.get(i);
+			}
+			mean1 /= vals1.size();
+			mean2 /= vals2.size();
+
+			double sumSq1 = 0;
+			double sumSq2 = 0;
+			double sumCross = 0;
+			for (int i = 0; i < vals1.size(); i++) {
+				double diff1 = vals1.get(i) - mean1;
+				double diff2 = vals2.get(i) - mean2;
+				sumSq1 += diff1 * diff1;
+				sumSq2 += diff2 * diff2;
+				sumCross += diff1 * diff2;
+			}
+
+			if (sumSq1 == 0 || sumSq2 == 0) {
+				return Double.NaN;
+			}
+
+			double correlation = sumCross / Math.sqrt(sumSq1 * sumSq2);
+			return correlation;
+		}
+
 		public double compareChemicalsInCommon(TreeMap<String,ExperimentalRecords>tm1,TreeMap<String,ExperimentalRecords>tm2, String units) {
 
 //			if(!units.toLowerCase().contains("log")) {
@@ -1442,8 +1678,12 @@ public class CompareExperimentalRecords {
 			createPlot(units, vals1, vals2);
 
 			MAE/=countInCommon;
+			double rSquared = calculateR2(vals1, vals2);
+			double correlation = calculateCorrelation(vals1, vals2);
 			System.out.println("Count in common="+countInCommon);
 			System.out.println("MAE="+MAE);
+			System.out.println("R^2="+df.format(rSquared));
+			System.out.println("Correlation="+df.format(correlation));
 			return MAE;
 
 		}
@@ -1534,8 +1774,12 @@ public class CompareExperimentalRecords {
 			createPlot(units, vals1, vals2, sourceName1, sourceName2);
 
 			MAE/=countInCommon;
+			double rSquared = calculateR2(vals1, vals2);
+			double correlation = calculateCorrelation(vals1, vals2);
 			System.out.println("Count in common="+countInCommon);
 			System.out.println("MAE="+MAE);
+			System.out.println("R^2="+df.format(rSquared));
+			System.out.println("Correlation="+df.format(correlation));
 			return MAE;
 
 		}
@@ -1644,8 +1888,12 @@ public class CompareExperimentalRecords {
 
 			createPlot(units, vals1, vals2,sourceName1,sourceName2);
 
+			double rSquared = calculateR2(vals1, vals2);
+			double correlation = calculateCorrelation(vals1, vals2);
 			jo.addProperty("countInCommon",pairs.size());
 			jo.addProperty("MAE",MAE);
+			jo.addProperty("R2", rSquared);
+			jo.addProperty("Correlation", correlation);
 
 			return MAE;
 
@@ -1847,7 +2095,7 @@ public class CompareExperimentalRecords {
 			cp.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 			jframe.setSize(500,500);
-			jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			jframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			jframe.setLocationRelativeTo(null);
 			jframe.setVisible(true);
 		}
@@ -1891,7 +2139,7 @@ public class CompareExperimentalRecords {
 			cp.setLayout(new FlowLayout(FlowLayout.LEFT));
 		
 			jframe.setSize(500,500);
-			jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			jframe.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			jframe.setLocationRelativeTo(null);
 			jframe.setVisible(true);
 		}
@@ -2106,22 +2354,26 @@ public class CompareExperimentalRecords {
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
 		// c.c.compareBcf1vsAll();
+		// c.c.compareBcfWetDryWithinSource();
+		// c.c.compareBcfWetDryAllSources();
+		c.c.compareEcotoxBcfWetDry();
 		
-		List<String> parameterNames = List.of(
-			ExperimentalConstants.expParamGuideline,
-			ExperimentalConstants.expParamMediaType,
-			ExperimentalConstants.expParamTestLocation,
-			ExperimentalConstants.expParamWetDry,
-			ExperimentalConstants.expParamWaterConcentration,
-			ExperimentalConstants.expParamLipidPercent,
-			ExperimentalConstants.expParamSpeciesSupercategory,
-			ExperimentalConstants.expParamMeasurementMethod,
-			ExperimentalConstants.expParamObservationDuration,
-			ExperimentalConstants.expParamTissueType,
-			ExperimentalConstants.expParamTemperature,
-			ExperimentalConstants.expParamExposureType
-		);
-		c.c.compareUniqueParameterValues(parameterNames);
+		// List<String> parameterNames = List.of(
+		// 	ExperimentalConstants.expParamWetDry
+			// ExperimentalConstants.expParamGuideline
+			// ExperimentalConstants.expParamMediaType,
+			// ExperimentalConstants.expParamTestLocation,
+			// ExperimentalConstants.expParamWetDry,
+			// ExperimentalConstants.expParamWaterConcentration,
+			// ExperimentalConstants.expParamLipidPercent,
+			// ExperimentalConstants.expParamSpeciesSupercategory,
+			// ExperimentalConstants.expParamMeasurementMethod,
+			// ExperimentalConstants.expParamObservationDuration,
+			// ExperimentalConstants.expParamTissueType,
+			// ExperimentalConstants.expParamTemperature,
+			// ExperimentalConstants.expParamExposureType
+		// );
+		// c.c.compareUniqueParameterValues(parameterNames);
 
 //		c.c.compareOralRat();
 

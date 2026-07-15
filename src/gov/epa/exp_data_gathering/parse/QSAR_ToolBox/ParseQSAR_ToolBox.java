@@ -433,7 +433,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		for (String filename:filenames) {
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null, filename);
-			p.generateOriginalJSONRecords=true;//*** set to true on first run
+			p.generateOriginalJSONRecords=false;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;

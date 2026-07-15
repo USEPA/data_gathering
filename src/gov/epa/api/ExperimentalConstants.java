@@ -1,11 +1,15 @@
 package gov.epa.api;
 
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
 public class ExperimentalConstants {
 
 	
-	public static final String strMethodKinetic="kinetic";
-	public static final String strMethodSteadyState="steady state";
-	public static final String strMethodOther="other";
+	public static final String strMethodKinetic="Kinetic";
+	public static final String strMethodSteadyState="Steady State";
+	public static final String strMethodOther="Other";
 	
 	//Add list of property names here:
 	public static final String strWaterSolubility="Water solubility";
@@ -371,11 +375,68 @@ public class ExperimentalConstants {
 	public static final String expParamPh = "pH";
 	public static final String expParamGuideline = "Test guideline";
 	public static final String expParamObservationDuration = "Observation duration";
+	public static final String expParamReliability = "Reliability";
 
 	// Data Source Names
 	public static final String sourceEcha = "ECHA REACH";
 	public static final String sourceNite = "Bioconcentration and logKow NITE";
 	public static final String sourceCanada = "Bioaccumulation Canada";
 	public static final String sourceCefic = "Bioaccumulation fish CEFIC LRI";
+
+	// Guideline Names
+	public static final String guidelineOecd305 = "OECD Guideline 305";
+	public static final String guidelineOecd203 = "OECD Guideline 203";
+	public static final String guidelineOecd210 = "OECD Guideline 210";
+	public static final String guidelineOecd319a = "OECD Guideline 319A";
+	public static final String guidelineOecd319b = "OECD Guideline 319B";
+
+	public static final Map<String, String> guidelineHashMap = Map.ofEntries(
+		Map.entry("OECD Guideline 305 (Bioaccumulation in Fish: Aqueous and Dietary Exposure) -I: Aqueous Exposure Bioconcentration Fish Test", "OECD Guideline 305-I"),
+		Map.entry("OECD Guideline 305 (Bioaccumulation in Fish: Aqueous and Dietary Exposure) -II: Minimised Aqueous Exposure Fish Test", "OECD Guideline 305-II"),
+		Map.entry("OECD Guideline 305 (Bioaccumulation in Fish: Aqueous and Dietary Exposure) -III: Dietary Exposure Bioaccumulation Fish Test", "OECD Guideline 305-III"),
+		Map.entry("OECD Guideline 305 A (Bioaccumulation: Sequential Static Fish Test)", "OECD Guideline 305A"),
+		Map.entry("OECD Guideline 305 B (Bioaccumulation: Semi-static Fish Test)", "OECD Guideline 305B"),
+		Map.entry("OECD Guideline 305 C (Bioaccumulation: Test For The Degree of Bioconcentration in Fish)", "OECD Guideline 305C"),
+		Map.entry("OECD Guideline 305 D (Bioaccumulation: Static Fish Test)", "OECD Guideline 305D"),
+		Map.entry("OECD Guideline 305 E (Bioaccumulation: Flow-through Fish Test)", "OECD Guideline 305E"),
+		Map.entry("\u2018\u2019OECD TG 305C “Degree of Bioconcentration in Fish\u2019\u2019", "OECD Guideline 305C"),
+		Map.entry("â??â??OECD TG 305C â??Degree of Bioconcentration in Fishâ??â??", "OECD Guideline 305C"),
+		// Map.entry("‘’OECD TG 305C “Degree of Bioconcentration in Fish’’", "OECD Guideline 305C"),
+		Map.entry("draft document of the new OECD TG for the S9 assay.", "OECD Guideline Draft for the S9 Assay"),
+		Map.entry(guidelineOecd305, guidelineOecd305),
+		Map.entry("OECD 305", guidelineOecd305),
+		Map.entry("EPAOECD - OECD TEST NO. 305 (2012),US EPA EPA 712-C-16-003 (2016)", guidelineOecd305),
+		Map.entry("OECD - 2012 TEST 305", guidelineOecd305),
+		Map.entry("OECD - BIOCONCENTRATION TEST 305, OECD, 1996", guidelineOecd305),
+		Map.entry("OECD - OECD 305", guidelineOecd305),
+		Map.entry("OECD - OECD 305, 2004", guidelineOecd305),
+		Map.entry("OECD - OECD BIOCONCENTRATION TEST 305 (OECD, 1996)", guidelineOecd305),
+		Map.entry("OECD - OECD BIOCONCENTRATION TEST 305 (OECD,1996)", guidelineOecd305),
+		Map.entry("OECD - OECD GUIDELINE 305-II, 2012", guidelineOecd305),
+		Map.entry("OECD - OECD NO. 305, 1996", guidelineOecd305),
+		Map.entry("OECD - OECD NO. 305, 2012", guidelineOecd305),
+		Map.entry("OECD - OECD TEST 305", guidelineOecd305),
+		Map.entry("OECD - OECD TEST GUIDELINE NO. 305", guidelineOecd305),
+		Map.entry("OECD - OECD TEST GUIDELINE NO. 305, 2012", guidelineOecd305),
+		Map.entry("OECD Guideline 305 (Bioconcentration: Flow-through Fish Test)", guidelineOecd305),
+		Map.entry("OECD Guideline No 305 Bioaccumulation in fish: aqueous and dietary exposure (2012)", guidelineOecd305),
+		Map.entry("OECD Guidelines for Testing of Chemicals, Guideline 305: Bioaccumulation in Fish: Aqueous and Dietary Exposure.", guidelineOecd305),
+		Map.entry("The test was performed according to the OECD Guidelines for Testing of Chemicals No 305 (adopted June 14, 1996): Bioconcentration: Flow-through Fish Test.", guidelineOecd305),
+		Map.entry(guidelineOecd203, guidelineOecd203),
+		Map.entry("OECD 203", guidelineOecd203),
+		Map.entry("OECD - 2019 TEST 203", guidelineOecd203),
+		Map.entry(guidelineOecd210, guidelineOecd210),
+		Map.entry("OECD 210", guidelineOecd210),
+		Map.entry("OECD - OECD GUIDELINES TEST NO. 210, 1992", guidelineOecd210),
+		Map.entry(guidelineOecd319a, guidelineOecd319a),
+		Map.entry("OECD 319A", guidelineOecd319a),
+		Map.entry("OECD Guideline 319A:Determination of in vitro intrinsic clearance using cryopreserved rainbow trout hepatocytes (RT-HEP), OECD319 A", guidelineOecd319a),
+		Map.entry(guidelineOecd319b, guidelineOecd319b),
+		Map.entry("OECD 319B", guidelineOecd319b),
+		Map.entry("OECD 319B - Determination of in vitro intrinsic clearance using Rainbow trout liver S9 subcellular fraction (RT-S9)", guidelineOecd319b),
+		Map.entry("OECD 319B : Determination of in vitro intrinsic clearance using rainbow trout liver S9 subcellular fraction (RT-S9)", guidelineOecd319b),
+		Map.entry("OECD Guideline 319B: Determination of in vitro intrinsic clearance using rainbow trout liver S9 sub-cellular fraction (RT-S9)", guidelineOecd319b)
+	);
+
 
 }
