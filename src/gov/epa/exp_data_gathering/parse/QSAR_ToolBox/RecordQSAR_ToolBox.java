@@ -536,6 +536,9 @@ public class RecordQSAR_ToolBox {
 		// to spaces
 		List<String> names = null;
 		if (this.Chemical_name_s != null && !this.Chemical_name_s.isBlank()) {
+			
+			this.Chemical_name_s = ChemicalNameFixer.replaceCommonHtmlEntities(this.Chemical_name_s);
+			
 			names = SYN_SPLIT.splitAsStream(this.Chemical_name_s.trim()).map(String::trim).filter(s -> !s.isEmpty())
 					.map(s -> s.replace('_', ' ')) // convert underscores to spaces AFTER splitting
 					.map(s -> s.replaceAll("\\s+", " ")) // normalize whitespace
@@ -561,8 +564,14 @@ public class RecordQSAR_ToolBox {
 				if (hasNoLettersAscii(name)) {
 					continue;
 				}
-				er.chemical_name = name;
-				String name2 = ChemicalNameFixer.fixName(name);
+//				er.chemical_name = name;
+//				String name2 = ChemicalNameFixer.fixName(name);
+				er.chemical_name = ChemicalNameFixer.fixName(name);
+				
+				if(!er.chemical_name.equals(name)) {
+					System.out.println("Fixed: \""+name+"\" to \""+er.chemical_name+"\"");
+				}
+				
 
 //	      System.out.println(counter + "\t" + name);
 
@@ -2741,7 +2750,14 @@ public class RecordQSAR_ToolBox {
 				er.note = Comments;
 			}
 			er.reference = Reference_source;
-			er.experimental_parameters.put("Media type", Water_type.toLowerCase().trim());
+			
+			
+			if (Water_type!=null) {
+				Water_type=Water_type.toLowerCase().replace("freshwater","Fresh water").replace("saltwater","Salt water").trim();
+				er.experimental_parameters.put("Media type", Water_type);
+				
+			}
+			
 			// er.experimental_parameters.put("Tissue", Organ);
 			er.experimental_parameters.put("Species latin", Test_organisms_species);
 			er.experimental_parameters.put("Species common", Species_common_name);
@@ -3174,7 +3190,12 @@ public class RecordQSAR_ToolBox {
 
 			}
 		}
+		
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
+		}
 
+		
 		// if(er.experimental_parameters.get("Species supercategory")==null) {
 		// System.out.println(Test_organisms_species+"\t"+Superclass);
 		// }
@@ -3183,11 +3204,14 @@ public class RecordQSAR_ToolBox {
 			er.keep = false;
 			er.reason = "Missing exposure type";
 		} else {
+			
+			Test_type=Test_type.replace("Semi-static","Renewal").replace("","");
+			
 			er.experimental_parameters.put("exposure_type", Test_type);
-			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static")) {
-				er.keep = false;
-				er.reason = "Invalid exposure type";
-			}
+//			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static")) {
+//				er.keep = false;
+//				er.reason = "Invalid exposure type";
+//			}
 		}
 
 		if (Endpoint == null || !Endpoint.equals("LC50")) {
@@ -3241,7 +3265,6 @@ public class RecordQSAR_ToolBox {
 		if (er.keep) {
 			if (er.chemical_name != null && er.chemical_name.contains("&"))
 				System.out.println(er.chemical_name);
-
 		}
 
 		return er;

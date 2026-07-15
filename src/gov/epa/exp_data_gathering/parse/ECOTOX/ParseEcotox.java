@@ -509,85 +509,93 @@ public class ParseEcotox extends Parse {
 	}
 
 	
-	
-	public void getAcuteAquaticExperimentalRecords(boolean excludeByExposureType,boolean includeConc2,String propertyName,int species_number,double durationDays) {
-
-		String source=RecordEcotox.sourceName;
-		
-		List<RecordEcotox>recordsOriginal=null;
-		boolean createOriginalRecords=true;
-
-		String jsonPath = "data/experimental/"+RecordEcotox.sourceName+File.separator+RecordEcotox.sourceName+" "+propertyName+" original records.json";
-
-		if (createOriginalRecords) {
-			recordsOriginal=RecordEcotox.get_Acute_Tox_Records_From_DB(species_number,propertyName);
-			
-			System.out.println(recordsOriginal.size());
-			
-			int howManyOriginalRecordsFiles = JSONUtilities.batchAndWriteJSON(recordsOriginal,jsonPath);
-		} else {
-			try {
-				RecordEcotox[]records2 = gson.fromJson(new FileReader(jsonPath), RecordEcotox[].class);
-				recordsOriginal=Arrays.asList(records2);
-				System.out.println(recordsOriginal.size());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-				
-		ExperimentalRecords experimentalRecords=new ExperimentalRecords();
-
-		Hashtable<String,RecordEcotox>htRecordEcotox=new Hashtable<>();
-		
-//		Hashtable<String, Double> htMWfromDTXSID = getMolWeightHashtable();//usi
-						
-		for (RecordEcotox re:recordsOriginal) {
-
-			if(!re.isAcceptableDuration(durationDays)) {
-//				System.out.println(re.getStudyDurationValueInDays());
-				continue;//4 days
-			}
-			
-//			if(re.dtxsid.equals("DTXSID0034566")) {
-//				System.out.println(gson.toJson(re));
+//	/**
+//	 * @deprecated should just get all the records and then filter during dataset creation
+//	 * 
+//	 * @param excludeByExposureType
+//	 * @param includeConc2
+//	 * @param propertyName
+//	 * @param species_number
+//	 * @param durationDays
+//	 */
+//	public void getAcuteAquaticExperimentalRecords(boolean excludeByExposureType,boolean includeConc2,String propertyName,int species_number,double durationDays) {
+//
+//		String source=RecordEcotox.sourceName;
+//		
+//		List<RecordEcotox>recordsOriginal=null;
+//		boolean createOriginalRecords=true;
+//
+//		String jsonPath = "data/experimental/"+RecordEcotox.sourceName+File.separator+RecordEcotox.sourceName+" "+propertyName+" original records.json";
+//
+//		if (createOriginalRecords) {
+//			recordsOriginal=RecordEcotox.get_Acute_Tox_Records_From_DB(species_number,propertyName);
+//			
+//			System.out.println(recordsOriginal.size());
+//			
+//			int howManyOriginalRecordsFiles = JSONUtilities.batchAndWriteJSON(recordsOriginal,jsonPath);
+//		} else {
+//			try {
+//				RecordEcotox[]records2 = gson.fromJson(new FileReader(jsonPath), RecordEcotox[].class);
+//				recordsOriginal=Arrays.asList(records2);
+//				System.out.println(recordsOriginal.size());
+//			} catch (Exception e) {
+//				e.printStackTrace();
 //			}
-			
-			addExperimentalRecordsAcuteFishTox(re, experimentalRecords,includeConc2);
-//			addExperimentalRecords(re, experimentalRecords,htMWfromDTXSID);//only gets you 3 more chemicals- almost all in g/L!
-			htRecordEcotox.put(re.test_id,re);
-		}
-
-//		if(excludeByWS) excludeByWS(experimentalRecords);
-		
-		if(excludeByExposureType) excludeByExposureType(experimentalRecords);
-
-		Hashtable<String, ExperimentalRecords> htER = experimentalRecords.createExpRecordHashtableBySID(ExperimentalConstants.str_g_L);
-		ExperimentalRecords.calculateAvgStdDevOverAllChemicals(htER, true);
-		
-//		extraMethods.compareExposureTypeFactors(experimentalRecords);
-//		extraMethods.compareConcentrationTypeFactors(experimentalRecords);
-		
-		//Print the largest bad records:
-//		lookAtLargestDeviations(htRecordEcotox, htER);
-		extraMethods.printRecords(htRecordEcotox, htER);
-		
-//		assignLiteratureSourceNames(experimentalRecords);
-//		System.out.println(gson.toJson(experimentalRecords));		
-
-		System.out.println("originalRecords.size()="+recordsOriginal.size());
-		System.out.println("experimentalRecords.size()="+experimentalRecords.size());
-		
-		
-		//Writer experimental records to Json file:
-		String mainFolder = "Data" + File.separator + "Experimental" + File.separator + source;
-		String fileNameJsonExperimentalRecords = source+"_"+propertyName+" Experimental Records.json";
-		JSONUtilities.batchAndWriteJSON(new Vector<ExperimentalRecord>(experimentalRecords),mainFolder+File.separator+fileNameJsonExperimentalRecords);
-		
-		//Write experimental records to excel file:
-		experimentalRecords.toExcel_File_Split(mainFolder+File.separator+fileNameJsonExperimentalRecords.replace("json", "xlsx"),100000);
-
-		
-	}
+//		}
+//				
+//		ExperimentalRecords experimentalRecords=new ExperimentalRecords();
+//
+//		Hashtable<String,RecordEcotox>htRecordEcotox=new Hashtable<>();
+//		
+////		Hashtable<String, Double> htMWfromDTXSID = getMolWeightHashtable();//usi
+//						
+//		for (RecordEcotox re:recordsOriginal) {
+//
+//			if(!re.isAcceptableDuration(durationDays)) {
+////				System.out.println(re.getStudyDurationValueInDays());
+//				continue;//4 days
+//			}
+//			
+////			if(re.dtxsid.equals("DTXSID0034566")) {
+////				System.out.println(gson.toJson(re));
+////			}
+//			
+//			addExperimentalRecordsAcuteFishTox(re, experimentalRecords,includeConc2);
+////			addExperimentalRecords(re, experimentalRecords,htMWfromDTXSID);//only gets you 3 more chemicals- almost all in g/L!
+//			htRecordEcotox.put(re.test_id,re);
+//		}
+//
+////		if(excludeByWS) excludeByWS(experimentalRecords);
+//		
+//		if(excludeByExposureType) excludeByExposureType(experimentalRecords);
+//
+//		Hashtable<String, ExperimentalRecords> htER = experimentalRecords.createExpRecordHashtableBySID(ExperimentalConstants.str_g_L);
+//		ExperimentalRecords.calculateAvgStdDevOverAllChemicals(htER, true);
+//		
+////		extraMethods.compareExposureTypeFactors(experimentalRecords);
+////		extraMethods.compareConcentrationTypeFactors(experimentalRecords);
+//		
+//		//Print the largest bad records:
+////		lookAtLargestDeviations(htRecordEcotox, htER);
+//		extraMethods.printRecords(htRecordEcotox, htER);
+//		
+////		assignLiteratureSourceNames(experimentalRecords);
+////		System.out.println(gson.toJson(experimentalRecords));		
+//
+//		System.out.println("originalRecords.size()="+recordsOriginal.size());
+//		System.out.println("experimentalRecords.size()="+experimentalRecords.size());
+//		
+//		
+//		//Writer experimental records to Json file:
+//		String mainFolder = "Data" + File.separator + "Experimental" + File.separator + source;
+//		String fileNameJsonExperimentalRecords = source+"_"+propertyName+" Experimental Records.json";
+//		JSONUtilities.batchAndWriteJSON(new Vector<ExperimentalRecord>(experimentalRecords),mainFolder+File.separator+fileNameJsonExperimentalRecords);
+//		
+//		//Write experimental records to excel file:
+//		experimentalRecords.toExcel_File_Split(mainFolder+File.separator+fileNameJsonExperimentalRecords.replace("json", "xlsx"),100000);
+//
+//		
+//	}
 	
 
 
@@ -830,18 +838,16 @@ public class ParseEcotox extends Parse {
 //		SetVars.setRainbowTrout();
 		
 		ParseEcotox p = new ParseEcotox();
-		p.generateOriginalJSONRecords=true;
+		p.generateOriginalJSONRecords=false;
 		p.removeDuplicates=false;//cant delete duplicates because experimental params might be different but still have same number value
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;
 		p.writeExcelFileByProperty=true;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 
-		
-		SetVars sv=p.new SetVars();
-		sv.setFatheadMinnow();
+//		SetVars sv=p.new SetVars();
+//		sv.setFatheadMinnow();
 
-		
 //		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF, ExperimentalConstants.strFishBCF,
 //				ExperimentalConstants.strFishBCFWholeBody, ExperimentalConstants.strBAF,
 //				ExperimentalConstants.strFishBAF, ExperimentalConstants.strFishBAFWholeBody,
@@ -853,12 +859,12 @@ public class ParseEcotox extends Parse {
 
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity,ExperimentalConstants.strChronicAquaticToxicity);
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strChronicAquaticToxicity);
-//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
+		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
 
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBAF,ExperimentalConstants.strBCF);
 
 		
-		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF);
+//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF);
 		
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF,ExperimentalConstants.strFishBCF,
 //				ExperimentalConstants.strFishBCFWholeBody);
