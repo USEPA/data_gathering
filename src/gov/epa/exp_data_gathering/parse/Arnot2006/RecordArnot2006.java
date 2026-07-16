@@ -695,7 +695,7 @@ public class RecordArnot2006 {
 		} else if(exposure_type.equals("S")) {
 			exposure_type=exposure_type.replace("S","Static");
 		} else if(exposure_type.equals("Semi-S")) {
-			exposure_type=exposure_type.replace("Semi-S","Semi-Static");
+			exposure_type=exposure_type.replace("Semi-S","Renewal");
 		} else if(exposure_type.equals("Lentic")) {
 			exposure_type="Lentic";
 		} else if(exposure_type.equals("Lotic")) {

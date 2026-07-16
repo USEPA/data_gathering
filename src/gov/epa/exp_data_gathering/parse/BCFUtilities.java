@@ -29,7 +29,7 @@ public class BCFUtilities {
 	public void ParseBCFSources() {
 		
 		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF, ExperimentalConstants.strBAF);
-		boolean generateOriginalRecords=false;
+		boolean generateOriginalRecords=true;
 		
 		for (String propertyName:propertyNames) {
 			System.out.println("\n**********************\n"+propertyName);

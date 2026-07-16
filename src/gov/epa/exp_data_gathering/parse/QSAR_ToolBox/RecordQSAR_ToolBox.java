@@ -2122,7 +2122,7 @@ public class RecordQSAR_ToolBox {
 			} else {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
 				if (Test_type.toLowerCase().contains("semi")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Semi-Static");
+					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Renewal");
 				} else {
 					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, WordUtils.capitalizeFully(Test_type));
 				}
@@ -2695,11 +2695,11 @@ public class RecordQSAR_ToolBox {
 			er.reason = "Missing exposure type";
 		} else {
 			if (Test_type.toLowerCase().contains("semi")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Semi-Static");
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Renewal");
 			} else {
 				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, Test_type);
 			}
-			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static")) {
+			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static") && !Test_type.equals("Renewal")) {
 				er.keep = false;
 				er.reason = "Invalid exposure type";
 			}

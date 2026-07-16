@@ -13,6 +13,7 @@ import java.util.TreeSet;
 
 import javax.swing.JFrame;
 
+import org.apache.jena.sparql.pfunction.library.listLength;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
@@ -287,6 +288,21 @@ public class CompareExperimentalRecords {
 				
 				if(rec.experimental_parameters.get(parameterName)==null || 
 						!rec.experimental_parameters.get(parameterName).equals(parameterValue)) {
+					recs1.remove(i--);
+				}
+			}
+		}
+
+
+		private void removeByParameterFuzzy(String parameterName, String parameterValue, ExperimentalRecords recs1) {
+			for (int i=0;i<recs1.size();i++) {
+				ExperimentalRecord rec=recs1.get(i);
+
+				Object parameterObject = rec.experimental_parameters.get(parameterName);
+				String parameterString = String.valueOf(parameterObject);
+				
+				if(parameterObject == null || 
+						!parameterString.toLowerCase().contains(parameterValue.toLowerCase())) {
 					recs1.remove(i--);
 				}
 			}
@@ -761,7 +777,23 @@ public class CompareExperimentalRecords {
 				String sourceNameWet = sourceName + " Wet";
 				String sourceNameDry = "Dry";
 
-				cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+				List<String> filterParameters = List.of(
+					// ExperimentalConstants.expParamWetDry,
+					ExperimentalConstants.expParamSpeciesSupercategory,
+					ExperimentalConstants.expParamTissueType
+				);
+				List<String> filterValues1 = List.of(
+					// "Wet",
+					"Fish",
+					"whole body"
+				);
+				List<String> filterValues2 = List.of(
+					// "Dry",
+					"Fish",
+					"whole body"
+				);
+
+				cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
 			}
 		}
 
@@ -789,10 +821,26 @@ public class CompareExperimentalRecords {
 			String sourceName = "All Sources";
 			// String sourceNameWet = sourceName + " (Wet)";
 			// String sourceNameDry = sourceName + " (Dry)";
-			String sourceNameWet = sourceName + " Wet";
-			String sourceNameDry = "Dry";
+			String sourceNameWet = "Wet";
+			String sourceNameDry = sourceName + " Dry";
 
-			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+			List<String> filterParameters = List.of(
+				ExperimentalConstants.expParamWetDry,
+				ExperimentalConstants.expParamSpeciesSupercategory,
+				ExperimentalConstants.expParamTissueType
+			);
+			List<String> filterValues1 = List.of(
+				"Wet",
+				"Fish",
+				"whole body"
+			);
+			List<String> filterValues2 = List.of(
+				"Dry",
+				"Fish",
+				"whole body"
+			);
+
+			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
 		}
 
 		private void compareEcotoxBcfWetDry() {
@@ -810,11 +858,193 @@ public class CompareExperimentalRecords {
 			String sourceName = "ECOTOX";
 			// String sourceNameWet = sourceName + " (Wet)";
 			// String sourceNameDry = sourceName + " (Dry)";
-			String sourceNameWet = sourceName + " BCF";
-			String sourceNameDry = "BCFD";
+			String sourceNameWet = "BCF";
+			String sourceNameDry = sourceName + " BCFD";
 
-			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas");
+			// cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas");
 			// cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", ExperimentalConstants.expParamWetDry, "Wet", "Dry");
+
+			List<String> filterParameters = List.of(
+				// ExperimentalConstants.expParamWetDry,
+				ExperimentalConstants.expParamSpeciesSupercategory
+				// ExperimentalConstants.expParamTissueType
+			);
+			List<String> filterValues1 = List.of(
+				// "Wet",
+				"Fish"
+				// "whole body"
+			);
+			List<String> filterValues2 = List.of(
+				// "Dry",
+				"Fish"
+				// "whole body"
+			);
+
+			cm.compare(sourceNameWet, sourceNameDry, sourcesWet, sourcesDry, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+		}
+
+		private void compareBcfOnParamWithinSource(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			for (Source source : sourcesAll) {
+				List<Source> sources1 = new ArrayList<>();
+				List<Source> sources2 = new ArrayList<>();
+
+				sources1.add(source);
+				sources2.add(source);
+
+				String sourceName = source.sourceName;
+				if (source.subfolder != null && !source.subfolder.isEmpty()) {
+					sourceName += " - " + source.subfolder;
+				}
+				// String sourceName1 = sourceName + " (1)";
+				// String sourceName2 = sourceName + " (2)";
+				String sourceName1;
+				String sourceName2;
+				if (filterParameters.size() == 1) {
+					sourceName1 = filterValues1.get(0);
+					sourceName2 = sourceName + " " + filterValues2.get(0);
+				} else {
+					sourceName1 = sourceName;
+					sourceName2 = sourceName;
+				}
+
+				cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+			}
+		}
+
+		private void compareBcfOnParamAllSources(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			List<Source> sources1 = sourcesAll;
+			List<Source> sources2 = sourcesAll;
+
+			String sourceName = "All Sources";
+			// String sourceName1 = sourceName + " (1)";
+			// String sourceName2 = sourceName + " (2)";
+			String sourceName1;
+			String sourceName2;
+			if (filterParameters.size() == 1) {
+				sourceName1 = filterValues1.get(0);
+				sourceName2 = sourceName + " " + filterValues2.get(0);
+			} else {
+				sourceName1 = sourceName;
+				sourceName2 = sourceName;
+			}
+
+			cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+		}
+
+		private void compareBcfOnParamWithinSourceFuzzy(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			for (Source source : sourcesAll) {
+				List<Source> sources1 = new ArrayList<>();
+				List<Source> sources2 = new ArrayList<>();
+
+				sources1.add(source);
+				sources2.add(source);
+
+				String sourceName = source.sourceName;
+				if (source.subfolder != null && !source.subfolder.isEmpty()) {
+					sourceName += " - " + source.subfolder;
+				}
+				// String sourceName1 = sourceName + " (1)";
+				// String sourceName2 = sourceName + " (2)";
+				String sourceName1;
+				String sourceName2;
+				if (filterParameters.size() == 1) {
+					sourceName1 = filterValues1.get(0);
+					sourceName2 = sourceName + " " + filterValues2.get(0);
+				} else {
+					sourceName1 = sourceName;
+					sourceName2 = sourceName;
+				}
+
+				cm.compareFuzzy(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+			}
+		}
+
+		private void compareBcfOnParamAllSourcesFuzzy(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = false;
+			
+			List<Source> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+			
+			sourcesAll.add(new Source("Arnot 2006", propertyName));
+			sourcesAll.add(new Source("ITRC July 2023", propertyName));
+			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+			sourcesAll.add(new Source("Burkhard", propertyName));
+
+			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+
+			List<Source> sources1 = sourcesAll;
+			List<Source> sources2 = sourcesAll;
+
+			String sourceName = "All Sources";
+			// String sourceName1 = sourceName + " (1)";
+			// String sourceName2 = sourceName + " (2)";
+			String sourceName1;
+			String sourceName2;
+			if (filterParameters.size() == 1) {
+				sourceName1 = filterValues1.get(0);
+				sourceName2 = sourceName + " " + filterValues2.get(0);
+			} else {
+				sourceName1 = sourceName;
+				sourceName2 = sourceName;
+			}
+
+			cm.compareFuzzy(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
 		}
 		
 		/**
@@ -1305,6 +1535,90 @@ public class CompareExperimentalRecords {
 			rm.removeByParameter(filterParameterName, filterParameterValueString1, recs1);
 			rm.removeByParameter(filterParameterName, filterParameterValueString2, recs2);
 
+
+			if(idType.equals("sid")) {
+				recs1.addDtxsids();
+				recs2.addDtxsids();
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			System.out.println("\n***************************\n");
+			System.out.println("sources1: "+sourceName1);
+			System.out.println("sources2: "+sourceName2);
+
+			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
+			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
+			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
+			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
+			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
+
+		}
+
+
+		void compare(String sourceName1, String sourceName2, List<Source>sources1, List<Source>sources2, String propertyName, String units, String idType, List<String> filterParameterName, List<String> filterParameterValueString1, List<String> filterParameterValueString2) {
+
+			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
+			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
+
+			for(int i=0;i<filterParameterName.size();i++) {
+				System.out.println("Filtering for " + filterParameterName.get(i) + "\t" + filterParameterValueString1.get(i) + "\t" + filterParameterValueString2.get(i));
+				rm.removeByParameter(filterParameterName.get(i), filterParameterValueString1.get(i), recs1);
+				rm.removeByParameter(filterParameterName.get(i), filterParameterValueString2.get(i), recs2);
+			}
+
+			if(idType.equals("sid")) {
+				recs1.addDtxsids();
+				recs2.addDtxsids();
+			}
+			
+			TreeMap<String, ExperimentalRecords> tm1=null;
+			TreeMap<String, ExperimentalRecords> tm2=null;
+
+			if(idType.equals("cas")) {
+				tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			} else if(idType.equals("sid")) {
+				tm1 = rm.getTreeMapByDTXSID(propertyName, units, recs1);
+				tm2 = rm.getTreeMapByDTXSID(propertyName, units, recs2);
+			}
+
+			System.out.println("\n***************************\n");
+			System.out.println("sources1: "+sourceName1);
+			System.out.println("sources2: "+sourceName2);
+
+			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
+			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
+			System.out.println("countIn1Not2="+getNewChemicalCount(tm1, tm2,false));
+			System.out.println("countIn2Not1="+getNewChemicalCount(tm2, tm1,false));
+			System.out.println("countInEither="+getCountInEither(tm2, tm1,false));
+			
+			compareChemicalsInCommon(sourceName1, sourceName2, tm1, tm2, units);
+
+		}
+
+
+		void compareFuzzy(String sourceName1, String sourceName2, List<Source>sources1, List<Source>sources2, String propertyName, String units, String idType, List<String> filterParameterName, List<String> filterParameterValueString1, List<String> filterParameterValueString2) {
+
+			ExperimentalRecords recs1=rm.getAllExperimentalRecords(sources1,propertyName);
+			ExperimentalRecords recs2=rm.getAllExperimentalRecords(sources2,propertyName);
+
+			for(int i=0;i<filterParameterName.size();i++) {
+				System.out.println("Filtering for " + filterParameterName.get(i) + "\t" + filterParameterValueString1.get(i) + "\t" + filterParameterValueString2.get(i));
+				rm.removeByParameterFuzzy(filterParameterName.get(i), filterParameterValueString1.get(i), recs1);
+				rm.removeByParameterFuzzy(filterParameterName.get(i), filterParameterValueString2.get(i), recs2);
+			}
 
 			if(idType.equals("sid")) {
 				recs1.addDtxsids();
@@ -2111,7 +2425,7 @@ public class CompareExperimentalRecords {
 			//        fig.plot(x, y2, ":k", 3.0f, "BAC");  // plot(x,y2,':k','LineWidth',3);
 		
 			fig.RenderPlot();                    // First render plot before modifying
-			fig.title(source1+" vs. "+source2);    // title('Stock 1 vs. Stock 2');
+			fig.title(source2+" vs. "+source1);    // title('Stock 1 vs. Stock 2');
 			//      fig.xlim(10, 100);                   // xlim([10 100]);
 			//      fig.ylim(200, 300);                  // ylim([200 300]);
 		
@@ -2356,7 +2670,22 @@ public class CompareExperimentalRecords {
 		// c.c.compareBcf1vsAll();
 		// c.c.compareBcfWetDryWithinSource();
 		// c.c.compareBcfWetDryAllSources();
-		c.c.compareEcotoxBcfWetDry();
+		// c.c.compareEcotoxBcfWetDry();
+
+		List<String> filterParameters = List.of(
+			ExperimentalConstants.expParamMediaType
+		);
+		List<String> filterValues1 = List.of(
+			"freshwater"
+		);
+		List<String> filterValues2 = List.of(
+			"saltwater"
+		);
+
+		c.c.compareBcfOnParamWithinSource(filterParameters, filterValues1, filterValues2);
+		// c.c.compareBcfOnParamAllSources(filterParameters, filterValues1, filterValues2);
+		// c.c.compareBcfOnParamWithinSourceFuzzy(filterParameters, filterValues1, filterValues2);
+		// c.c.compareBcfOnParamAllSourcesFuzzy(filterParameters, filterValues1, filterValues2);
 		
 		// List<String> parameterNames = List.of(
 		// 	ExperimentalConstants.expParamWetDry
@@ -2371,7 +2700,7 @@ public class CompareExperimentalRecords {
 			// ExperimentalConstants.expParamObservationDuration,
 			// ExperimentalConstants.expParamTissueType,
 			// ExperimentalConstants.expParamTemperature,
-			// ExperimentalConstants.expParamExposureType
+		// 	ExperimentalConstants.expParamExposureType
 		// );
 		// c.c.compareUniqueParameterValues(parameterNames);
 
