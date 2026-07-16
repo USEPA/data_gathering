@@ -19,6 +19,8 @@ import com.google.gson.GsonBuilder;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.database.SQLite_Utilities;
 import gov.epa.database.SqlUtilities;
+
+import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
 import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
@@ -365,12 +367,18 @@ public class RecordEcotox {
 	
 	
 	transient Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-
 	transient static HashSet<String>conc1_units=new HashSet<>();
-	
 	static transient UnitConverter uc = new UnitConverter("Data" + File.separator + "density.txt");
 
-	
+	/**
+	 * In the SQL query that gets the data it filters out non FW and LAB
+	 * "media_type like '%FW%' and test_location like '%LAB%'
+	 * Instead, store the media_type and test_location as parameters
+	 * 
+	 * @param propertyName
+	 * @param valueNumber
+	 * @return
+	 */
 	ExperimentalRecord toExperimentalRecordFishTox(String propertyName, int valueNumber) {
 
 		String conc_type=null;
@@ -407,8 +415,10 @@ public class RecordEcotox {
 
 		if(conc_min!=null && conc_min==0) conc_min=null;
 
-		if(conc_unit.equals("ml/L")) conc_unit="mL/L";
-		if(conc_unit.equals("ug/ml")) conc_unit="mg/L";
+		if(conc_unit!=null) {
+			if(conc_unit.equals("ml/L")) conc_unit="mL/L";
+			if(conc_unit.equals("ug/ml")) conc_unit="mg/L";
+		}
 					
 		ExperimentalRecord er=new ExperimentalRecord();
 		
@@ -461,13 +471,14 @@ public class RecordEcotox {
 
 		
 		er.experimental_parameters=new LinkedHashMap<>();//keeps insertion order
+
 		er.parameter_values=new ArrayList<>();
-		
 		er.experimental_parameters.put("test_id", test_id);
 		er.experimental_parameters.put("result_id", result_id);
-		
+		er.experimental_parameters.put("Media type", media_type);
 		er.experimental_parameters.put("exposure_type", exposure_type);
 		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
+		er.experimental_parameters.put("Test location", test_location);
 		er.experimental_parameters.put("concentration_type", getConcentrationType(conc_type));
 		
 		
@@ -495,7 +506,7 @@ public class RecordEcotox {
 			er.reason="No final numerical value";
 		}
 
-		if(er.property_value_units_original.equals("NR")) {
+		if(er.property_value_units_original==null  || er.property_value_units_original.equals("NR")) {
 			er.keep=false;
 			er.reason="Units missing";
 		}
@@ -637,355 +648,243 @@ public class RecordEcotox {
 	}
 	
 
+	/**
+	 * Query sqlite db for BCF records
+	 * 
+	 * //TODO also get the following: // t.test_radiolabel: whether concentrations are imprecise radiolabel measurements (need metabolite correction?) 
+	 * r.additional_comments: have kinetic vs conc method for BCF? //
+	 * 
+	 * Old query:
+	 * String sql="select r.endpoint, t.test_id, dtxsid, cas_number,
+	 * chemical_name, bcf1_mean ,bcf1_unit,\r\n" // + " conc1_mean_op, conc1_mean,
+	 * conc1_unit, conc1_min, conc1_max, conc1_min_op, conc1_max_op,\r\n" // +
+	 * "exposure_duration_mean_op,
+	 * exposure_duration_mean,exposure_duration_unit,\r\n" // + "media_type,
+	 * test_location, exposure_type,chem_analysis_method, s.common_name,
+	 * s.latin_name,s.ecotox_group, rsc.description as 'response_site',\r\n" // + "
+	 * author, publication_year, title,source from tests t\r\n"
+	 * 
+	 * @param endpoint
+	 * @return
+	 */
 	public static List<RecordEcotox> get_BCF_Records_From_DB(String endpoint) {
-		List<RecordEcotox>records=new ArrayList<>();
-						
-		String sql = "select t.*, r.*, c.*, r2.*, s.*, rsc.description, "
-				+ "mc.media_temperature_mean_op, mc.media_temperature_mean, "
-				+ "mc.media_temperature_min, mc.media_temperature_max, mc.media_temperature_unit\r\n" // listing desired media fields to avoid having to add a lot more fields
-				+ "from tests t\r\n"
-				+ "	join results r on t.test_id=r.test_id\r\n"
-				+ "	join chemicals c on c.cas_number=t.test_cas\r\n"
-				+ "	left join references_ r2 on r2.reference_number=t.reference_number\r\n"
-				+ "	left join species s on t.species_number=s.species_number\r\n"
-				+ "	left join response_site_codes rsc on rsc.code=r.response_site\r\n" //gets tissue type
-				+ " left join media_characteristics mc on mc.result_id=r.result_id\r\n" // gets temperature
-				+ "	where bcf1_mean is not null and endpoint ='"+endpoint+"';";
-//				+ "	where bcf1_mean is not null and endpoint like '%"+endpoint+"%';";//this will allow BCFD (dry weight)
 
-		System.out.println(sql);
-		
-		try {
+	    List<RecordEcotox> records = new ArrayList<>();
 
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
+	    String sql =
+	        "select " +
+	        "  t.*, " +
+	        "  r.*, " +
+	        "  c.*, " +
+	        "  r2.*, " +
+	        "  s.*, " +
+	        "  rsc.description as response_site, " +
+	        "  mc.media_temperature_mean_op, " +
+	        "  mc.media_temperature_mean, " +
+	        "  mc.media_temperature_min, " +
+	        "  mc.media_temperature_max, " +
+	        "  mc.media_temperature_unit, " +
+	        "  coalesce(et.description, 'Not reported') as exposure_type, " +
+	        "  coalesce(ca.description, 'Not reported') as chem_analysis_method, " +
+	        "  coalesce(mt.description, 'Not reported') as media_type, " +
+	        "  coalesce(tl.description, 'Not reported') as test_location " +
+	        "from tests t " +
+	        "join results r on t.test_id = r.test_id " +
+	        "join chemicals c on c.cas_number = t.test_cas " +
+	        "left join references_ r2 on r2.reference_number = t.reference_number " +
+	        "left join species s on t.species_number = s.species_number " +
+	        "left join response_site_codes rsc on rsc.code = r.response_site " +
+	        "left join media_characteristics mc on mc.result_id = r.result_id " +
+	        "left join exposure_type_codes et on replace(t.exposure_type, '/', '') = et.code " +
+	        "left join chemical_analysis_codes ca on replace(r.chem_analysis_method, '/', '') = ca.code " +
+	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code " +
+	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code " +
+	        "where r.bcf1_mean is not null and r.endpoint = '" + endpoint + "';";
 
-//			JsonArray ja = new JsonArray();
+	    System.out.println(sql);
 
-			Hashtable<String,String>htExposureType=getExposureTypeLookup(databasePath);
-			Hashtable<String,String>htMediaType=getMediaTypeLookup(databasePath);
-			Hashtable<String,String>htTestLocation=getLocationTypeLookup(databasePath);
-			
-			int counter=0;
-			
-			while (rs.next()) {
-				counter++;
-//				System.out.println(rs.getString(1));
-//				JsonObject jo = new JsonObject();
-				RecordEcotox rec=new RecordEcotox();
-				SqlUtilities.createRecord(rs, rec);
-				records.add(rec);
-				
-				rec.setExposureType(htExposureType);
-				rec.setChemicalAnalysisMethod();
-				rec.setMediaType(htMediaType);
-				rec.setTestLocation(htTestLocation);
+	    try {
+	        Statement stat = SQLite_Utilities.getStatement(databasePath);
+	        ResultSet rs = stat.executeQuery(sql);
 
-			}
-			
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
+	        while (rs.next()) {
+	            RecordEcotox rec = new RecordEcotox();
+	            SqlUtilities.createRecord(rs, rec);
+	            records.add(rec);
+	        }
 
-		}
-		
-		return records;
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	    }
+
+	    return records;
 	}
 	
-	
-	public static List<RecordEcotox> get_Acute_Tox_Records_From_DB(int speciesNumber,String propertyName) {
+	 
+//	/**
+//	 * @deprecated should just get all records and filter later
+//	 * @param speciesNumber
+//	 * @param propertyName
+//	 * @return
+//	 */
+//	public static List<RecordEcotox> get_Acute_Tox_Records_From_DB(int speciesNumber,String propertyName) {
+//
+//		List<RecordEcotox>records=new ArrayList<>();
+//
+//		String sql = "select *\n" + "from tests t\n" + "join results r on t.test_id=r.test_id\n"
+//				+ "join chemicals c on c.cas_number=t.test_cas\n"
+//				+ "join references_ r2 on r2.reference_number=t.reference_number\n"
+////				+ "left join exposure_type_codes etc on t.exposure_type=etc.code "
+////				+ "left join chemical_analysis_codes cac on r.chem_analysis_method=cac.code "								
+//				+ "where t.species_number="+speciesNumber+" and \r\n"
+//				+ "media_type like '%FW%' and test_location like '%LAB%' and \r\n"
+//				+ "endpoint like '%LC50%' and \r\n"
+//				+ "measurement like '%MORT%';";//just use MORT to be safe
+////				+ "(measurement like '%MORT%' or measurement like '%SURV%');";
+//		
+//		//Note filter for duration happens later
+//		
+//				System.out.println(sql);
+//		try {
+//
+//			Statement stat = SQLite_Utilities.getStatement(databasePath);
+//			ResultSet rs = stat.executeQuery(sql);
+//
+////			JsonArray ja = new JsonArray();
+//
+//			Hashtable<String,String>htExposureType=getLookup(databasePath,"exposure_type_codes");
+//			
+//			int counter=0;
+//			
+//			while (rs.next()) {
+//				
+//				counter++;
+////				System.out.println(rs.getString(1));
+////				JsonObject jo = new JsonObject();
+//
+//				RecordEcotox rec=new RecordEcotox();
+//				SqlUtilities.createRecord(rs, rec);
+//				
+//				rec.property_name=propertyName;
+//				rec.setFromLookup(htExposureType, rec.exposure_type);
+//				rec.setChemicalAnalysisMethod();
+//				records.add(rec);
+//			}
+//
+//
+//			System.out.println(records.size());
+//
+////			System.out.println(gson.toJson(records));
+//
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//
+//		}
+//		
+//		return records;
+//
+//	}
 
-		List<RecordEcotox>records=new ArrayList<>();
 
-		String sql = "select *\n" + "from tests t\n" + "join results r on t.test_id=r.test_id\n"
-				+ "join chemicals c on c.cas_number=t.test_cas\n"
-				+ "join references_ r2 on r2.reference_number=t.reference_number\n"
-//				+ "left join exposure_type_codes etc on t.exposure_type=etc.code "
-//				+ "left join chemical_analysis_codes cac on r.chem_analysis_method=cac.code "								
-				+ "where t.species_number="+speciesNumber+" and \r\n"
-				+ "media_type like '%FW%' and test_location like '%LAB%' and \r\n"
-				+ "endpoint like '%LC50%' and \r\n"
-				+ "measurement like '%MORT%';";//just use MORT to be safe
-//				+ "(measurement like '%MORT%' or measurement like '%SURV%');";
-		
-		//Note filter for duration happens later
-		
-				System.out.println(sql);
-		try {
-
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
-
-//			JsonArray ja = new JsonArray();
-
-			Hashtable<String,String>htExposureType=getExposureTypeLookup(databasePath);
-			
-			int counter=0;
-			
-			while (rs.next()) {
-				
-				counter++;
-//				System.out.println(rs.getString(1));
-//				JsonObject jo = new JsonObject();
-
-				RecordEcotox rec=new RecordEcotox();
-				SqlUtilities.createRecord(rs, rec);
-				
-				rec.property_name=propertyName;
-				rec.setExposureType(htExposureType);
-				rec.setChemicalAnalysisMethod();
-				records.add(rec);
-			}
-
-
-			System.out.println(records.size());
-
-//			System.out.println(gson.toJson(records));
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-
-		}
-		
-		return records;
-
-	}
 	
 	public static List<RecordEcotox> get_Acute_Tox_Records_From_DB() {
 
-		List<RecordEcotox>records=new ArrayList<>();
+	    List<RecordEcotox> records = new ArrayList<>();
 
-		String sql = "select *\n" + "from tests t\n" + "join results r on t.test_id=r.test_id\n"
-				+ "join chemicals c on c.cas_number=t.test_cas\n"
-				+ "join references_ r2 on r2.reference_number=t.reference_number\n"
-				+ "left join species s on t.species_number=s.species_number\r\n"
-				+ "where media_type like '%FW%' and test_location like '%LAB%' and \r\n"
-				+ "(endpoint like '%LC50%' or endpoint like '%EC50%') and \r\n"
-				+ "measurement like '%MORT%';";//just use MORT to be safe
-//				+ "(measurement like '%MORT%' or measurement like '%SURV%');";
-		
-		//Note filter for duration happens later
-		
-	System.out.println(sql);
-		try {
+	    String sql =
+	        "select " +
+	        "  t.*, " +
+	        "  r.*, " +
+	        "  c.*, " +
+	        "  r2.*, " +
+	        "  s.*, " +
+	        "  coalesce(e.description, 'Not reported') as effect, " +
+	        "  coalesce(x.description, 'Not reported') as exposure_type, " +
+	        "  coalesce(a.description, 'Not reported') as chem_analysis_method, " +
+	        "  coalesce(mt.description, 'Not reported') as media_type, " +
+	        "  coalesce(tl.description, 'Not reported') as test_location\n" +
+	        "from tests t " +
+	        "join results r on t.test_id = r.test_id " +
+	        "join chemicals c on c.cas_number = t.test_cas " +
+	        "join references_ r2 on r2.reference_number = t.reference_number " +
+	        "left join species s on t.species_number = s.species_number " +
+	        "left join effect_codes e on replace(r.effect, '/', '') = e.code " +
+	        "left join exposure_type_codes x on replace(t.exposure_type, '/', '') = x.code " +
+	        "left join chemical_analysis_codes a on replace(r.chem_analysis_method, '/', '') = a.code " +
+	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code " +
+	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code " +
+	        "where (r.endpoint like '%LC50%' or r.endpoint like '%EC50%') " +
+	        "  and r.measurement like '%MORT%';";
 
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
+	    System.out.println(sql);
 
-			Hashtable<String,String>htExposureType=getExposureTypeLookup(databasePath);
-			Hashtable<String,String>htEffect=getEffectLookup(databasePath);
+	    try {
+	        Statement stat = SQLite_Utilities.getStatement(databasePath);
+	        ResultSet rs = stat.executeQuery(sql);
 
-			
-			int counter=0;
-			while (rs.next()) {
-				counter++;
-//				System.out.println(rs.getString(1));
-				RecordEcotox rec=new RecordEcotox();
-				SqlUtilities.createRecord(rs, rec);
-				rec.setEffect(htEffect);//rather than table join, use hashtable, is this best way?
-				rec.setExposureType(htExposureType);
-				rec.setChemicalAnalysisMethod();
-				records.add(rec);
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return records;
+	        while (rs.next()) {
+	            RecordEcotox rec = new RecordEcotox();
+	            SqlUtilities.createRecord(rs, rec);
+	            records.add(rec);
+	        }
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	    }
+
+	    return records;
 	}
-
+	
 	
 	public static List<RecordEcotox> get_Chronic_Tox_Records_From_DB() {
 
-		List<RecordEcotox>records=new ArrayList<>();
+	    List<RecordEcotox> records = new ArrayList<>();
 
-		String sql = "select *\n" + "from tests t\n" + "join results r on t.test_id=r.test_id\n"
-				+ "join chemicals c on c.cas_number=t.test_cas\n"
-				+ "join references_ r2 on r2.reference_number=t.reference_number\n"
-				+ "left join species s on t.species_number=s.species_number\r\n"
-				+ "where media_type like '%FW%' and test_location like '%LAB%' and \r\n"
-				+ "(endpoint like '%LOEC%' or endpoint like '%NOEC%');";
-		
-		//Note filter for duration happens later
-		
-	System.out.println(sql);
-		try {
+	    String sql =
+	        "select " +
+	        "  t.*, " +
+	        "  r.*, " +
+	        "  c.*, " +
+	        "  r2.*, " +
+	        "  s.*, " +
+	        "  coalesce(e.description, 'Not reported') as effect, " +
+	        "  coalesce(x.description, 'Not reported') as exposure_type, " +
+	        "  coalesce(m.description, 'Not reported') as chem_analysis_method, " +
+	        "  coalesce(mt.description, 'Not reported') as media_type, " +
+	        "  coalesce(tl.description, 'Not reported') as test_location " +
+	        "from tests t " +
+	        "join results r on t.test_id = r.test_id " +
+	        "join chemicals c on c.cas_number = t.test_cas " +
+	        "join references_ r2 on r2.reference_number = t.reference_number " +
+	        "left join species s on t.species_number = s.species_number " +
+	        "left join effect_codes e on replace(r.effect, '/', '') = e.code " +
+	        "left join exposure_type_codes x on replace(r.exposure_type, '/', '') = x.code " +
+	        "left join chemical_analysis_codes m on replace(r.chem_analysis_method, '/', '') = m.code " +
+	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code " +
+	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code " +
+	        "where (endpoint like '%LOEC%' or endpoint like '%NOEC%');";
 
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
+	    System.out.println(sql);
 
-			Hashtable<String,String>htExposureType=getExposureTypeLookup(databasePath);
-			Hashtable<String,String>htEffect=getEffectLookup(databasePath);
-			
-			int counter=0;
-			while (rs.next()) {
-				counter++;
-//				System.out.println(rs.getString(1));
-				RecordEcotox rec=new RecordEcotox();
-				SqlUtilities.createRecord(rs, rec);
-				rec.setExposureType(htExposureType);//rather than table join, use hashtable, is this best way?
-				rec.setEffect(htEffect);//rather than table join, use hashtable, is this best way?
-				rec.setChemicalAnalysisMethod();
-				records.add(rec);
-			}
 
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return records;
+	    try {
+	        Statement stat = SQLite_Utilities.getStatement(databasePath);
+	        ResultSet rs = stat.executeQuery(sql);
+
+	        while (rs.next()) {
+	            RecordEcotox rec = new RecordEcotox();
+	            SqlUtilities.createRecord(rs, rec);
+	            records.add(rec);
+	        }
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	    }
+
+	    return records;
 	}
 	
-	public static Hashtable<String,String> getExposureTypeLookup(String databasePath) {
 
-		Hashtable<String,String>htDesc=new Hashtable<>();
-		String sql = "select code,description from exposure_type_codes;";
-		try {
-
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
-			while (rs.next()) {
-				String code= rs.getString(1);
-				String description= rs.getString(2);
-				htDesc.put(code, description);
-			}
-			
-			htDesc.put("U", "Not reported");
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return htDesc;
-	}
-	
-	
-	public static Hashtable<String,String> getEffectLookup(String databasePath) {
-
-		Hashtable<String,String>htDesc=new Hashtable<>();
-		String sql = "select code,description from effect_codes;";
-		try {
-
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
-			while (rs.next()) {
-				String code= rs.getString(1);
-				String description= rs.getString(2);
-				htDesc.put(code, description);
-			}
-			
-			htDesc.put("U", "Not reported");
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return htDesc;
-	}
-	
-	public static Hashtable<String,String> getMediaTypeLookup(String databasePath) {
-
-		Hashtable<String,String>htDesc=new Hashtable<>();
-		String sql = "select code,description from media_type_codes;";
-		try {
-
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
-			while (rs.next()) {
-				String code= rs.getString(1);
-				String description= rs.getString(2);
-				htDesc.put(code, description);
-			}
-			
-			htDesc.put("U", "Not reported");
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return htDesc;
-	}
-	
-	public static Hashtable<String,String> getLocationTypeLookup(String databasePath) {
-
-		Hashtable<String,String>htDesc=new Hashtable<>();
-		String sql = "select code,description from test_location_codes;";
-		try {
-
-			Statement stat = SQLite_Utilities.getStatement(databasePath);
-			ResultSet rs = stat.executeQuery(sql);
-			while (rs.next()) {
-				String code= rs.getString(1);
-				String description= rs.getString(2);
-				htDesc.put(code, description);
-			}
-			
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		return htDesc;
-	}
-	
-	void setExposureType(Hashtable<String,String>htDesc) {
-		
-		String code=exposure_type.replace("/","");
-		
-		if(htDesc.containsKey(code)) {
-			exposure_type=htDesc.get(code);
-		} else {
-			System.out.println("Unknown exposure_type: "+code);
-			
-		}
-		
-	}
-	
-	
-
-	void setEffect(Hashtable<String,String>htDesc) {
-		
-		String code=effect.replace("/","");
-		if(htDesc.containsKey(code)) {
-			effect=htDesc.get(code);
-		} else {
-			System.out.println("Unknown effect code: "+code);
-		}
-		
-	}
-	
-	
-	void setTestLocation(Hashtable<String,String>htDesc) {
-		
-		String code=test_location.replace("/","");
-		
-		if(htDesc.containsKey(code)) {
-			test_location=htDesc.get(code);
-		} else {
-			System.out.println("Unknown exposure_type: "+code);
-			
-		}
-		
-	}
-	
-	void setChemicalAnalysisMethod() {
-		//TODO use hashtable like in exposure type
-		
-		String cam=chem_analysis_method.replace("/", "");
-		
-		if(cam.contains("M")) {
-			chem_analysis_method="Measured";			
-		} else if(cam.contains("Z")) {
-			chem_analysis_method="Chemical analysis reported";
-		} else if(cam.contains("X")) {
-			chem_analysis_method="Unmeasured values (some measured values reported in article)";
-		} else if(cam.equals("U")) {
-			chem_analysis_method="Unmeasured";
-		} else if(cam.contains("NR") || cam.equals("--")) {
-			chem_analysis_method="Not reported";
-		} else if(cam.contains("NC")) {
-			chem_analysis_method="Not coded";
-		} else {
-			System.out.println("Unknown chem_analysis_method:\t"+chem_analysis_method);
-		}
-		
-		
-	}
-	
 	void setMediaType(Hashtable<String, String> htMediaType) {
 		String code=media_type.replace("/", "");
 		if(htMediaType.containsKey(code)) {
@@ -995,6 +894,7 @@ public class RecordEcotox {
 		}
 	}
 	
+
 	String getConcentrationType(String conc_type) {
 		
 		if(conc_type==null) return "Not available";
@@ -1012,8 +912,6 @@ public class RecordEcotox {
 			System.out.println("Unknown conc_type:\t"+conc_type);
 			return conc_type;
 		}
-		
-			
 	}
 	
 
@@ -1067,12 +965,7 @@ public class RecordEcotox {
 
 		return true;
 	}
-	
-	public static void main(String[] args) {
-		RecordEcotox r = new RecordEcotox();
-		 List<RecordEcotox>records=r.get_Acute_Tox_Records_From_DB(1,ExperimentalConstants.strNINETY_SIX_HOUR_FATHEAD_MINNOW_LC50);
-	}
-	
+		
 	
 	private String getSpeciesSupercategory() {
 
@@ -1477,7 +1370,13 @@ public class RecordEcotox {
 		String CAS2=cas_number.substring(cas_number.length()-3,cas_number.length()-1);
 		String CAS3=cas_number.substring(cas_number.length()-1,cas_number.length());
 		er.casrn=CAS1+"-"+CAS2+"-"+CAS3;
-		er.chemical_name=chemical_name;
+		
+		er.chemical_name=ChemicalNameFixer.fixName(chemical_name);
+		
+		if(!er.chemical_name.equals(chemical_name)) {
+			System.out.println("Fixed chemical name: \""+chemical_name+"\" to \""+er.chemical_name+"\"");
+		}
+		
 	}
 
 

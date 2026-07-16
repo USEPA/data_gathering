@@ -537,6 +537,9 @@ public class RecordQSAR_ToolBox {
 		// to spaces
 		List<String> names = null;
 		if (this.Chemical_name_s != null && !this.Chemical_name_s.isBlank()) {
+			
+			this.Chemical_name_s = ChemicalNameFixer.replaceCommonHtmlEntities(this.Chemical_name_s);
+			
 			names = SYN_SPLIT.splitAsStream(this.Chemical_name_s.trim()).map(String::trim).filter(s -> !s.isEmpty())
 					.map(s -> s.replace('_', ' ')) // convert underscores to spaces AFTER splitting
 					.map(s -> s.replaceAll("\\s+", " ")) // normalize whitespace
@@ -562,8 +565,13 @@ public class RecordQSAR_ToolBox {
 				if (hasNoLettersAscii(name)) {
 					continue;
 				}
-				er.chemical_name = name;
-				String name2 = ChemicalNameFixer.fixName(name);
+//				er.chemical_name = name;
+//				String name2 = ChemicalNameFixer.fixName(name);
+				er.chemical_name = ChemicalNameFixer.fixName(name);
+				
+				if(!er.chemical_name.equals(name)) {
+					System.out.println("Fixed: \""+name+"\" to \""+er.chemical_name+"\"");
+				}
 				break;
 			}
 		}
@@ -2332,9 +2340,18 @@ public class RecordQSAR_ToolBox {
 				er.note = Comments;
 			}
 			er.reference = Reference_source;
-			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type.toLowerCase().trim());
+			
+			if (Water_type!=null) {
+				Water_type=Water_type.toLowerCase().replace("freshwater","Fresh water").replace("saltwater","Salt water").trim();
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type);
+			}
+			
+			// er.experimental_parameters.put("Tissue", Organ);
 			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, Test_organisms_species);
 			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, Species_common_name);
+
+//			setTemperature(er);
+			// TemperatureCondition.getTemperatureCondition(er, Temperature);
 			
 			// setpH(er);
 			if (Statistics != null) {
@@ -2689,6 +2706,14 @@ public class RecordQSAR_ToolBox {
 				er.reason = "Not a fish species";
 			}
 		}
+		
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
+		}
+
+		// if(er.experimental_parameters.get("Species supercategory")==null) {
+		// System.out.println(Test_organisms_species+"\t"+Superclass);
+		// }
 
 		if (Test_type == null) {
 			er.keep = false;
@@ -2756,7 +2781,6 @@ public class RecordQSAR_ToolBox {
 		if (er.keep) {
 			if (er.chemical_name != null && er.chemical_name.contains("&"))
 				System.out.println(er.chemical_name);
-
 		}
 
 		return er;
