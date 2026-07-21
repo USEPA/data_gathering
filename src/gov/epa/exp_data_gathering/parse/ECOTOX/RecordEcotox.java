@@ -485,7 +485,7 @@ public class RecordEcotox {
 		if(er.property_name.equals(ExperimentalConstants.strAcuteAquaticToxicity)
 				|| er.property_name.equals(ExperimentalConstants.strChronicAquaticToxicity)) {//general property
 			er.experimental_parameters.put("test_type", endpoint);
-			setObservationDuration(er,"Observation duration");
+			setParameterObservationDuration(er,"Observation duration");
 			addSpeciesParameters(er);
 		}
 
@@ -540,7 +540,7 @@ public class RecordEcotox {
 		
 
 
-	private void setObservationDuration(ExperimentalRecord er,String parameterName) {
+	private void setParameterObservationDuration(ExperimentalRecord er,String parameterName) {
 		
 		String unit=obs_duration_unit;
 		Double mean=getValueInDays(obs_duration_mean,unit);
@@ -597,7 +597,7 @@ public class RecordEcotox {
 	 * @param parameterName
 	 */
 	@Deprecated
-	private void setExposureDuration(ExperimentalRecord er,String parameterName) {
+	private void setParameterExposureDuration(ExperimentalRecord er,String parameterName) {
 		
 		String unit=exposure_duration_unit;		
 		Double mean=getValueInDays(exposure_duration_mean,unit);
@@ -667,7 +667,7 @@ public class RecordEcotox {
 	 * @param endpoint
 	 * @return
 	 */
-	public static List<RecordEcotox> get_BCF_Records_From_DB(String endpoint) {
+	public static List<RecordEcotox> get_BCF_Records_From_DB(String endpointAbbrev) {
 
 	    List<RecordEcotox> records = new ArrayList<>();
 
@@ -684,6 +684,7 @@ public class RecordEcotox {
 	        "  mc.media_temperature_min, " +
 	        "  mc.media_temperature_max, " +
 	        "  mc.media_temperature_unit, " +
+	        "  coalesce(rsc.description, 'Not reported') as response_site, " +
 	        "  coalesce(et.description, 'Not reported') as exposure_type, " +
 	        "  coalesce(ca.description, 'Not reported') as chem_analysis_method, " +
 	        "  coalesce(mt.description, 'Not reported') as media_type, " +
@@ -699,7 +700,7 @@ public class RecordEcotox {
 	        "left join chemical_analysis_codes ca on replace(r.chem_analysis_method, '/', '') = ca.code " +
 	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code " +
 	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code " +
-	        "where r.bcf1_mean is not null and r.endpoint = '" + endpoint + "';";
+	        "where r.bcf1_mean is not null and r.endpoint = '" + endpointAbbrev + "';";
 
 	    System.out.println(sql);
 
@@ -884,17 +885,6 @@ public class RecordEcotox {
 	    return records;
 	}
 	
-
-	void setMediaType(Hashtable<String, String> htMediaType) {
-		String code=media_type.replace("/", "");
-		if(htMediaType.containsKey(code)) {
-			media_type=htMediaType.get(code);
-		} else {
-			System.out.println("Unknown media_type: "+code);
-		}
-	}
-	
-
 	String getConcentrationType(String conc_type) {
 		
 		if(conc_type==null) return "Not available";
@@ -1121,7 +1111,7 @@ public class RecordEcotox {
 		if(bcf1_mean!=null) {
 			er.property_value_numeric_qualifier=bcf1_mean_op;
 			er.property_value_point_estimate_original=bcf1_mean;	
-			er.property_value_string=er.property_value_point_estimate_original+" "+bcf1_unit;//TODO
+			er.property_value_string=er.property_value_point_estimate_original+" "+bcf1_unit;
 
 		} else if(bcf1_min!=null && bcf1_max!=null) {
 			
@@ -1150,27 +1140,20 @@ public class RecordEcotox {
 		er.experimental_parameters=new LinkedHashMap<>();
 		er.experimental_parameters.put("test_id", test_id);
 
-		setSpeciesParameters(er); 
+		setParametersSpecies(er); 
 		
 		if(limitToFish && ecotox_group!=null && !ecotox_group.toLowerCase().contains("fish")) {
 			er.keep=false;
 			er.reason="Not a fish species";
 		}
 		
+		setParameterResponseSite(er);
+		
+		
 		if(description==null) {
 //			System.out.println(gson.toJson(this));
 		} else {
-			if(description.contains("Whole organism")) {
-				er.experimental_parameters.put("Response site", "whole body");	
-			} else if (description.toLowerCase().contains("multiple tissue/organ")) {
-				er.experimental_parameters.put("Response site", "multiple tissue/organs");
-			} else if (description.toLowerCase().contains("muscle+bone")) {
-				er.experimental_parameters.put("Response site", "muscle and bone");
-			} else if (description.toLowerCase().contains("root + stem")) {
-				er.experimental_parameters.put("Response site", "root and stem");
-			} else {
-				er.experimental_parameters.put("Response site", description.toLowerCase().trim());
-			} 
+			
 		}
 		if(limitToWholeBody && (description==null || !description.equals("Whole organism")))  {
 			er.keep=false;
@@ -1183,6 +1166,56 @@ public class RecordEcotox {
 			er.reason="Not a standard test species";
 		}
 		
+		setParameterMediaType(er);
+		if (media_type.contains("water")) {
+			setParameterWaterConcentration(er);			
+		}
+
+		setParameterObservationDuration(er,"Observation duration");//to be consistent with Arnot 2006
+		er.experimental_parameters.put("Test location", test_location);
+		er.experimental_parameters.put("exposure_type", WordUtils.capitalizeFully(exposure_type));
+		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
+		setParameterTemperature(er);
+		setParameterLipidPercentage(er);
+		// Measurement Method (using measurement_comments)
+		setParameterMeasurementMethod(er);
+
+		setParameterWetDry(er);
+
+		setParameterGuideline(er);
+		
+		//TODO store t.test_radiolabel, r.additional_comments => calculation method = kinetic or conc
+		//Maybe omit radiolabeled ones since have no way to know if they corrected for metabolites when
+		//determining concentrations
+		uc.convertRecord(er);
+
+		return er;
+	}
+
+	private void setParameterWetDry(ExperimentalRecord er) {
+		// Test Specificity (dry_wet)
+		if (dry_wet != null && !dry_wet.trim().isEmpty()) {
+			if (dry_wet.toLowerCase().contains("dry")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			} else if (dry_wet.toLowerCase().contains("wet")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			} else if (dry_wet.toLowerCase().contains("nc")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Classified");
+			} else if (dry_wet.toLowerCase().contains("nr")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Reported");
+				if(additional_comments!=null && additional_comments.toLowerCase().contains("dry wt")) {
+					System.out.println("NR for dry_wet but additional_comments="+additional_comments);//DOESNT happen?
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sets the type of water that was used
+ 	 * <p>TODO use constants in ExperimentalConstants instead of hardcoded strings like "freshwater"
+	 * @param er
+	 */
+	private void setParameterMediaType(ExperimentalRecord er) {
 		if (media_type != null) {
 			if (media_type.toLowerCase().contains("fresh")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, "freshwater");
@@ -1192,68 +1225,12 @@ public class RecordEcotox {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, media_type.toLowerCase().trim());
 			}
 		}
+	}
+
+	private void setParameterMeasurementMethod(ExperimentalRecord er) {
 		
-		if (media_type.contains("water")) {
-			setWaterConcentration(er);			
-		}
-
-		setObservationDuration(er,"Observation duration");//to be consistent with Arnot 2006
+		//TODO also look at additional_comments field
 		
-		er.experimental_parameters.put("Test location", test_location);
-		er.experimental_parameters.put("exposure_type", WordUtils.capitalizeFully(exposure_type));
-		er.experimental_parameters.put("chem_analysis_method", chem_analysis_method);
-
-		// New parameters
-		// Temperature
-		if (media_temperature_mean != null || media_temperature_max != null || media_temperature_min != null) {
-
-			// System.out.println("Have water conc="+Exposure_concentration_MeanValue);
-
-			ParameterValue pv = new ParameterValue();
-			pv.parameter.name = "Temperature";
-			pv.unit.abbreviation = ExperimentalConstants.str_C;
-			// pv.unit.abbreviation = media_temperature_unit;
-
-			if (media_temperature_mean != null) {
-				double mean = BCFUtilities.parseTemperature(media_temperature_mean, media_temperature_unit);
-				pv.value_point_estimate = mean;
-			} else if (media_temperature_max != null || media_temperature_min != null) {
-				if (media_temperature_max != null) {
-					double max = BCFUtilities.parseTemperature(media_temperature_max, media_temperature_unit);
-					pv.value_max = max;
-				}
-				if (media_temperature_min != null) {
-					double min = BCFUtilities.parseTemperature(media_temperature_min, media_temperature_unit);
-					pv.value_min = min;
-				}
-			}
-
-			er.parameter_values.add(pv);
-		}
-
-		// Lipid Percentage (using lipid_pct_*)
-		Boolean foundLipidPct = false;
-		if (lipid_pct_mean != null || lipid_pct_max != null || lipid_pct_min != null) {
-			ParameterValue pv = new ParameterValue();
-			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
-			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
-
-			if (lipid_pct_mean != null) {
-				pv.value_point_estimate = lipid_pct_mean;
-			}
-			if (lipid_pct_max != null) {
-				pv.value_max = Double.parseDouble(lipid_pct_max);
-			}
-			if (lipid_pct_min != null) {
-				pv.value_min = Double.parseDouble(lipid_pct_min);
-			}
-
-			er.parameter_values.add(pv);
-			
-			foundLipidPct = true;
-		}
-
-		// Measurement Method (using measurement_comments)
 		if (measurement_comments != null && !measurement_comments.trim().isEmpty()) {
 			if (measurement_comments.toLowerCase().contains("steady state")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
@@ -1275,47 +1252,14 @@ public class RecordEcotox {
 				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Unknown");
 			}
 
-			// Lipid Percentage (using measurement_comments)
-			if (!foundLipidPct) {
-				Pattern pattern = Pattern.compile("lipid.*percentage", Pattern.CASE_INSENSITIVE);
-				Pattern pattern2 = Pattern.compile("lipid.*content", Pattern.CASE_INSENSITIVE);
-				Pattern pattern3 = Pattern.compile("%.*lipid", Pattern.CASE_INSENSITIVE);
-
-				Pattern patternNumber = Pattern.compile("(\\d+\\.?\\d*)\\s*%");
-
-				Matcher matcher = pattern.matcher(measurement_comments);
-				Matcher matcher2 = pattern2.matcher(measurement_comments);
-				Matcher matcher3 = pattern3.matcher(measurement_comments);
-
-				Matcher matcherNumber = patternNumber.matcher(measurement_comments);
-
-				if ((matcher.find() || matcher2.find() || matcher3.find()) && matcherNumber.find()) {
-					ParameterValue pv = new ParameterValue();
-					pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
-					pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
-					double wc = Double.parseDouble(matcherNumber.group(1));
-					pv.value_point_estimate = wc;
-					er.parameter_values.add(pv);
-					// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, matcherNumber.group(1));
-				} else if (matcher.find() || matcher2.find() || matcher3.find()) {
-					System.out.println("Matcher found for lipid percentage but no number found in: " + measurement_comments);
-				}
-			}
+			
 		}
+	}
 
-		// Test Specificity (dry_wet)
-		if (dry_wet != null && !dry_wet.trim().isEmpty()) {
-			if (dry_wet.toLowerCase().contains("dry")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-			} else if (dry_wet.toLowerCase().contains("wet")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-			} else if (dry_wet.toLowerCase().contains("nc")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Classified");
-			} else if (dry_wet.toLowerCase().contains("nr")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Reported");
-			}
-		}
-
+	private void setParameterGuideline(ExperimentalRecord er) {
+		
+		//TODO figure out which guidelines are valid and only use the good ones during dataset creation
+		
 		// Test Guideline (test_method and test_method_comments)
 		if (test_method != null && !test_method.trim().isEmpty()) {
 			String guideline;
@@ -1342,17 +1286,134 @@ public class RecordEcotox {
 				BCFUtilities.setOecd305Parameters(er);
 			}
 		}
-		
-		//TODO store t.test_radiolabel, r.additional_comments => calculation method = kinetic or conc
-		//Maybe omit radiolabeled ones since have no way to know if they corrected for metabolites when
-		//determining concentrations
-		uc.convertRecord(er);
+	}
 
-		return er;
+	private void setParameterLipidPercentage(ExperimentalRecord er) {
+		// Lipid Percentage (using lipid_pct_*)
+		Boolean foundLipidPct = false;
+		if (lipid_pct_mean != null || lipid_pct_max != null || lipid_pct_min != null) {
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+
+			if (lipid_pct_mean != null) {
+				pv.value_point_estimate = lipid_pct_mean;
+			}
+			if (lipid_pct_max != null) {
+				pv.value_max = Double.parseDouble(lipid_pct_max);
+			}
+			if (lipid_pct_min != null) {
+				pv.value_min = Double.parseDouble(lipid_pct_min);
+			}
+
+			er.parameter_values.add(pv);
+			
+			foundLipidPct = true;
+		}
+		
+		if (measurement_comments != null && !measurement_comments.trim().isEmpty()) {
+			// Lipid Percentage (using measurement_comments)
+						if (!foundLipidPct) {
+							Pattern pattern = Pattern.compile("lipid.*percentage", Pattern.CASE_INSENSITIVE);
+							Pattern pattern2 = Pattern.compile("lipid.*content", Pattern.CASE_INSENSITIVE);
+							Pattern pattern3 = Pattern.compile("%.*lipid", Pattern.CASE_INSENSITIVE);
+
+							Pattern patternNumber = Pattern.compile("(\\d+\\.?\\d*)\\s*%");
+
+							Matcher matcher = pattern.matcher(measurement_comments);
+							Matcher matcher2 = pattern2.matcher(measurement_comments);
+							Matcher matcher3 = pattern3.matcher(measurement_comments);
+
+							Matcher matcherNumber = patternNumber.matcher(measurement_comments);
+
+							if ((matcher.find() || matcher2.find() || matcher3.find()) && matcherNumber.find()) {
+								ParameterValue pv = new ParameterValue();
+								pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+								pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+								double wc = Double.parseDouble(matcherNumber.group(1));
+								pv.value_point_estimate = wc;
+								er.parameter_values.add(pv);
+								// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, matcherNumber.group(1));
+							} else if (matcher.find() || matcher2.find() || matcher3.find()) {
+								System.out.println("Matcher found for lipid percentage but no number found in: " + measurement_comments);
+							}
+						}
+			
+		}
+	}
+
+	private void setParameterTemperature(ExperimentalRecord er) {
+		if (media_temperature_mean != null || media_temperature_max != null || media_temperature_min != null) {
+
+			// System.out.println("Have water conc="+Exposure_concentration_MeanValue);
+
+			ParameterValue pv = new ParameterValue();
+			pv.parameter.name = "Temperature";
+			pv.unit.abbreviation = ExperimentalConstants.str_C;
+			// pv.unit.abbreviation = media_temperature_unit;
+
+			if (media_temperature_mean != null) {
+				double mean = BCFUtilities.parseTemperature(media_temperature_mean, media_temperature_unit);
+				pv.value_point_estimate = mean;
+			} else if (media_temperature_max != null || media_temperature_min != null) {
+				if (media_temperature_max != null) {
+					double max = BCFUtilities.parseTemperature(media_temperature_max, media_temperature_unit);
+					pv.value_max = max;
+				}
+				if (media_temperature_min != null) {
+					double min = BCFUtilities.parseTemperature(media_temperature_min, media_temperature_unit);
+					pv.value_min = min;
+				}
+			}
+
+			er.parameter_values.add(pv);
+		}
+	}
+
+	/**
+	 * TODO use constants in ExperimentalConstants instead of hardcoded strings like "whole body"
+	 * 
+	 * @param er
+	 */
+	private void setParameterResponseSite(ExperimentalRecord er) {
+		if (response_site == null || "Not reported".equalsIgnoreCase(response_site)) {
+		    if (additional_comments != null) {
+		        Pattern pattern = Pattern.compile("EFCT/(.+?)//");
+		        Matcher matcher = pattern.matcher(additional_comments);
+
+		        if (matcher.find()) {
+		            String responseSite = matcher.group(1).trim().toLowerCase();
+		            responseSite=responseSite.replace("analyzed", "").trim();
+		            er.experimental_parameters.put(
+			                ExperimentalConstants.expParamResponseSite,
+			                responseSite
+			            );
+		            
+		            //TODO filter out the ones that arent body of the animal
+		            
+		            System.out.println("response site: " + responseSite);
+		        } else {
+//		            System.out.println("Additional comments: " + additional_comments);
+		        }
+		    }
+		
+		} else {
+			if(response_site.contains("Whole organism")) {//TODO move to BCF utilities and come up with list of values that match whole body?
+				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, ExperimentalConstants.expParamValueWholeBody);	
+			} else if (response_site.toLowerCase().contains("multiple tissue/organ")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "multiple tissue/organs");
+			} else if (response_site.toLowerCase().contains("muscle+bone")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "muscle and bone");
+			} else if (response_site.toLowerCase().contains("root + stem")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "root and stem");
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, response_site.trim());
+			} 
+		}
 	}
 
 
-	private void setSpeciesParameters(ExperimentalRecord er) {
+	private void setParametersSpecies(ExperimentalRecord er) {
 		er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, latin_name);
 		er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, common_name);
 
@@ -1395,7 +1456,7 @@ public class RecordEcotox {
 	}
 
 
-	private void setWaterConcentration(ExperimentalRecord er) {
+	private void setParameterWaterConcentration(ExperimentalRecord er) {
 		conc1_unit=conc1_unit.replace("/ml", "/mL");
 		
 		if(conc1_unit.contains("/g") ||  conc1_unit.contains("/acre") ||
@@ -1426,8 +1487,6 @@ public class RecordEcotox {
 			}
 		}
  		
-		//TODO instead store "Water concentration (ug/L)"
-				
 		ParameterValue pv=new ParameterValue();
 		pv.parameter.name="Water concentration";
 		pv.unit.abbreviation=erWC.property_value_units_final;

@@ -862,42 +862,25 @@ public class ParseEcotox extends Parse {
 
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity,ExperimentalConstants.strChronicAquaticToxicity);
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strChronicAquaticToxicity);
-//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
-
-//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBAF,ExperimentalConstants.strBCF);
 
 		
+		//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strAcuteAquaticToxicity);
+
+//		p.getAcuteAquaticToxicityData();
+
+// ******************************************************************************************************
+//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBAF,ExperimentalConstants.strBCF);
+//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF,ExperimentalConstants.strFishBCF,
+//		ExperimentalConstants.strFishBCFWholeBody);
+
 //		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF);
 		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF, "BCFD");
-		
-//		List<String>propertyNames=Arrays.asList(ExperimentalConstants.strBCF,ExperimentalConstants.strFishBCF,
-//				ExperimentalConstants.strFishBCFWholeBody);
-		
-//		List<String> propertyNames = Arrays.asList(ExperimentalConstants.strBCF);
-		
 		for (String propertyName:propertyNames) {
-			p.init(propertyName.equals("BCFD") ? "BCFD" : propertyName);
+			p.init(propertyName);
 			p.propertyName=ExperimentalConstants.strBCF;
 			p.bcfEndpoint=propertyName.equals("BCFD") ? "BCFD" : "BCF";
 			p.createFiles();
 		}
-		
-//		p.getAcuteAquaticToxicityData();
-		
-//		/************************************************************************
-		
-//		p.getBCF_ExperimentalRecords(ExperimentalConstants.strBCF,false);		
-//		p.getBCF_ExperimentalRecords(ExperimentalConstants.strFishBCF,false);
-//		p.getBCF_ExperimentalRecords(ExperimentalConstants.strFishBCFWholeBody,false);
-		
-//		p.getBCF_ExperimentalRecords(ExperimentalConstants.strStandardFishBCF,false);
-//		p.getBCF_ExperimentalRecords(ExperimentalConstants.strStandardFishBCFWholeBody,false);
-		
-//		p.compareEcotoxToToxval();
-		
-//		p.maxExcelRows=999999;
-//		p.compareExpToPredWs();
-
 	}
 
 
