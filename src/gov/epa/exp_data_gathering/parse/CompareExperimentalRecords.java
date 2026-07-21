@@ -2674,22 +2674,31 @@ public class CompareExperimentalRecords {
 
 		List<String> filterParameters = List.of(
 			ExperimentalConstants.expParamMediaType
+			// ExperimentalConstants.expParamSpeciesSupercategory,
+			// ExperimentalConstants.expParamTissueType,
+			// ExperimentalConstants.expParamWetDry
 		);
 		List<String> filterValues1 = List.of(
 			"freshwater"
+			// "Fish",
+			// "whole body",
+			// "Wet"
 		);
 		List<String> filterValues2 = List.of(
 			"saltwater"
+			// "Fish",
+			// "whole body",
+			// "Wet"
 		);
 
-		c.c.compareBcfOnParamWithinSource(filterParameters, filterValues1, filterValues2);
+		// c.c.compareBcfOnParamWithinSource(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamAllSources(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamWithinSourceFuzzy(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamAllSourcesFuzzy(filterParameters, filterValues1, filterValues2);
 		
-		// List<String> parameterNames = List.of(
+		List<String> parameterNames = List.of(
 		// 	ExperimentalConstants.expParamWetDry
-			// ExperimentalConstants.expParamGuideline
+			ExperimentalConstants.expParamGuideline
 			// ExperimentalConstants.expParamMediaType,
 			// ExperimentalConstants.expParamTestLocation,
 			// ExperimentalConstants.expParamWetDry,
@@ -2701,8 +2710,8 @@ public class CompareExperimentalRecords {
 			// ExperimentalConstants.expParamTissueType,
 			// ExperimentalConstants.expParamTemperature,
 		// 	ExperimentalConstants.expParamExposureType
-		// );
-		// c.c.compareUniqueParameterValues(parameterNames);
+		);
+		c.c.compareUniqueParameterValues(parameterNames);
 
 //		c.c.compareOralRat();
 
