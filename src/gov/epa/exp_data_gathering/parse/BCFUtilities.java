@@ -110,14 +110,29 @@ public class BCFUtilities {
 			er.updateNote("Exposure type set to Flow-through based on OECD 305 guideline standards");
 		}
 		// Guideline is supposed to normalize to 5% lipid content
-		if (er.experimental_parameters.get(ExperimentalConstants.expParamLipidPercent) == null) {
+		if (er.parameter_values == null) {
 			ParameterValue pv = new ParameterValue();
 			pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
 			pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
 			pv.value_point_estimate = 5.0;
 			er.parameter_values.add(pv);
 			er.updateNote("Lipid content set to 5% based on OECD 305 guideline standards");
-		}
+		} else {
+            Boolean hasLipidPercent = false;
+            for (ParameterValue pv : er.parameter_values) {
+                if (pv.parameter.name.equals(ExperimentalConstants.expParamLipidPercent)) {
+                    hasLipidPercent = true;
+                }
+            }
+            if (!hasLipidPercent) {
+                ParameterValue pv = new ParameterValue();
+                pv.parameter.name = ExperimentalConstants.expParamLipidPercent;
+                pv.unit.abbreviation = ExperimentalConstants.str_dimensionless;
+                pv.value_point_estimate = 5.0;
+                er.parameter_values.add(pv);
+                er.updateNote("Lipid content set to 5% based on OECD 305 guideline standards");
+            }
+        }
 		// Guideline is supposed to normalize to wet-weight, might be set elsewhere
 		if (er.experimental_parameters.get(ExperimentalConstants.expParamWetDry) == null) {
 			er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");

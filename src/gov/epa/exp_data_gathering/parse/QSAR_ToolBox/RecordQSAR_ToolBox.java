@@ -2199,26 +2199,7 @@ public class RecordQSAR_ToolBox {
 			if (!dryWetBoolean) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Specified");
 			}
-		} 
-
-		// Water concentration (Quantitative water concentration) TODO (Check in NITE if need to handle max/min pairs)
-		if (this.Exposure_concentration_MeanValue != null && !this.Exposure_concentration_MeanValue.isEmpty() && this.Exposure_concentration_Unit != null && !this.Exposure_concentration_Unit.isEmpty()) {
-			ParameterValue pv = new ParameterValue();
-			pv.parameter.name = ExperimentalConstants.expParamWaterConcentration;
-			pv.unit.abbreviation = ExperimentalConstants.str_g_L;
-			if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_g_L)) {
-				pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue);
-			} else if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_mg_L)) {
-				pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue) / 1000.0;
-			} else if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_ug_L)) {
-				pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue) / 1000000.0;
-			} else {
-				System.out.println("Unhandled water concentration unit: " + this.Exposure_concentration_Unit);
-			}
-			er.parameter_values.add(pv);
 		}
-
-		// Concentration type (Measured) TODO
 		
 		// Lipid concentration (% lipid)
 		String lipidContentMax = null;
@@ -2288,7 +2269,7 @@ public class RecordQSAR_ToolBox {
 			}
 		}
 		
-		// Tissue type (whole body, organ, lipid) TODO
+		// Tissue type (whole body, organ, lipid)
 		String tissueType = null;
 		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty()) {
 			tissueType = this.Basis_for_the_BCF;
@@ -2374,16 +2355,21 @@ public class RecordQSAR_ToolBox {
 		} else if (Database.equals("Bioconcentration and logKow NITE")) {
 			setObservationDuration(er);
 
-			if (Exposure_concentration_MeanValue != null) {
-
-				// System.out.println("Have water conc="+Exposure_concentration_MeanValue);
-
+			// Water concentration (Quantitative water concentration)
+			if (this.Exposure_concentration_MeanValue != null && !this.Exposure_concentration_MeanValue.isEmpty() && this.Exposure_concentration_Unit != null && !this.Exposure_concentration_Unit.isEmpty()) {
 				ParameterValue pv = new ParameterValue();
-				pv.parameter.name = "Water concentration";
+				pv.parameter.name = ExperimentalConstants.expParamWaterConcentration;
 				pv.unit.abbreviation = ExperimentalConstants.str_g_L;
-				double wc = Double.parseDouble(Exposure_concentration_MeanValue);
-				pv.value_point_estimate = wc * 1e-3;
-				// System.out.println(wc +" mg/L "+ pv.valuePointEstimate + " g/L");
+				pv.unit.name = "G_L";
+				if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_g_L)) {
+					pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue);
+				} else if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_mg_L)) {
+					pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue) / 1000.0;
+				} else if (this.Exposure_concentration_Unit.equalsIgnoreCase(ExperimentalConstants.str_ug_L)) {
+					pv.value_point_estimate = Double.parseDouble(this.Exposure_concentration_MeanValue) / 1000000.0;
+				} else {
+					System.out.println("Unhandled water concentration unit: " + this.Exposure_concentration_Unit);
+				}
 				er.parameter_values.add(pv);
 			}
 
@@ -2600,6 +2586,17 @@ public class RecordQSAR_ToolBox {
 			logUniqueHandle("Handle Endpoint=" + Endpoint);
 		}
 
+		if (Predefined_substance_type != null) {
+			if (!Predefined_substance_type.toLowerCase().contains("mono")) {
+				// Chemicals can be Mono constituent, Polymer, UVCB, Unspecified
+				er.keep = false;
+				er.updateReason("Chemical is not a mono-constituent");
+			}
+		} else {
+			// Do all QSAR Toolbox records utilize this field?
+			// Shouldn't notate records that don't have this field to begin with
+			// er.updateNote("No value for predefined substance type, chemical could be a polymer or UVCB");
+		}
 
 		if (Calculation_basis != null) {
 			// System.out.println(this.Row+"\t"+this.CAS_Number+"\t"+Endpoint + "\t" + this.Calculation_basis);
