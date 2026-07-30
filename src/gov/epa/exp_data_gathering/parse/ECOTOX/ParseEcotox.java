@@ -781,7 +781,7 @@ public class ParseEcotox extends Parse {
 //			System.out.println("");
 			
 			String unitsCompare=null;
-			if(Folder.getName().equals(ExperimentalConstants.strBCF) || Folder.getName().equals(ExperimentalConstants.strBAF)) {
+			if(Folder.getName().equals(ExperimentalConstants.strBCF) || Folder.getName().equals(ExperimentalConstants.strBAF) || Folder.getName().equals("BCFD")) {
 				unitsCompare="L/kg";
 			} else {//Fish tox
 				unitsCompare="g/L";

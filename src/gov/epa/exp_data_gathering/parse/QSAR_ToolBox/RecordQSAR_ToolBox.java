@@ -13,19 +13,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Vector;
-
-import java.util.Locale;
-import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.WordUtils;
-import org.apache.http.annotation.Experimental;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,6 +34,7 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
+import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.LiteratureSource;
@@ -42,10 +42,8 @@ import gov.epa.exp_data_gathering.parse.ParameterValue;
 import gov.epa.exp_data_gathering.parse.Parse;
 import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PublicSource;
-import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
-import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class RecordQSAR_ToolBox {
@@ -2149,56 +2147,113 @@ public class RecordQSAR_ToolBox {
 				}
 			}
 		} else if (this.Database != null && List.of(ExperimentalConstants.sourceEcha).contains(this.Database)) {
-			Boolean dryWetBoolean = false;
-			if (this.Basis_for_the_BCF != null) {
-				if (this.Basis_for_the_BCF.toLowerCase().contains("w.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-					dryWetBoolean = true;
-				} else if (this.Basis_for_the_BCF.toLowerCase().contains("d.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-					dryWetBoolean = true;
+			Boolean dryBoolean = false;
+			Boolean wetBoolean = false;
+
+			List<String> fields = new ArrayList<>(Arrays.asList(
+				this.Basis_for_the_BCF,
+				this.Basis_for_the_BCF_other,
+				this.Details_on_results,
+				this.Conclusions
+			));
+			fields.removeIf(Objects::isNull);
+
+			List<String> dryTerms = List.of(
+				"d.w",
+				"dry weight",
+				"dry wt",
+				"dried seaweed",
+				"dw",
+				"dry"
+			);
+
+			List<String> wetTerms = List.of(
+				"w.w",
+				"wet weight",
+				"wet wt",
+				"ww",
+				"wet"
+			);
+
+			for (String field : fields) {
+				if (field != null && !field.isEmpty()) {
+					for (String dry : dryTerms) {
+						if (field.toLowerCase().contains(dry)) {
+							dryBoolean = true;
+						}
+					}
+					for (String wet : wetTerms) {
+						if (field.toLowerCase().contains(wet)) {
+							wetBoolean = true;
+						}
+					}
 				}
 			}
 
-			if (!dryWetBoolean && this.Basis_for_the_BCF_other != null) {
-				if (this.Basis_for_the_BCF_other.toLowerCase().contains("w.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-					dryWetBoolean = true;
-				} else if (this.Basis_for_the_BCF_other.toLowerCase().contains("d.w")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-					dryWetBoolean = true;
-				}
+			if (dryBoolean && !wetBoolean) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			} else if (!dryBoolean && wetBoolean) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			} else if (dryBoolean && wetBoolean) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
+				er.updateNote("Might need to check if the original record is specified properly as wet weight or dry weight");
 			}
 
-			if (!dryWetBoolean && this.Details_on_results != null) {
-				if (this.Details_on_results.toLowerCase().contains("dry") && !this.Details_on_results.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-					dryWetBoolean = true;
-				} else if (this.Details_on_results.toLowerCase().contains("wet") && !this.Details_on_results.toLowerCase().contains("dry")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-					dryWetBoolean = true;
-				} else if (this.Details_on_results.toLowerCase().contains("dry") && this.Details_on_results.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
-					dryWetBoolean = true;
-				}
-			}
+			// if (this.Basis_for_the_BCF != null) {
+			// 	if (this.Basis_for_the_BCF.toLowerCase().contains("w.w")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			// 		// dryWetBoolean = true;
+			// 		wetBoolean = true;
+			// 	}
+			// 	if (this.Basis_for_the_BCF.toLowerCase().contains("d.w")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			// 		// dryWetBoolean = true;
+			// 		dryBoolean = true;
+			// 	}
+			// }
 
-			if (!dryWetBoolean && this.Conclusions != null) {
-				if (this.Conclusions.toLowerCase().contains("dry") && !this.Conclusions.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-					dryWetBoolean = true;
-				} else if (this.Conclusions.toLowerCase().contains("wet") && !this.Conclusions.toLowerCase().contains("dry")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-					dryWetBoolean = true;
-				} else if (this.Conclusions.toLowerCase().contains("dry") && this.Conclusions.toLowerCase().contains("wet")) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
-					dryWetBoolean = true;
-				}
-			}
+			// if (this.Basis_for_the_BCF_other != null) {
+			// 	if (this.Basis_for_the_BCF_other.toLowerCase().contains("w.w")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			// 		// dryWetBoolean = true;
+			// 		wetBoolean = true;
+			// 	}
+			// 	if (this.Basis_for_the_BCF_other.toLowerCase().contains("d.w")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			// 		// dryWetBoolean = true;
+			// 		dryBoolean = true;
+			// 	}
+			// }
 
-			if (!dryWetBoolean) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Specified");
-			}
+			// if (this.Details_on_results != null) {
+			// 	if (this.Details_on_results.toLowerCase().contains("dry")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			// 		// dryWetBoolean = true;
+			// 		dryBoolean = true;
+			// 	}
+			// 	if (this.Details_on_results.toLowerCase().contains("wet")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			// 		// dryWetBoolean = true;
+			// 		wetBoolean = true;
+			// 	}
+			// }
+
+			// if (this.Conclusions != null) {
+			// 	if (this.Conclusions.toLowerCase().contains("dry")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
+			// 		// dryWetBoolean = true;
+			// 		dryBoolean = true;
+			// 	}
+			// 	if (this.Conclusions.toLowerCase().contains("wet")) {
+			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
+			// 		// dryWetBoolean = true;
+			// 		wetBoolean = true;
+			// 	}
+			// }
+
+			// if (!dryWetBoolean) {
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Specified");
+			// }
 		}
 		
 		// Lipid concentration (% lipid)
@@ -2271,9 +2326,9 @@ public class RecordQSAR_ToolBox {
 		
 		// Tissue type (whole body, organ, lipid)
 		String tissueType = null;
-		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty()) {
+		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty() && !this.Basis_for_the_BCF.toLowerCase().contains("other")) {
 			tissueType = this.Basis_for_the_BCF;
-		} else if (this.Basis_for_the_BCF_other != null && !this.Basis_for_the_BCF_other.isEmpty()) {
+		} else if (this.Basis_for_the_BCF_other != null && !this.Basis_for_the_BCF_other.isEmpty() && !this.Basis_for_the_BCF_other.toLowerCase().contains("other")) {
 			tissueType = this.Basis_for_the_BCF_other;
 		} else if (this.Tissue_analyzed != null && !this.Tissue_analyzed.isEmpty()) {
 			tissueType = this.Tissue_analyzed;
@@ -2281,15 +2336,66 @@ public class RecordQSAR_ToolBox {
 			tissueType = this.Organ;
 		}
 
-		if (tissueType != null && !tissueType.isEmpty()) {
-			if (tissueType.toLowerCase().contains("whole body")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body");
-			} else if (tissueType.toLowerCase().contains("organ")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "organ");
-			} else {
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissueType.toLowerCase().trim());
+		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType);
+		if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+			// Only put in the properly cleaned and formatted response site values
+			er.experimental_parameters.put(
+				ExperimentalConstants.expParamResponseSite,
+				responseSiteFinal
+			);
+		} else if (tissueType != null && !tissueType.isEmpty()) {
+			// Clean out bad records based on data in this column
+			if (tissueType.toLowerCase().contains("fu calc") || tissueType.toLowerCase().contains("extrapolation")) {
+				er.keep = false;
+				er.updateReason("Extrapolated value from fU calculation");
 			}
+			if (tissueType.toLowerCase().contains("metabolite")) {
+				er.keep = false;
+				er.updateReason("Chemical metabolite used");
+			}
+			if (tissueType.toLowerCase().contains("log kow") && !Endpoint.equals(ExperimentalConstants.strLogKOW)) {
+				er.keep = false;
+				er.updateReason("Wrong endpoint");
+			}
+			if (tissueType.toLowerCase().contains("calculation") || tissueType.toLowerCase().contains("calculated") || tissueType.toLowerCase().contains("bcf model")) {
+				er.keep = false;
+				er.updateReason("Calculated value");
+			}
+			if (tissueType.toLowerCase().equals("based on 14c determinations and not on measurement of actual test substance concentrations in fish tissue")) {
+				er.keep = false;
+				er.updateReason("Calculated value");
+			}
+			if ((tissueType.toLowerCase().contains("bmf") || tissueType.toLowerCase().contains("biomagnification factor")) && !Endpoint.equals(ExperimentalConstants.strBMF)) {
+				er.keep = false;
+				er.updateReason("Wrong endpoint");
+			}
+			if (tissueType.toLowerCase().contains("bioaccumulation factor") && !Endpoint.equals(ExperimentalConstants.strBAF)) {
+				er.keep = false;
+				er.updateReason("Wrong endpoint");
+			}
+			if (tissueType.toLowerCase().contains("literature")) {
+				er.keep = false;
+				er.updateReason("Literature value, not experimental value reported");
+			}
+			if (tissueType.toLowerCase().contains("depuration")) {
+				er.keep = false;
+				er.updateReason("Wrong endpoint");
+			}
+			if (tissueType.toLowerCase().contains("growth corrected dietary")) {
+				er.keep = false;
+				er.updateReason("Wrong endpoint");
+			}
+			if (tissueType.toLowerCase().contains("fu = 1")) {
+				er.keep = false;
+				er.updateReason("Extrapolated value from fU calculation");
+			}
+			if (tissueType.toLowerCase().equals("read minus across to structural analogues")) {
+				er.keep = false;
+				er.updateReason("Extrapolated from read-across to structural analogues");
+			}
+			// TODO: Add in potential corrections to other fields?
 		}
+
 
 		// Temperature and pH
 		setExperimentalParameters(er);
@@ -2298,6 +2404,9 @@ public class RecordQSAR_ToolBox {
 		if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline) != null) {
 			if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).equals(ExperimentalConstants.guidelineOecd305)) {
 				BCFUtilities.setOecd305Parameters(er);
+			} else if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).toString().contains("850.1730")) {
+				BCFUtilities.setOecd305Parameters(er);
+				er.updateNote("OPPTS 850.1730 guideline assumed to be similar enough to OECD 305 to update parameters");
 			}
 		}
 	}
@@ -2391,11 +2500,18 @@ public class RecordQSAR_ToolBox {
 			er.publicSourceOriginal.url = "https://www.nite.go.jp/en/chem/qsar/evaluation.html";
 			er.publicSourceOriginal.description = "National Institute of Technology and Evaluation (Japan)";
 
-			if (Tissue_analyzed != null) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type.toLowerCase().trim());
-				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, Tissue_analyzed.toLowerCase().trim());
-				er.note = Statistics;
-			}
+			// if (Tissue_analyzed != null) {
+			// 	er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type.toLowerCase().trim());
+			// 	// er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, Tissue_analyzed.toLowerCase().trim());
+			// 	String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(Tissue_analyzed);
+			// 	if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+			// 		er.experimental_parameters.put(
+			// 			ExperimentalConstants.expParamResponseSite,
+			// 			responseSiteFinal
+			// 		);
+			// 	}
+			er.updateNote(Statistics);
+			// }
 		} else if (Database.equals("ECHA REACH")) {
 			setObservationDuration(er);
 			setGuideline(er);

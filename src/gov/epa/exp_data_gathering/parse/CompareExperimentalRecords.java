@@ -1050,20 +1050,84 @@ public class CompareExperimentalRecords {
 		/**
 		 * Compares unique text parameter values from multiple sources
 		 */
-		private void compareUniqueParameterValues(List<String> parameterNames) {
+		private void compareUniqueParameterValues(String propertyName, List<String> parameterNames) {
 			
 			List<Source> sourcesAll = new ArrayList<>();
-			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 			sourcesAll.add(new Source("Arnot 2006", propertyName));
 			sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
 			sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
 			sourcesAll.add(new Source("Burkhard", propertyName));
 
 			sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
-			sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
 			sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+			// TODO: Finish work on ECHA REACH data and add back in
+			// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 
+			ExperimentalRecords recs=rm.getAllExperimentalRecords(sourcesAll,propertyName);
+			TreeSet<String>hsParams=new TreeSet<>();
+			
+			Hashtable<String,String>htFilter=new Hashtable<>();
+			
+			htFilter.put("Species supercategory", "Fish");
+			
+
+			for (ExperimentalRecord er:recs) {
+
+				String source=null;
+				if(er.publicSourceOriginal!=null) {
+					source=er.publicSourceOriginal.name;
+				} else if (er.original_source_name!=null) {
+					source=er.original_source_name;
+				} else if (er.publicSource!=null) {
+					source=er.publicSource.name;
+				} else {
+					source=er.source_name;
+				}
+
+				if(er.parameter_values!=null) {
+					for(ParameterValue pv:er.parameter_values) {
+						if(pv.value_text!=null && parameterNames.contains(pv.parameter.name)) {
+							hsParams.add(pv.parameter.name+"\t"+pv.value_text+"\t"+source);	
+						}
+					}
+				}
+				
+				if(er.experimental_parameters!=null) {
+					
+					boolean skip=false;
+					for (String parameterName :htFilter.keySet()) {
+						
+						String parameterValueFilter=htFilter.get(parameterName);
+						String parameterValue=(String)er.experimental_parameters.get(parameterName);
+						
+						if(!parameterValueFilter.equals(parameterValue)) {
+							skip=true;
+							break;
+						}						
+					}
+					
+					if(skip)
+						continue;
+					
+					for (String parameterName:er.experimental_parameters.keySet()) {
+						if (parameterName != null && parameterNames.contains(parameterName)) {
+							hsParams.add(parameterName+"\t"+er.experimental_parameters.get(parameterName)+"\t"+source);	
+						}
+					}
+					
+					
+					
+				}
+			}
+			
+			for (String item:hsParams) {
+				System.out.println(item);
+			}
+		}
+
+
+		private void compareUniqueParameterValues(String propertyName, List<String> parameterNames, List<Source> sourcesAll) {
 			ExperimentalRecords recs=rm.getAllExperimentalRecords(sourcesAll,propertyName);
 			TreeSet<String>hsParams=new TreeSet<>();
 			
@@ -2663,7 +2727,19 @@ public class CompareExperimentalRecords {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
+
+		List<Source> sourcesAll = new ArrayList<>();
+		sourcesAll.add(new Source("Arnot 2006", propertyName));
+		sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
+		sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+		sourcesAll.add(new Source("Burkhard", propertyName));
+
+		sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+		sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
@@ -2672,33 +2748,33 @@ public class CompareExperimentalRecords {
 		// c.c.compareBcfWetDryAllSources();
 		// c.c.compareEcotoxBcfWetDry();
 
-		List<String> filterParameters = List.of(
-			ExperimentalConstants.expParamMediaType
-			// ExperimentalConstants.expParamSpeciesSupercategory,
-			// ExperimentalConstants.expParamTissueType,
-			// ExperimentalConstants.expParamWetDry
-		);
-		List<String> filterValues1 = List.of(
-			"freshwater"
-			// "Fish",
-			// "whole body",
-			// "Wet"
-		);
-		List<String> filterValues2 = List.of(
-			"saltwater"
-			// "Fish",
-			// "whole body",
-			// "Wet"
-		);
+		// List<String> filterParameters = List.of(
+		// 	ExperimentalConstants.expParamMediaType
+		// 	// ExperimentalConstants.expParamSpeciesSupercategory,
+		// 	// ExperimentalConstants.expParamTissueType,
+		// 	// ExperimentalConstants.expParamWetDry
+		// );
+		// List<String> filterValues1 = List.of(
+		// 	"freshwater"
+		// 	// "Fish",
+		// 	// "whole body",
+		// 	// "Wet"
+		// );
+		// List<String> filterValues2 = List.of(
+		// 	"saltwater"
+		// 	// "Fish",
+		// 	// "whole body",
+		// 	// "Wet"
+		// );
 
 		// c.c.compareBcfOnParamWithinSource(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamAllSources(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamWithinSourceFuzzy(filterParameters, filterValues1, filterValues2);
 		// c.c.compareBcfOnParamAllSourcesFuzzy(filterParameters, filterValues1, filterValues2);
 		
-		List<String> parameterNames = List.of(
-		// 	ExperimentalConstants.expParamWetDry
-			ExperimentalConstants.expParamGuideline
+		// List<String> parameterNames = List.of(
+			// ExperimentalConstants.expParamWetDry
+			// ExperimentalConstants.expParamGuideline
 			// ExperimentalConstants.expParamMediaType,
 			// ExperimentalConstants.expParamTestLocation,
 			// ExperimentalConstants.expParamWetDry,
@@ -2707,11 +2783,15 @@ public class CompareExperimentalRecords {
 			// ExperimentalConstants.expParamSpeciesSupercategory,
 			// ExperimentalConstants.expParamMeasurementMethod,
 			// ExperimentalConstants.expParamObservationDuration,
-			// ExperimentalConstants.expParamTissueType,
+			// ExperimentalConstants.expParamTissueType
 			// ExperimentalConstants.expParamTemperature,
 		// 	ExperimentalConstants.expParamExposureType
-		);
-		c.c.compareUniqueParameterValues(parameterNames);
+		// );
+
+		List<String> parameterNames = List.of(ExperimentalConstants.expParamGuideline);
+		// List<String> parameterNames = List.of(ExperimentalConstants.expParamTissueType);
+		// c.c.compareUniqueParameterValues(propertyName, parameterNames);
+		c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
 
 //		c.c.compareOralRat();
 

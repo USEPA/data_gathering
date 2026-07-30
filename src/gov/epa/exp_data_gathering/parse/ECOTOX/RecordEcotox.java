@@ -1378,37 +1378,59 @@ public class RecordEcotox {
 	private void setParameterResponseSite(ExperimentalRecord er) {
 		if (response_site == null || "Not reported".equalsIgnoreCase(response_site)) {
 		    if (additional_comments != null) {
-		        Pattern pattern = Pattern.compile("EFCT/(.+?)//");
+		        Pattern pattern = Pattern.compile("EFCT/([^/].+?)//");
 		        Matcher matcher = pattern.matcher(additional_comments);
 
 		        if (matcher.find()) {
 		            String responseSite = matcher.group(1).trim().toLowerCase();
 		            responseSite=responseSite.replace("analyzed", "").trim();
-		            er.experimental_parameters.put(
-			                ExperimentalConstants.expParamResponseSite,
-			                responseSite
-			            );
+					String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(responseSite);
+
+					if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+						er.experimental_parameters.put(
+							ExperimentalConstants.expParamResponseSite,
+							responseSiteFinal.toLowerCase()
+						);
+					}
 		            
 		            //TODO filter out the ones that arent body of the animal
 		            
-		            System.out.println("response site: " + responseSite);
+		            // System.out.println("response site: " + responseSite);
 		        } else {
 //		            System.out.println("Additional comments: " + additional_comments);
 		        }
 		    }
 		
 		} else {
-			if(response_site.contains("Whole organism")) {//TODO move to BCF utilities and come up with list of values that match whole body?
-				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, ExperimentalConstants.expParamValueWholeBody);	
-			} else if (response_site.toLowerCase().contains("multiple tissue/organ")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "multiple tissue/organs");
-			} else if (response_site.toLowerCase().contains("muscle+bone")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "muscle and bone");
-			} else if (response_site.toLowerCase().contains("root + stem")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "root and stem");
+			if (response_site_comments == null || response_site_comments.equals("/")) {
+				String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site);
+				if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+					er.experimental_parameters.put(
+						ExperimentalConstants.expParamResponseSite,
+						responseSiteFinal.toLowerCase()
+					);
+				}
+				// if(response_site.contains("Whole organism")) {
+				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, ExperimentalConstants.expParamValueWholeBody);	
+				// } else if (response_site.toLowerCase().contains("multiple tissue/organ")) {
+				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "multiple tissue/organs");
+				// } else if (response_site.toLowerCase().contains("muscle+bone")) {
+				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "muscle and bone");
+				// } else if (response_site.toLowerCase().contains("root + stem")) {
+				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, "root and stem");
+				// } else {
+				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, response_site.trim());
+				// }
 			} else {
-				er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, response_site.trim());
-			} 
+				String responseSite = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site);
+				String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.handleEcotoxComments(responseSite, response_site_comments);
+				if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+					er.experimental_parameters.put(
+						ExperimentalConstants.expParamResponseSite,
+						responseSiteFinal.toLowerCase()
+					);
+				}
+			}
 		}
 	}
 

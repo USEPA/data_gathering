@@ -414,6 +414,14 @@ public class RecordArnot2006 {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus gonads");
 			} else if (tissue_analyzed.toLowerCase().contains("whole body without viscera")) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "whole body minus viscera");
+			} else if (tissue_analyzed.toLowerCase().contains("edible")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "edible portion");
+			} else if (tissue_analyzed.toLowerCase().contains("gill")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "gill");
+			} else if (tissue_analyzed.toLowerCase().contains("gonad")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "gonad");
+			} else if (tissue_analyzed.toLowerCase().contains("ovaries")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, "ovary");
 			} else {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, tissue_analyzed.toLowerCase().trim());
 			}
