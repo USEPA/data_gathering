@@ -4,7 +4,6 @@ import java.awt.FlowLayout;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.TreeSet;
 
 import javax.swing.JFrame;
 
-import org.apache.jena.sparql.pfunction.library.listLength;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
@@ -23,7 +21,6 @@ import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.RecordQSAR_ToolBox;
-import gov.epa.exp_data_gathering.parse.Parse;
 
 /**
  * @author TMARTI02
@@ -965,6 +962,106 @@ public class CompareExperimentalRecords {
 			cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
 		}
 
+		private void compareBcfQsarToolboxOldNewIndividual(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = true;
+			
+			List<List<Source>> sourcesAll = new ArrayList<>();
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+
+			List<Source> sources1 = new ArrayList<>();
+			List<Source> sources2 = new ArrayList<>();
+			List<Source> sources3 = new ArrayList<>();
+			List<Source> sources4 = new ArrayList<>();
+			List<Source> sources5 = new ArrayList<>();
+
+			sources1.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sources3.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sources4.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+			sources5.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+
+			sources1.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
+			sources3.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
+			sources4.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
+			sources5.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
+
+			sourcesAll.add(sources1);
+			sourcesAll.add(sources2);
+			sourcesAll.add(sources3);
+			sourcesAll.add(sources4);
+			sourcesAll.add(sources5);
+
+			for (List<Source> sourceList : sourcesAll) {
+				List<Source> sourcesOld = new ArrayList<>();
+				List<Source> sourcesNew = new ArrayList<>();
+
+				sourcesOld.add(sourceList.get(0));
+				sourcesNew.add(sourceList.get(1));
+
+				String sourceName1 = sourceList.get(0).sourceName;
+				if (sourceList.get(0).subfolder != null && !sourceList.get(0).subfolder.isEmpty()) {
+					sourceName1 += " - " + sourceList.get(0).subfolder;
+				}
+				String sourceName2 = sourceList.get(1).sourceName;
+				if (sourceList.get(1).subfolder != null && !sourceList.get(1).subfolder.isEmpty()) {
+					sourceName2 += " - " + sourceList.get(1).subfolder;
+				}
+				// String sourceName1 = sourceName + " (1)";
+				// String sourceName2 = sourceName + " (2)";
+				// String sourceName1;
+				// String sourceName2;
+				if (filterParameters != null && filterParameters.size() == 1) {
+					sourceName1 = filterValues1.get(0);
+					sourceName2 = sourceName2 + " " + filterValues2.get(0);
+				}
+
+				if (filterParameters != null) {
+					cm.compare(sourceName1, sourceName2, sourcesOld, sourcesNew, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+				} else {
+					cm.compare(sourceName1, sourceName2, sourcesOld, sourcesNew, propertyName, units, "cas");
+				}
+			}
+		}
+
+		private void compareBcfQsarToolboxOldNewAggregate(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
+			printChemicalsInCommon = false;
+			
+			String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
+			String units = "L/kg";
+
+			List<Source> sources1 = new ArrayList<>();
+			List<Source> sources2 = new ArrayList<>();
+
+			sources1.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sources1.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+			sources1.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+			sources1.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+			sources1.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+
+			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
+			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
+			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
+			sources2.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
+
+			String sourceName1 = "QSAR Toolbox v.4.8.2";
+			String sourceName2 = "QSAR Toolbox v.4.9";
+
+			if (filterParameters != null && filterParameters.size() == 1) {
+				sourceName1 = filterValues1.get(0);
+				sourceName2 = sourceName2 + " " + filterValues2.get(0);
+			}
+
+			if (filterParameters != null) {
+				cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas", filterParameters, filterValues1, filterValues2);
+			} else {
+				cm.compare(sourceName1, sourceName2, sources1, sources2, propertyName, units, "cas");
+			}
+		}
+
 		private void compareBcfOnParamWithinSourceFuzzy(List<String> filterParameters, List<String> filterValues1, List<String> filterValues2) {
 			printChemicalsInCommon = false;
 			
@@ -998,7 +1095,7 @@ public class CompareExperimentalRecords {
 				// String sourceName2 = sourceName + " (2)";
 				String sourceName1;
 				String sourceName2;
-				if (filterParameters.size() == 1) {
+				if (filterParameters != null && filterParameters.size() == 1) {
 					sourceName1 = filterValues1.get(0);
 					sourceName2 = sourceName + " " + filterValues2.get(0);
 				} else {
@@ -1036,7 +1133,7 @@ public class CompareExperimentalRecords {
 			// String sourceName2 = sourceName + " (2)";
 			String sourceName1;
 			String sourceName2;
-			if (filterParameters.size() == 1) {
+			if (filterParameters != null && filterParameters.size() == 1) {
 				sourceName1 = filterValues1.get(0);
 				sourceName2 = sourceName + " " + filterValues2.get(0);
 			} else {
@@ -2730,16 +2827,24 @@ public class CompareExperimentalRecords {
 		String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
 
-		List<Source> sourcesAll = new ArrayList<>();
-		sourcesAll.add(new Source("Arnot 2006", propertyName));
-		sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
-		sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
-		sourcesAll.add(new Source("Burkhard", propertyName));
+		// List<Source> sourcesAll = new ArrayList<>();
+		// sourcesAll.add(new Source("Arnot 2006", propertyName));
+		// sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
+		// sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+		// sourcesAll.add(new Source("Burkhard", propertyName));
 
-		sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
-		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
-		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
-		sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+		// Old QSAR Toolbox sources (v4.8.2)
+		// sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
+
+		// New QSAR Toolbox sources (v4.9)
+		// sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
+		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
+		// sourcesAll.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
 
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
@@ -2788,10 +2893,13 @@ public class CompareExperimentalRecords {
 		// 	ExperimentalConstants.expParamExposureType
 		// );
 
-		List<String> parameterNames = List.of(ExperimentalConstants.expParamGuideline);
+		// List<String> parameterNames = List.of(ExperimentalConstants.expParamGuideline);
 		// List<String> parameterNames = List.of(ExperimentalConstants.expParamTissueType);
 		// c.c.compareUniqueParameterValues(propertyName, parameterNames);
-		c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
+		// c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
+
+		c.c.compareBcfQsarToolboxOldNewIndividual(null, null, null);
+		// c.c.compareBcfQsarToolboxOldNewAggregate(null, null, null);
 
 //		c.c.compareOralRat();
 

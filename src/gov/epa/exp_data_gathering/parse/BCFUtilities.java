@@ -1,7 +1,15 @@
 package gov.epa.exp_data_gathering.parse;
 
+import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.Arnot2006.ParseArnot2006;
@@ -9,18 +17,6 @@ import gov.epa.exp_data_gathering.parse.Burkhard.ParseBurkhard2;
 import gov.epa.exp_data_gathering.parse.ECOTOX.ParseEcotox;
 import gov.epa.exp_data_gathering.parse.ITRC.ParseITRC;
 import gov.epa.exp_data_gathering.parse.QSAR_ToolBox.ParseQSAR_ToolBox;
-
-import java.text.Normalizer;
-import java.util.Locale;
-import java.util.Map;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.Set;
-import java.util.HashSet;
-
-
 /**
 * @author TMARTI02
 */
@@ -46,9 +42,10 @@ public class BCFUtilities {
 
 
 	private void createQSAR_ToolboxFiles(boolean generateOriginalRecords) {
-		String [] filenames= {ParseQSAR_ToolBox.fileNameBCF_ECHA_REACH, ParseQSAR_ToolBox.fileNameBCF_Canada, 
-				ParseQSAR_ToolBox.fileNameBCF_CEFIC, ParseQSAR_ToolBox.fileNameBCF_NITE};
-
+		// String [] filenames= {ParseQSAR_ToolBox.fileNameBCF_ECHA_REACH, ParseQSAR_ToolBox.fileNameBCF_Canada, 
+		// 		ParseQSAR_ToolBox.fileNameBCF_CEFIC, ParseQSAR_ToolBox.fileNameBCF_NITE};
+        
+        String [] filenames = {ParseQSAR_ToolBox.fileNameBCF_ECHA_REACHNew, ParseQSAR_ToolBox.fileNameBCF_ECHA_REACHNew2, ParseQSAR_ToolBox.fileNameBCF_CanadaNew, ParseQSAR_ToolBox.fileNameBCF_CEFICNew, ParseQSAR_ToolBox.fileNameBCF_NITENew};
 		for (String filename:filenames) {
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null, filename);
 			p.generateOriginalJSONRecords=generateOriginalRecords;//*** set to true on first run
@@ -534,6 +531,7 @@ public class BCFUtilities {
 
     public class ResponseSiteFormatter {
         private static Set<String> unhandledSites = new HashSet<>();
+        private static Set<String> badSites = new HashSet<>();
     
         public static String normalizeResponseSite(String responseSite) {
             if (responseSite == null) return null;
@@ -590,6 +588,69 @@ public class BCFUtilities {
                 unhandledSites.add(s);
                 System.out.println("Unhandled response site value: " + s);
                 return null;
+            }
+    
+            return null;
+        }
+
+        public static String normalizeResponseSite(String responseSite, ExperimentalRecord er) {
+            if (responseSite == null) return null;
+            String s = responseSite.trim().toLowerCase();
+            
+            // For values that need to be converted, check for them first
+            if (ExperimentalConstants.ecotoxResponseSiteMap.keySet().contains(s)) {
+                s = ExperimentalConstants.ecotoxResponseSiteMap.get(s).trim().toLowerCase();
+            } else if (ExperimentalConstants.ecotoxResponseSiteMap.keySet().contains(s.toUpperCase())) {
+                s = ExperimentalConstants.ecotoxResponseSiteMap.get(s.toUpperCase()).trim().toLowerCase();
+            }
+
+            // Clean and prep responseSite for iteration
+            s = s.replace("(s)", "");
+            s = s.replaceAll("\\s*\\+\\s*", " and ");
+            s = s.replaceAll("\\s*&\\s*", " and ");
+            s = s.replaceAll("\\s+", " ");
+            s = s.replace("elimination described,\\s*", "");
+            s = s.replaceAll(",\\s*residue 7 d post exp-?osure reported", "");
+            s = s.replaceAll(",\\s*elimination.*", "");
+            s = s.replaceAll("ana-?lyzed,", "");
+            s = s.replaceAll("distri-?bution,", "");
+            s = s.replaceAll(",?\\s*kinetic approach,?\\s*", "");
+            s = s.replaceAll("\\d*\\.?\\d*\\s*%\\s*loss in 42 d", "");
+            s = s.replaceAll("\\d*\\.?\\d*\\s*%\\s*loss after 42 d", "");
+            s = s.replaceAll(",\\s*depuration.*", "");
+            s = s.replaceAll("depuration.*,\\s*", "");
+            s = s.replaceAll(",\\s*kinetic.*", "");
+            s = s.replaceAll("elim.*, ", "");
+            s = s.replaceAll(",\\s*elim.*", "");
+            s = s.replaceAll(",\\s*test.*", "");
+            s = s.replaceAll(",\\s*plateau.*", "");
+            s = s.replaceAll("ana-?lyzed", "");
+            s = s.replaceAll(",\\s*steady state.*", "");
+            s = s.replaceAll(",\\s*equilibration.*", "");
+            s = s.replace("to bcf", "");
+            s = s.replaceAll(",\\s*plateau method", "");
+            s = s.replaceAll("whole body\\s*,.*", "whole body");
+            s = s.replaceAll("\\s*-\\s*", " minus ");
+            s = s.replaceAll(",\\s*$", "");
+            s = s.trim();
+            
+            // Compare cleaned string to explicitly allowed values
+            // for (String key : ExperimentalConstants.responseSiteMap.keySet()) {
+            //     if (s.contains(key)) {
+            //         return ExperimentalConstants.responseSiteMap.get(key);
+            //     }
+            // }
+            if (ExperimentalConstants.responseSiteMap.keySet().contains(s)) {
+                return ExperimentalConstants.responseSiteMap.get(s);
+            }
+
+            boolean badHandled = handleBadResponseSites(s, er);
+            if (!badHandled && !unhandledSites.contains(s)) {
+                unhandledSites.add(s);
+                System.out.println("Unhandled response site value: " + s);
+            } else if (badHandled && !badSites.contains(s)) {
+                badSites.add(s);
+                System.out.println("Bad response site value handled: " + s);
             }
     
             return null;
@@ -672,6 +733,84 @@ public class BCFUtilities {
             // LIVER CELLS (leave as is)
             return responseSite;
         }
+    }
+
+    public static boolean handleBadResponseSites(String responseSite, ExperimentalRecord er) {
+        String s = responseSite.toLowerCase();
+        String endpoint = er.property_name;
+        if (endpoint != null) {
+            endpoint = endpoint.toLowerCase();
+        } else {
+            endpoint = "";
+        }
+        boolean handled = false;
+        // Clean out bad records based on data in this column
+        if (s.contains("fu calc") || s.contains("extrapolation")) {
+            er.keep = false;
+            er.updateReason("Extrapolated value from fU calculation");
+            handled = true;
+        }
+        if (s.contains("metabolite")) {
+            er.keep = false;
+            er.updateReason("Chemical metabolite used");
+            handled = true;
+        }
+        if (s.contains("log kow") && !endpoint.equals(ExperimentalConstants.strLogKOW)) {
+            er.keep = false;
+            er.updateReason("Wrong endpoint");
+            handled = true;
+        }
+        if (s.contains("calculation") || s.contains("calculated") || s.contains("bcf model")) {
+            er.keep = false;
+            er.updateReason("Calculated value");
+            handled = true;
+        }
+        if (s.equals("based on 14c determinations and not on measurement of actual test substance concentrations in fish tissue")) {
+            er.keep = false;
+            er.updateReason("Calculated value");
+            handled = true;
+        }
+        if ((s.contains("bmf") || s.contains("biomagnification factor")) && !endpoint.equals(ExperimentalConstants.strBMF)) {
+            er.keep = false;
+            er.updateReason("Wrong endpoint");
+            handled = true;
+        }
+        if (s.contains("bioaccumulation factor") && !endpoint.equals(ExperimentalConstants.strBAF)) {
+            er.keep = false;
+            er.updateReason("Wrong endpoint");
+            handled = true;
+        }
+        if (s.contains("literature")) {
+            er.keep = false;
+            er.updateReason("Literature value, not experimental value reported");
+            handled = true;
+        }
+        if (s.contains("depuration")) {
+            er.keep = false;
+            er.updateReason("Wrong endpoint");
+            handled = true;
+        }
+        if (s.contains("growth corrected dietary")) {
+            er.keep = false;
+            er.updateReason("Wrong endpoint");
+            handled = true;
+        }
+        if (s.contains("fu = 1")) {
+            er.keep = false;
+            er.updateReason("Extrapolated value from fU calculation");
+            handled = true;
+        }
+        if (s.equals("read minus across to structural analogues")) {
+            er.keep = false;
+            er.updateReason("Extrapolated from read-across to structural analogues");
+            handled = true;
+        }
+        if (s.contains("radioactivity") || s.contains("radioacitivity") || s.contains("rdioactivity") || s.contains("radiolabelled")) {
+            er.keep = false;
+            er.updateReason("Radioactivity measured, not actual test substance concentrations in fish tissue");
+            handled = true;
+        }
+        return handled;
     }
 
 	

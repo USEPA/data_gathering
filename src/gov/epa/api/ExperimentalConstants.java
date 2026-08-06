@@ -1437,6 +1437,16 @@ public class ExperimentalConstants {
 		Map.entry("whole fish, normalised to 5% lipid content", "whole body"),
 		Map.entry("whole plant", "whole body"),
 		Map.entry("whole test organism", "whole body"),
+		Map.entry("2 minus 5 g tissue", "tissue"),
+		Map.entry("muscle plug", "plug"),
+		Map.entry("muscle tissue weight", "tissue"),
+		Map.entry("muscle tissues", "tissue"),
+		Map.entry("soft parts and syphon", "soft tissue, siphon"),
+		Map.entry("whole body. ww of dw not specified", "whole body"),
+		Map.entry("whole fish (dry or wet weight not specified)", "whole body"),
+		Map.entry("whole fish, not specified", "whole body"),
+		Map.entry("total body , no sig elim", "whole body"),
+		Map.entry("not specified", ""),
 		Map.entry("", "")
 	);
 

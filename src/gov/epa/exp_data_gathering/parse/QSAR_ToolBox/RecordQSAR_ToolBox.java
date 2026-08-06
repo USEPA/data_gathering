@@ -687,6 +687,8 @@ public class RecordQSAR_ToolBox {
 					.equals("Environmental Fate and Transport#Biodegradation#in water: screening tests")) {
 				handleBiodegWaterScreening(er);
 
+			} else if (EndpointPath.equals("Environmental Fate and Transport#Bioaccumulation#aquatic / sediment")) {
+				
 			} else {
 				System.out.println("Need to handle EndpointPath=" + EndpointPath);
 				return null;
@@ -2336,66 +2338,14 @@ public class RecordQSAR_ToolBox {
 			tissueType = this.Organ;
 		}
 
-		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType);
+		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType, er);
 		if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 			// Only put in the properly cleaned and formatted response site values
 			er.experimental_parameters.put(
 				ExperimentalConstants.expParamResponseSite,
 				responseSiteFinal
 			);
-		} else if (tissueType != null && !tissueType.isEmpty()) {
-			// Clean out bad records based on data in this column
-			if (tissueType.toLowerCase().contains("fu calc") || tissueType.toLowerCase().contains("extrapolation")) {
-				er.keep = false;
-				er.updateReason("Extrapolated value from fU calculation");
-			}
-			if (tissueType.toLowerCase().contains("metabolite")) {
-				er.keep = false;
-				er.updateReason("Chemical metabolite used");
-			}
-			if (tissueType.toLowerCase().contains("log kow") && !Endpoint.equals(ExperimentalConstants.strLogKOW)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("calculation") || tissueType.toLowerCase().contains("calculated") || tissueType.toLowerCase().contains("bcf model")) {
-				er.keep = false;
-				er.updateReason("Calculated value");
-			}
-			if (tissueType.toLowerCase().equals("based on 14c determinations and not on measurement of actual test substance concentrations in fish tissue")) {
-				er.keep = false;
-				er.updateReason("Calculated value");
-			}
-			if ((tissueType.toLowerCase().contains("bmf") || tissueType.toLowerCase().contains("biomagnification factor")) && !Endpoint.equals(ExperimentalConstants.strBMF)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("bioaccumulation factor") && !Endpoint.equals(ExperimentalConstants.strBAF)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("literature")) {
-				er.keep = false;
-				er.updateReason("Literature value, not experimental value reported");
-			}
-			if (tissueType.toLowerCase().contains("depuration")) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("growth corrected dietary")) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("fu = 1")) {
-				er.keep = false;
-				er.updateReason("Extrapolated value from fU calculation");
-			}
-			if (tissueType.toLowerCase().equals("read minus across to structural analogues")) {
-				er.keep = false;
-				er.updateReason("Extrapolated from read-across to structural analogues");
-			}
-			// TODO: Add in potential corrections to other fields?
 		}
-
 
 		// Temperature and pH
 		setExperimentalParameters(er);
