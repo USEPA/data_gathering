@@ -1107,7 +1107,14 @@ public class RecordQSAR_ToolBox {
 		if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline) != null)
 			guidelines = er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).toString();
 
-		if (Media != null) {
+		if (Media != null && !Media.isEmpty() && !Media.equalsIgnoreCase("not specified")) {
+			if (Media.equalsIgnoreCase("fresh water")) {
+				Media = "freshwater";
+			} else if (Media.equalsIgnoreCase("natural water: freshwater")) {
+				Media = "freshwater";
+			} else if (Media.equalsIgnoreCase("natural water: marine")) {
+				Media = "marine";
+			}
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Media);
 		}
 
@@ -2119,7 +2126,15 @@ public class RecordQSAR_ToolBox {
 
 	private void addNewExperimentalParameters(ExperimentalRecord er) {
 		// Water type (freshwater vs saltwater)
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: marine")) {
+				this.Water_media_type = "marine";
+			}
+
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type.toLowerCase().trim());
 		}
 
@@ -2381,8 +2396,16 @@ public class RecordQSAR_ToolBox {
 			}
 			er.reference = Reference_source;
 			
-			if (Water_type!=null) {
-				Water_type=Water_type.toLowerCase().replace("freshwater","Fresh water").replace("saltwater","Salt water").trim();
+			if (Water_type!=null && !Water_type.isEmpty() && !Water_type.equalsIgnoreCase("not specified")) {
+				Water_type=Water_type.toLowerCase().replace("fresh water", "freshwater").replace("salt water", "saltwater").trim();
+				if (Water_type.equalsIgnoreCase("fresh water")) {
+					Water_type = "freshwater";
+				} else if (Water_type.equalsIgnoreCase("natural water: freshwater")) {
+					Water_type = "freshwater";
+				} else if (Water_type.equalsIgnoreCase("natural water: marine")) {
+					Water_type = "marine";
+				}
+
 				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type);
 			}
 			
@@ -2770,7 +2793,15 @@ public class RecordQSAR_ToolBox {
 			}
 		}
 		
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: marine")) {
+				this.Water_media_type = "marine";
+			}
+
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
 		}
 

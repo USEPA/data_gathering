@@ -2827,11 +2827,11 @@ public class CompareExperimentalRecords {
 		String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
 
-		// List<Source> sourcesAll = new ArrayList<>();
-		// sourcesAll.add(new Source("Arnot 2006", propertyName));
-		// sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
-		// sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
-		// sourcesAll.add(new Source("Burkhard", propertyName));
+		List<Source> sourcesAll = new ArrayList<>();
+		sourcesAll.add(new Source("Arnot 2006", propertyName));
+		sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
+		sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+		sourcesAll.add(new Source("Burkhard", propertyName));
 
 		// Old QSAR Toolbox sources (v4.8.2)
 		// sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
@@ -2840,11 +2840,11 @@ public class CompareExperimentalRecords {
 		// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 
 		// New QSAR Toolbox sources (v4.9)
-		// sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
-		// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
-		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
-		// sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
-		// sourcesAll.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
+		sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+		sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
+		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
+		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
+		sourcesAll.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
 
 		// c.c.compareBCF();
 		// c.c.compareMultipleBCF();
@@ -2895,10 +2895,11 @@ public class CompareExperimentalRecords {
 
 		// List<String> parameterNames = List.of(ExperimentalConstants.expParamGuideline);
 		// List<String> parameterNames = List.of(ExperimentalConstants.expParamTissueType);
+		List<String> parameterNames = List.of(ExperimentalConstants.expParamMediaType);
 		// c.c.compareUniqueParameterValues(propertyName, parameterNames);
-		// c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
+		c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
 
-		c.c.compareBcfQsarToolboxOldNewIndividual(null, null, null);
+		// c.c.compareBcfQsarToolboxOldNewIndividual(null, null, null);
 		// c.c.compareBcfQsarToolboxOldNewAggregate(null, null, null);
 
 //		c.c.compareOralRat();
