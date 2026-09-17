@@ -701,6 +701,13 @@ public class RecordPesticidePropertyDB {
             row.createCell(col++).setCellValue(record.source);
         }
 
+		try {
+			File file = new File(fileName);
+			file.getParentFile().mkdirs();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
         try (FileOutputStream fileOut = new FileOutputStream(fileName)) {
             workbook.write(fileOut);
         } catch (Exception e) {
@@ -788,7 +795,7 @@ public class RecordPesticidePropertyDB {
 				if(POM>0)				
 					er.experimental_parameters.put("Percentage_Organic_Matter",POM);
 			} catch (Exception ex) {
-				System.out.println(er.chemical_name+"\t"+percentageOrganicMatter+"\tparseError");
+				System.out.println(er.chemical_name+"\t"+percentageOrganicMatter+"\tparseError in handling %OM");
 			}
 		}
 		
