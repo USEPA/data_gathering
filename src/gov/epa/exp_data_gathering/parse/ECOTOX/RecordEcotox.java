@@ -1384,7 +1384,7 @@ public class RecordEcotox {
 		        if (matcher.find()) {
 		            String responseSite = matcher.group(1).trim().toLowerCase();
 		            responseSite=responseSite.replace("analyzed", "").trim();
-					String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(responseSite);
+					String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(responseSite, er);
 
 					if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 						er.experimental_parameters.put(
@@ -1403,7 +1403,7 @@ public class RecordEcotox {
 		
 		} else {
 			if (response_site_comments == null || response_site_comments.equals("/")) {
-				String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site);
+				String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site, er);
 				if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 					er.experimental_parameters.put(
 						ExperimentalConstants.expParamResponseSite,
@@ -1422,7 +1422,7 @@ public class RecordEcotox {
 				// 	er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, response_site.trim());
 				// }
 			} else {
-				String responseSite = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site);
+				String responseSite = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(response_site, er);
 				String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.handleEcotoxComments(responseSite, response_site_comments);
 				if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 					er.experimental_parameters.put(

@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 //import java.io.IOException;
 import java.lang.reflect.Type;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.poi.util.IOUtils;
-
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -52,6 +49,13 @@ public class ParseQSAR_ToolBox extends Parse {
 	public static String fileNameBCF_CEFIC="bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.xlsx";
 	public static String fileNameBCF_NITE="Bioconcentration and logKow NITE v.4.8.2 2026-06-02.xlsx";
 	public static String fileNameBCF_ECHA_REACH="bcfbaf echa reach v.4.8.2 2026-06-02.xlsx";//TODO
+
+	// New files as of 2026-08-04 TODO
+	public static String fileNameBCF_CanadaNew = "new files" + File.separator + "bioaccumulation canada v.4.9 2026-08-04.xlsx";
+	public static String fileNameBCF_CEFICNew = "new files" + File.separator + "bioaccumulation fish CEFIC LRI v.4.9 2026-08-04.xlsx";
+	public static String fileNameBCF_NITENew = "new files" + File.separator + "Bioconcentration and logKow NITE v.4.9 2026-08-04.xlsx";
+	public static String fileNameBCF_ECHA_REACHNew = "new files" + File.separator + "bcfbaf echa reach v.4.9 2026-08-04.xlsx";
+	public static String fileNameBCF_ECHA_REACHNew2 = "new files" + File.separator + "REACH Bioaccumulation database (normalized) v.4.9 2026-08-04.xlsx";
 	
 	public static String fileName96hrAcuteAquatic="96 hour aquatic toxicity.xlsx";
 	public static String fileNamePhyschem="echa reach physchem properties.xlsx";
@@ -155,6 +159,16 @@ public class ParseQSAR_ToolBox extends Parse {
 			mainFolder+=File.separator+propertyName;//output json/excel in subfolder
 			jsonFolder= mainFolder;
 			new File(mainFolder).mkdirs();
+		} else if (fileName.equals(fileNameBCF_CEFICNew)) {
+			init("bioaccumulation fish CEFIC LRI v.4.9");
+		} else if (fileName.equals(fileNameBCF_CanadaNew)) {
+			init("bioaccumulation canada v.4.9");
+		} else if (fileName.equals(fileNameBCF_NITENew)) {
+			init("Bioconcentration and logKow NITE v.4.9");
+		} else if (fileName.equals(fileNameBCF_ECHA_REACHNew)) {
+			init("BCFBAF ECHA REACH v.4.9");
+		} else if (fileName.equals(fileNameBCF_ECHA_REACHNew2)) {
+			init("REACH Bioaccumulation database (normalized) v.4.9");
 		}
 		
 	}
@@ -200,10 +214,41 @@ public class ParseQSAR_ToolBox extends Parse {
 					continue;
 				}
 				
-				//Can only filter by whole body if filename is CEFIC
-				if(fileName.equals(fileNameBCF_CEFIC)) {
+				if (fileName.equals(fileNameBCF_CanadaNew)) {
+					if (!recordQSAR_ToolBox.Database.equals("Bioaccumulation Canada")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;					
+					ExperimentalRecord erCanada=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(erCanada!=null)	recordsExperimental.add(erCanada);
+					
+					//Canada doesnt have BAF data
+				} else if (fileName.equals(fileNameBCF_CEFICNew)) {
+					//Can only filter by whole body if filename is CEFIC
 					if (!recordQSAR_ToolBox.Database.equals("Bioaccumulation fish CEFIC LRI")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
 						continue;					
+					ExperimentalRecord erCEFIC=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(erCEFIC!=null)	recordsExperimental.add(erCEFIC);
+
+					//CEFIC doesnt have BAF data
+				} else if (fileName.equals(fileNameBCF_NITENew)) {
+					if (!recordQSAR_ToolBox.Database.equals("Bioconcentration and logKow NITE")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;					
+					
+					ExperimentalRecord erBCF=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(erBCF!=null)	recordsExperimental.add(erBCF);
+				} else if (fileName.equals(fileNameBCF_ECHA_REACHNew)) {
+					if (!recordQSAR_ToolBox.Database.equals("ECHA REACH")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;
+					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(er!=null)	recordsExperimental.add(er);
+				} else if (fileName.equals(fileNameBCF_ECHA_REACHNew2)) {
+					if (!recordQSAR_ToolBox.Database.equals("ECHA REACH")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;
+					ExperimentalRecord er=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
+					if(er!=null)	recordsExperimental.add(er);
+				} else if(fileName.equals(fileNameBCF_CEFIC)) {
+					//Can only filter by whole body if filename is CEFIC
+					if (!recordQSAR_ToolBox.Database.equals("Bioaccumulation fish CEFIC LRI")) //QSAR toolbox exported ECHA reach records as well for the NITE chemicals
+						continue;
 					ExperimentalRecord erCEFIC=recordQSAR_ToolBox.toExperimentalRecordBCF(htSpeciesByBinomalName);
 					if(erCEFIC!=null)	recordsExperimental.add(erCEFIC);
 
@@ -427,11 +472,12 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		// findMissingFieldsInRecordClass();
 		
-		String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
+		// String [] filenames= {fileNameBCF_ECHA_REACH, fileNameBCF_Canada, fileNameBCF_CEFIC, fileNameBCF_NITE};
 		// String [] filenames= {fileNameBCF_ECHA_REACH};
 		// String [] filenames= {fileNameBCF_Canada};
 		// String [] filenames= {fileNameBCF_CEFIC};
 		// String [] filenames= {fileNameBCF_NITE};
+		String [] filenames = {fileNameBCF_ECHA_REACHNew, fileNameBCF_CanadaNew, fileNameBCF_CEFICNew, fileNameBCF_NITENew, fileNameBCF_ECHA_REACHNew2};
 		
 		for (String filename:filenames) {
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null, filename);

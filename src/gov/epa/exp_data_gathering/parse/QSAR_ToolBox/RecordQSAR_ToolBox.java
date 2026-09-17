@@ -687,6 +687,8 @@ public class RecordQSAR_ToolBox {
 					.equals("Environmental Fate and Transport#Biodegradation#in water: screening tests")) {
 				handleBiodegWaterScreening(er);
 
+			} else if (EndpointPath.equals("Environmental Fate and Transport#Bioaccumulation#aquatic / sediment")) {
+				
 			} else {
 				System.out.println("Need to handle EndpointPath=" + EndpointPath);
 				return null;
@@ -1105,7 +1107,14 @@ public class RecordQSAR_ToolBox {
 		if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline) != null)
 			guidelines = er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).toString();
 
-		if (Media != null) {
+		if (Media != null && !Media.isEmpty() && !Media.equalsIgnoreCase("not specified")) {
+			if (Media.equalsIgnoreCase("fresh water")) {
+				Media = "freshwater";
+			} else if (Media.equalsIgnoreCase("natural water: freshwater")) {
+				Media = "freshwater";
+			} else if (Media.equalsIgnoreCase("natural water: marine")) {
+				Media = "marine";
+			}
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Media);
 		}
 
@@ -2117,7 +2126,15 @@ public class RecordQSAR_ToolBox {
 
 	private void addNewExperimentalParameters(ExperimentalRecord er) {
 		// Water type (freshwater vs saltwater)
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: marine")) {
+				this.Water_media_type = "marine";
+			}
+
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type.toLowerCase().trim());
 		}
 
@@ -2336,66 +2353,14 @@ public class RecordQSAR_ToolBox {
 			tissueType = this.Organ;
 		}
 
-		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType);
+		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType, er);
 		if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 			// Only put in the properly cleaned and formatted response site values
 			er.experimental_parameters.put(
 				ExperimentalConstants.expParamResponseSite,
 				responseSiteFinal
 			);
-		} else if (tissueType != null && !tissueType.isEmpty()) {
-			// Clean out bad records based on data in this column
-			if (tissueType.toLowerCase().contains("fu calc") || tissueType.toLowerCase().contains("extrapolation")) {
-				er.keep = false;
-				er.updateReason("Extrapolated value from fU calculation");
-			}
-			if (tissueType.toLowerCase().contains("metabolite")) {
-				er.keep = false;
-				er.updateReason("Chemical metabolite used");
-			}
-			if (tissueType.toLowerCase().contains("log kow") && !Endpoint.equals(ExperimentalConstants.strLogKOW)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("calculation") || tissueType.toLowerCase().contains("calculated") || tissueType.toLowerCase().contains("bcf model")) {
-				er.keep = false;
-				er.updateReason("Calculated value");
-			}
-			if (tissueType.toLowerCase().equals("based on 14c determinations and not on measurement of actual test substance concentrations in fish tissue")) {
-				er.keep = false;
-				er.updateReason("Calculated value");
-			}
-			if ((tissueType.toLowerCase().contains("bmf") || tissueType.toLowerCase().contains("biomagnification factor")) && !Endpoint.equals(ExperimentalConstants.strBMF)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("bioaccumulation factor") && !Endpoint.equals(ExperimentalConstants.strBAF)) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("literature")) {
-				er.keep = false;
-				er.updateReason("Literature value, not experimental value reported");
-			}
-			if (tissueType.toLowerCase().contains("depuration")) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("growth corrected dietary")) {
-				er.keep = false;
-				er.updateReason("Wrong endpoint");
-			}
-			if (tissueType.toLowerCase().contains("fu = 1")) {
-				er.keep = false;
-				er.updateReason("Extrapolated value from fU calculation");
-			}
-			if (tissueType.toLowerCase().equals("read minus across to structural analogues")) {
-				er.keep = false;
-				er.updateReason("Extrapolated from read-across to structural analogues");
-			}
-			// TODO: Add in potential corrections to other fields?
 		}
-
 
 		// Temperature and pH
 		setExperimentalParameters(er);
@@ -2431,8 +2396,16 @@ public class RecordQSAR_ToolBox {
 			}
 			er.reference = Reference_source;
 			
-			if (Water_type!=null) {
-				Water_type=Water_type.toLowerCase().replace("freshwater","Fresh water").replace("saltwater","Salt water").trim();
+			if (Water_type!=null && !Water_type.isEmpty() && !Water_type.equalsIgnoreCase("not specified")) {
+				Water_type=Water_type.toLowerCase().replace("fresh water", "freshwater").replace("salt water", "saltwater").trim();
+				if (Water_type.equalsIgnoreCase("fresh water")) {
+					Water_type = "freshwater";
+				} else if (Water_type.equalsIgnoreCase("natural water: freshwater")) {
+					Water_type = "freshwater";
+				} else if (Water_type.equalsIgnoreCase("natural water: marine")) {
+					Water_type = "marine";
+				}
+
 				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type);
 			}
 			
@@ -2820,7 +2793,15 @@ public class RecordQSAR_ToolBox {
 			}
 		}
 		
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()) {
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
+				this.Water_media_type = "freshwater";
+			} else if (this.Water_media_type.equalsIgnoreCase("natural water: marine")) {
+				this.Water_media_type = "marine";
+			}
+
 			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
 		}
 
