@@ -80,6 +80,9 @@ public class ExperimentalConstants {
 	public static final String strTTR_ANSA = "Binding to TTR (replacement of ANSA)";//OPERA
 	public static final String strCACO2 = "Caco-2 permeability (Papp)";//OPERA
 	public static final String strRBIODEG = "Ready biodegradability";//OPERA
+	
+	public static final String strRBIODEG_10_day = "Ready biodegradability within 10 day window";
+	
 	public static final String strOXYGENCONSUMPTION = "Percent O2 consumption";
 	public static final String strPercentageBiodegradation = "Percentage biodegradation";
 	

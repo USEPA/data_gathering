@@ -57,7 +57,9 @@ public class ParseQSAR_ToolBox extends Parse {
 	public static String fileNamePhyschem="echa reach physchem properties.xlsx";
 	
 	public static String fileNameKoc="echa reach koc with name UTF-8.tsv";
-	public static String fileNameBiodegWaterScreening="biodegradation in water screening tests 2026-04-013.tsv";
+//	public static String fileNameBiodegWaterScreening="biodegradation in water screening tests 2026-04-013.tsv";
+	public static String fileNameBiodegWaterScreening="biodegradation in water screening tests v.4.9 2026-08-04.tsv";	
+	
 	
 //	static String fileName=fileNameAcuteToxicityEchaReach;
 //	static String fileName=fileNameAcuteToxicityDB;
@@ -433,7 +435,7 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		for (String filename:filenames) {
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(null, filename);
-			p.generateOriginalJSONRecords=false;//*** set to true on first run
+			p.generateOriginalJSONRecords=true;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
@@ -552,10 +554,20 @@ public class ParseQSAR_ToolBox extends Parse {
 		String folder="data\\experimental\\QSAR_Toolbox\\text files\\";
 		String folderExcel="data\\experimental\\QSAR_Toolbox\\excel files\\";
 		
-		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
-				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
-				"Bioconcentration and logKow NITE v.4.8.2 2026-06-02.tsv",
-				"bcfbaf echa reach v.4.8.2 2026-06-02.tsv"};
+//		String[] filenames = { "bioaccumulation canada v.4.8.2 2026-06-02.tsv",
+//				"bioaccumulation fish CEFIC LRI v.4.8.2 2026-06-02.tsv",
+//				"Bioconcentration and logKow NITE v.4.8.2 2026-06-02.tsv",
+//				"bcfbaf echa reach v.4.8.2 2026-06-02.tsv"};
+		
+//		String[] filenames = { 
+//				"REACH Bioaccumulation database (normalized) v.4.9 2026-08-04.tsv",
+//				"bioaccumulation canada v.4.9 2026-08-04.tsv",
+//				"bioaccumulation fish CEFIC LRI v.4.9 2026-08-04.tsv",
+//				"Bioconcentration and logKow NITE v.4.9 2026-08-04.tsv",
+//				"bcfbaf echa reach v.4.9 2026-08-04.tsv"};
+		
+		String [] filenames= {"biodegradation in water screening tests v.4.9 2026-08-04.tsv"};
+		
 		
 		boolean stopAtFirstBlankRow=true;
 		boolean detectNumerics=false;//keep as strings in excel
@@ -575,9 +587,9 @@ public class ParseQSAR_ToolBox extends Parse {
 
 //		UnitConverter.printMissingDensityCas=true;
 		
-		// convertTsvFilesToExcel();
+		 convertTsvFilesToExcel();
 		
-		runBCF();
+//		runBCF();
 //		run96hrAcuteFishTox();
 //		runPhyschem();
 //		runKoc();
