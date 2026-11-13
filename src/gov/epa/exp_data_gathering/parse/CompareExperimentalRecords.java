@@ -17,6 +17,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import com.google.gson.JsonObject;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.QSAR.utilities.MatlabChart;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
@@ -204,6 +205,40 @@ public class CompareExperimentalRecords {
 			//		System.out.println(recs.get(0).casrn+"\t"+avg);
 		
 		}
+		
+		private static void setMulticlassScore(ExperimentalRecords recs, List<Double> vals) {
+		    if (vals == null || vals.isEmpty()) return;
+
+		    // Count how many times each integer score occurs
+		    java.util.Map<Integer, Integer> counts = new java.util.HashMap<>();
+		    for (Double v : vals) {
+		        if (v == null) continue;
+		        int score = v.intValue();
+		        counts.put(score, counts.getOrDefault(score, 0) + 1);
+		    }
+
+		    if (counts.isEmpty()) return;
+
+		    // Find most common score
+		    int bestScore = -1;
+		    int bestCount = 0;
+		    for (java.util.Map.Entry<Integer, Integer> e : counts.entrySet()) {
+		        if (e.getValue() > bestCount) {
+		            bestScore = e.getKey();
+		            bestCount = e.getValue();
+		        }
+		    }
+
+		    double fraction = (double) bestCount / (double) vals.size();
+
+		    if (fraction >= 0.8) {
+		        recs.medianValue = (double) bestScore;
+		    } else if (vals.size() == 1) {
+		        recs.medianValue = vals.get(0);
+		    } else {
+//		        System.out.println(recs.get(0).casrn + "\t" + recs.get(0).source_name + "\t" + fraction);
+		    }
+		}
 
 		/**
 		 * TODO This method assumes that property has log units as modelable units
@@ -223,7 +258,7 @@ public class CompareExperimentalRecords {
 				if(!er.property_value_units_final.equals(units)) continue;
 				Double val=null;
 				
-				if(units.equals(ExperimentalConstants.str_binary)) {
+				if(units.equals(ExperimentalConstants.str_binary) || units.equals(ExperimentalConstants.str_multiclass)) {
 					val=er.property_value_point_estimate_final;
 				} else {
 					if(er.property_value_numeric_qualifier!=null) {
@@ -260,6 +295,9 @@ public class CompareExperimentalRecords {
 				
 				if(units.equals(ExperimentalConstants.str_binary)) {
 					setBinaryScore(recs,vals);
+				} else if(units.equals(ExperimentalConstants.str_multiclass)) {
+					setMulticlassScore(recs,vals);
+					
 				} else {
 					setMedianValue(recs,vals);	
 				}
@@ -643,8 +681,8 @@ public class CompareExperimentalRecords {
 //			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.8.2"));
 			
-			
-			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
+			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+//			sources2.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.8.2"));
 //			sources2.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 
@@ -1323,19 +1361,41 @@ public class CompareExperimentalRecords {
 
 		private void compareRBiodeg() {
 			
-			String propertyName=ExperimentalConstants.strRBIODEG;
-			
+
 			List<Source>sources1=new ArrayList<>();
 			List<Source>sources2=new ArrayList<>();
 
-			sources1.add(new Source(RecordQSAR_ToolBox.sourceName,"RBiodeg 301F ECHA Reach"));
-			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
-
-//			sources1.add(new Source("RIFM_2026_01",null));//fragrance data
+//			String propertyName=ExperimentalConstants.strRBIODEG;
+//			sources1.add(new Source(RecordQSAR_ToolBox.sourceName,"RBiodeg 301F ECHA Reach"));
 //			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
 
-			cm.compareChemicalsInCommonConcordance(sources1, sources2, propertyName,
-					ExperimentalConstants.str_binary);
+			//**********************************************************************************************************
+			String propertyName=ExperimentalConstants.strRBIODEG;
+			sources1.add(new Source("RIFM_2026_08_12","RBiodeg 301F RIFM"));//fragrance data
+////			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
+			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach 2026-10-30"));
+			
+//			sources1.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach"));
+//			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 301 F ECHA Reach 2026-10-30"));
+
+			cm.compareChemicalsInCommonConcordance(sources1, sources2, propertyName,ExperimentalConstants.str_binary);
+
+			//**********************************************************************************************************
+
+//			String propertyName=ExperimentalConstants.strRBIODEG_10_day;
+//			sources1.add(new Source("RIFM_2026_08_12","RBiodeg 301F RIFM (10 day window)"));//fragrance data
+//			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 10 day 301 F ECHA Reach 2026-10-30"));
+////			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg 10 day 301 F ECHA Reach"));
+//			cm.compareChemicalsInCommonConcordance(sources1, sources2, propertyName, ExperimentalConstants.str_binary);
+
+			//**********************************************************************************************************
+			
+
+//			String propertyName=ExperimentalConstants.strRBIODEG_multiclass;
+//			sources1.add(new Source("RIFM_2026_08_12","RBiodeg 301F RIFM multiclass"));//fragrance data
+//			sources2.add(new Source(RecordEChemPortal.sourceName,"RBiodeg multiclass 301 F ECHA Reach 2026-10-30"));
+//			cm.compareChemicalsInCommonConcordance(sources1, sources2, propertyName,
+//					ExperimentalConstants.str_multiclass);
 
 		}
 
@@ -2383,6 +2443,9 @@ public class CompareExperimentalRecords {
 
 			TreeMap<String, ExperimentalRecords> tm1 = rm.getTreeMapByCAS(propertyName, units, recs1);
 			TreeMap<String, ExperimentalRecords> tm2 = rm.getTreeMapByCAS(propertyName, units, recs2);
+			
+			
+//			System.out.println(JsonUtilities.gsonPretty.toJson(tm1));
 
 			System.out.println("countWithMedian1="+getCountWithMedian(tm1));
 			System.out.println("countWithMedian2="+getCountWithMedian(tm2));
@@ -2400,7 +2463,7 @@ public class CompareExperimentalRecords {
 
 			DecimalFormat df=new DecimalFormat("0.00");
 
-			//		boolean printValues=true;
+//			boolean printValues=true;
 			boolean printValues=false;
 
 			if(printValues) System.out.println("casrn\tBinary_1\tBinary_2");
@@ -2826,12 +2889,19 @@ public class CompareExperimentalRecords {
 		// TODO Auto-generated method stub
 		String propertyName = ExperimentalConstants.strBCF; // "Bioconcentration factor"
 		CompareExperimentalRecords c=new CompareExperimentalRecords();
+		
+//		 c.c.compareRBiodeg();
+		// c.c.compareRBiodeg_DebugOriginal();
+		// c.c.analyzeRBiodeg_BadRecords();
+		// c.c.analyzeRBiodeg_KeepFlag();
+//		c.c.compareRBiodegFull();
 
-		List<Source> sourcesAll = new ArrayList<>();
-		sourcesAll.add(new Source("Arnot 2006", propertyName));
-		sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
-		sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
-		sourcesAll.add(new Source("Burkhard", propertyName));
+
+//		List<Source> sourcesAll = new ArrayList<>();
+//		sourcesAll.add(new Source("Arnot 2006", propertyName));
+//		sourcesAll.add(new Source("ITRC July 2023", propertyName)); // Not the same folder naming structure for ITRC
+//		sourcesAll.add(new Source("ECOTOX_2026_03_12", propertyName));
+//		sourcesAll.add(new Source("Burkhard", propertyName));
 
 		// Old QSAR Toolbox sources (v4.8.2)
 		// sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.8.2"));
@@ -2840,13 +2910,13 @@ public class CompareExperimentalRecords {
 		// sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.8.2"));
 
 		// New QSAR Toolbox sources (v4.9)
-		sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
-		sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
-		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
-		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
-		sourcesAll.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
+//		sourcesAll.add(new Source("QSAR_Toolbox","Bioconcentration and logKow NITE v.4.9"));
+//		sourcesAll.add(new Source("QSAR_Toolbox","BCFBAF ECHA REACH v.4.9"));
+//		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation canada v.4.9"));
+//		sourcesAll.add(new Source("QSAR_Toolbox","bioaccumulation fish CEFIC LRI v.4.9"));
+//		sourcesAll.add(new Source("QSAR_Toolbox", "REACH Bioaccumulation database (normalized) v.4.9"));
 
-		// c.c.compareBCF();
+		 c.c.compareBCF();
 		// c.c.compareMultipleBCF();
 		// c.c.compareBcf1vsAll();
 		// c.c.compareBcfWetDryWithinSource();
@@ -2895,9 +2965,9 @@ public class CompareExperimentalRecords {
 
 		// List<String> parameterNames = List.of(ExperimentalConstants.expParamGuideline);
 		// List<String> parameterNames = List.of(ExperimentalConstants.expParamTissueType);
-		List<String> parameterNames = List.of(ExperimentalConstants.expParamMediaType);
+//		List<String> parameterNames = List.of(ExperimentalConstants.expParamMediaType);
 		// c.c.compareUniqueParameterValues(propertyName, parameterNames);
-		c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
+//		c.c.compareUniqueParameterValues(propertyName, parameterNames, sourcesAll);
 
 		// c.c.compareBcfQsarToolboxOldNewIndividual(null, null, null);
 		// c.c.compareBcfQsarToolboxOldNewAggregate(null, null, null);
@@ -2907,11 +2977,6 @@ public class CompareExperimentalRecords {
 //		c.c.lookAtLLNA_MixtureVsNonMixtureNIEHS_ICE();//only 8?
 //		c.c.compareSensitization();
 
-		// c.c.compareRBiodeg();
-		// c.c.compareRBiodeg_DebugOriginal();
-		// c.c.analyzeRBiodeg_BadRecords();
-		// c.c.analyzeRBiodeg_KeepFlag();
-//		c.c.compareRBiodegFull();
 		
 //		c.c.compareKoc();
 //		c.c.compareAquaticTox();

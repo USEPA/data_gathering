@@ -24,6 +24,13 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 
 import com.google.gson.JsonObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.DateUtil;
+
+
+
 
 
 
@@ -158,6 +165,85 @@ public class ExcelSourceReader {
 			e.printStackTrace();
 		}
 	}
+	
+	
+
+	private static String getContent(boolean setBlankToNull, FormulaEvaluator evaluator, Cell cell) {
+	    if (cell == null) {
+	        return null;
+	    }
+
+	    String content = null;
+	    CellType type = cell.getCellType();
+
+	    if (type == CellType.STRING) {
+
+	        if (encoding == null) {
+	            content = cell.getStringCellValue();
+	        } else {
+	            // 2025-06-03 to avoid ? characters:
+	            content = new String(cell.getStringCellValue().getBytes(Charset.forName(encoding)));
+	        }
+
+	    } else if (type == CellType.NUMERIC) {
+
+	        if (DateUtil.isCellDateFormatted(cell)) {
+	            Date date = cell.getDateCellValue();
+	            content = new SimpleDateFormat("yyyy-MM-dd").format(date);
+	        } else {
+	            content = String.valueOf(cell.getNumericCellValue());
+	        }
+
+	    } else if (type == CellType.BOOLEAN) {
+	        content = String.valueOf(cell.getBooleanCellValue());
+
+	    } else if (type == CellType.BLANK) {
+	        content = setBlankToNull ? null : "";
+
+	    } else if (type == CellType.FORMULA) {
+
+	        CellValue evaluated = evaluator.evaluate(cell);
+
+	        if (evaluated == null) {
+	            return setBlankToNull ? null : "";
+	        }
+
+	        switch (evaluated.getCellType()) {
+	            case STRING:
+	                content = evaluated.getStringValue();
+	                break;
+
+	            case NUMERIC:
+	                if (DateUtil.isCellDateFormatted(cell)) {
+	                    Date date = cell.getDateCellValue();
+	                    content = new SimpleDateFormat("yyyy-MM-dd").format(date);
+	                } else {
+	                    content = String.valueOf(evaluated.getNumberValue());
+	                }
+	                break;
+
+	            case BOOLEAN:
+	                content = String.valueOf(evaluated.getBooleanValue());
+	                break;
+
+	            case BLANK:
+	                content = setBlankToNull ? null : "";
+	                break;
+
+	            case ERROR:
+	            default:
+	                content = null;
+	                break;
+	        }
+
+	    } else {
+	        System.out.println(type);
+	    }
+
+	    return content;
+	}
+	
+	
 
 	/**
 	 * Initializes a new reader for the given source from the given filename NOTE:
@@ -448,49 +534,9 @@ public class ExcelSourceReader {
 		return records;
 	}
 	
-	private static String getContent(boolean setBlankToNull, FormulaEvaluator evaluator, Cell cell) {
-
-		CellType type = cell.getCellType();
-		
-		String content=null;
-		if (type == CellType.STRING) {
-			
-			if(encoding==null) {
-				content = cell.getStringCellValue();				
-			} else {
-				//2025-06-03 to avoid ? characters:
-				content= new String(cell.getStringCellValue().getBytes(Charset.forName(encoding)));
-			}
-			
-//			content = cell.getRichStringCellValue().getString();
-
-			
-		} else if (type == CellType.NUMERIC) {
-			content = cell.getNumericCellValue() + "";
-		} else if (type == CellType.BOOLEAN) {
-			content = cell.getBooleanCellValue() + "";
-		} else if (type == CellType.BLANK) {
-			content = "";
-			if (setBlankToNull)
-				content = null;
-		} else if (type == CellType.FORMULA) {//2024-01-23 (TMM)
-			type = evaluator.evaluateFormulaCell(cell);
-			if (type == CellType.STRING) {
-				content = cell.getStringCellValue();
-			} else if (type == CellType.NUMERIC) {
-				content = cell.getNumericCellValue() + "";
-			} else if (type == CellType.BOOLEAN) {
-				content = cell.getBooleanCellValue() + "";
-			} else if (type == CellType.BLANK) {
-				content = "";
-				if (setBlankToNull)
-					content = null;
-			}
-		} else {
-			System.out.println(type);
-		}
-		return content;
-	}
+	
+	
+	
 
 	/**
 	 * Writes records from a spreadsheet to JSON original records format consistent
@@ -526,6 +572,9 @@ public class ExcelSourceReader {
 	 */
 	public Vector<JsonObject> parseRecordsFromExcel(int chemicalNameIndex) {
 		List<String> fieldNames = getHeaders(sheet,headerRowNum);
+		
+//		System.out.println(encoding);
+		
 		HashMap<Integer, String> hm = generateDefaultMap(fieldNames, 0);
 		return parseRecordsFromExcel(hm, chemicalNameIndex, false);
 	}

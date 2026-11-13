@@ -34,6 +34,7 @@ import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.ChemicalNameFixer;
+import gov.epa.exp_data_gathering.parse.EstimateParser;
 import gov.epa.exp_data_gathering.parse.EstimateParser.Estimate;
 import gov.epa.exp_data_gathering.parse.ExcelSourceReader;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
@@ -44,10 +45,13 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PublicSource;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
 import gov.epa.exp_data_gathering.parse.UnitConverter;
+import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal;
+import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal.RecordDegradation;
 import gov.epa.ghs_data_gathering.Utilities.Utilities;
 
 public class RecordQSAR_ToolBox {
 
+	public static String sourceName="QSAR_Toolbox";
 	public Integer Row;
 	public String Chemical_Number;
 	public String RecordNumber;
@@ -216,7 +220,7 @@ public class RecordQSAR_ToolBox {
 
 	public String Duration;
 	public String Duration_Unit;
-	
+
 	public String Duration_of_test_contact_time_MeanValue;
 	public String Duration_of_test_contact_time_Qualifier;
 	public String Duration_of_test_contact_time_Unit;
@@ -232,7 +236,7 @@ public class RecordQSAR_ToolBox {
 	public String Oxygen_conditions_other;
 
 	public String Unit_details;
-	public String Qualifier;//always duplicative of Value_Qualifier? 
+	public String Qualifier;// always duplicative of Value_Qualifier?
 	public String Value_MeanValue;
 	public String Value_Qualifier;
 	public String Value_Unit;
@@ -255,8 +259,8 @@ public class RecordQSAR_ToolBox {
 	public String Type_of_method;
 	public String Assay;
 	public String Assay_original;
-	public String Interpretation_Of_Results;
-	public String Interpretation_Of_Results_other;
+	public String Interpretation_of_results;
+	public String Interpretation_of_results_other;
 	public String Route_Of_Challenge_Exposure;
 	public String Route_Of_Induction_Exposure;
 	public String Assay_other;
@@ -323,7 +327,6 @@ public class RecordQSAR_ToolBox {
 	public String Atmospheric_Pressure_MaxValue;
 	public String Atmospheric_Pressure_MaxQualifier;
 
-	
 	public String Water_media_type;
 	public String Water_media_type_other;
 	public String Media;
@@ -339,17 +342,17 @@ public class RecordQSAR_ToolBox {
 	public String Org_carbon_MaxValue;
 	public String Org_carbon_MaxQualifier;
 
-	//New fields
+	// New fields
 	public String BCFk_lipid_BCFk_ww_lipid;
 	public String BCFk_ww_k1_k2;
 	public String BCFss_lipid_Scale;
-	
+
 	public String Elimination_phase_duration_MeanValue;
 	public String Elimination_phase_duration_Scale;
 	public String Elimination_phase_duration_Unit;
 	public String Exposure_concentration_Scale;
 	public String Exposure_concentration_Unit;
-	
+
 	public String Lipid_MaxValue;
 	public String Lipid_MeanValue;
 	public String Lipid_MinValue;
@@ -394,13 +397,13 @@ public class RecordQSAR_ToolBox {
 	public String Lipid_content_Scale;
 	public String Lipid_content_Unit;
 	public String Lipid_method;
-	
+
 	public String Reason_for_reliability_3_4;
 	public String Refference_ID;
 	public String Route_of_exposure;
 	public String Route_of_exposure_other;
 	public String Sexual_maturation_offspring;
-	
+
 	public String Order;
 	public String Phylum;
 	public String Class;
@@ -424,7 +427,6 @@ public class RecordQSAR_ToolBox {
 	public String Infraphylum;
 	public String Kingdom;
 
-	
 	public String T50_Elimination_MeanValue;
 	public String T50_Elimination_Scale;
 	public String T50_Elimination_Unit;
@@ -495,11 +497,14 @@ public class RecordQSAR_ToolBox {
 	// public static final String[] fieldNames =
 	// {"field0","CAS_Number","Chemical_name_s","SMILES","Molecular_formula","Predefined_substance_type","Additional_Ids","Identity","CAS_SMILES_relation","Comment","EndpointPath","Database","URL","Year","Title","Strain","Endpoint","Test_type","Conclusions","Reliability","Purpose_flag","GLP_compliance","Test_guideline","Study_result_type","Applied_transforms","Harmonized_Template","Qualifier_of_guideline","Route_of_administration","Test_organisms_species","Substance_Test_material_equality","APPLICANT_S_SUMMARY_AND_CONCLUSION_executive_summary","Assigned_SMILES","Qualifier","Year_0","Year_1","Title_0","Title_1","Strain_other","Test_type_other","Test_guideline_other","Year_2","Title_2","Bibliographic_source_2","Author_s_or_transferred_reference_2","Type_of_inhalation_exposure","Route_of_administration_original","Type_of_coverage","Bibliographic_source","Author_s_or_transferred_reference","Unit_details","Test_guideline_0","Test_guideline_1","Test_guideline_2","Test_guideline_other_2","Qualifier_of_guideline_0","Qualifier_of_guideline_1","Qualifier_of_guideline_2","TestMaterialIsNull","Test_guideline_3","Qualifier_of_guideline_3","Any_other_information_on_results_incl_tables","Test_organisms_species_other","Endpoint_other","Test_guideline_other_3","Type_of_inhalation_exposure_other","Route_of_administration_other","Type_of_coverage_other","Route_of_administration_other_original","Year_3","Year_4","Title_3","Title_4","Year_5","Title_5","Bibliographic_source_5","Author_s_or_transferred_reference_5","Test_guideline_other_1","Test_guideline_other_0","Year_6","Title_6","Year_7","Year_8","Year_9","Title_7","Title_8","Title_9","Year_10","Title_10","Year_11","Title_11","Year_12","Year_13","Year_14","Year_15","Year_16","Year_17","Year_18","Year_19","Title_12","Title_13","Title_14","Title_15","Title_16","Title_17","Title_18","Title_19","Test_guideline_4","Test_guideline_5","Test_guideline_other_4","Test_guideline_other_5","Qualifier_of_guideline_4","Qualifier_of_guideline_5","Duration_MaxQualifier","Duration","Value_MeanValue","Value_Qualifier","Value_Unit","Value_Scale","Value_MinValue","Value_MinQualifier","Value_MaxValue","Value_MaxQualifier","Original_value_MeanValue","Original_value_Qualifier","Original_value_Unit","Original_value_Scale","Original_value_MinValue","Original_value_MinQualifier","Original_value_MaxValue","Original_value_MaxQualifier"};
 
-	public static final String sourceName = "QSAR_Toolbox";
+//	public static String sourceName = "QSAR_Toolbox";
+//	public static String outputTestGuideline;
+//	public static String outputProperty;
 
 	static final transient UnitConverter unitConverter = new UnitConverter("data/density.txt");
 	static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues()
 			.create();
+
 
 	private static void logUniqueHandle(String message) {
 		if (message == null || message.isBlank()) {
@@ -522,6 +527,7 @@ public class RecordQSAR_ToolBox {
 
 	// Split on either '|' or ';', ignoring surrounding whitespace
 	private static final Pattern SYN_SPLIT = Pattern.compile("\\s*[;|]\\s*");
+	public static boolean omitBasedOnGLPCompliance = false;
 
 	private void setIdentifiers(ExperimentalRecord er) {
 		if (this.CAS_Number != null && !this.CAS_Number.equals("No CAS number")
@@ -535,9 +541,9 @@ public class RecordQSAR_ToolBox {
 		// to spaces
 		List<String> names = null;
 		if (this.Chemical_name_s != null && !this.Chemical_name_s.isBlank()) {
-			
+
 			this.Chemical_name_s = ChemicalNameFixer.replaceCommonHtmlEntities(this.Chemical_name_s);
-			
+
 			names = SYN_SPLIT.splitAsStream(this.Chemical_name_s.trim()).map(String::trim).filter(s -> !s.isEmpty())
 					.map(s -> s.replace('_', ' ')) // convert underscores to spaces AFTER splitting
 					.map(s -> s.replaceAll("\\s+", " ")) // normalize whitespace
@@ -566,29 +572,33 @@ public class RecordQSAR_ToolBox {
 //				er.chemical_name = name;
 //				String name2 = ChemicalNameFixer.fixName(name);
 				er.chemical_name = ChemicalNameFixer.fixName(name);
-				
-				if(!er.chemical_name.equals(name)) {
-					System.out.println("Fixed: \""+name+"\" to \""+er.chemical_name+"\"");
-				}
+
+//				if (!er.chemical_name.equals(name)) {
+//					System.out.println("Fixed: \"" + name + "\" to \"" + er.chemical_name + "\"");
+//				}
 				break;
 			}
 		}
 
+//		if (this.Additional_Ids != null && this.Additional_Ids.contains("DTXSID :")) {
+//			String[] ids = this.Additional_Ids.split(";");
+//			for (String id : ids) {
+//				if (id.contains("DTXSID")) {
+//					er.dsstox_substance_id = "DTXSID" + id.substring(id.indexOf(':') + 1);
+//				}
+//			}
+//		}
+		
 		if (this.Additional_Ids != null && this.Additional_Ids.contains("DTXSID :")) {
-			String[] ids = this.Additional_Ids.split(";");
-			for (String id : ids) {
-				if (id.contains("DTXSID")) {
-					er.dsstox_substance_id = "DTXSID" + id.substring(id.indexOf(':') + 1);
-				}
-			}
+			er.dsstox_substance_id =parseDtxsid(Additional_Ids);
 		}
+		
 
 		er.smiles = this.SMILES;
-		
-		//TODO if Assigned_SMILES=true should we omit? i.e they looked it up?
-		//TODO what about CAS_SMILES_relation field?
 
-		
+		// TODO if Assigned_SMILES=true should we omit? i.e they looked it up?
+		// TODO what about CAS_SMILES_relation field?
+
 		if (er.smiles != null && er.smiles.contains("missing"))
 			er.smiles = null;
 
@@ -596,9 +606,23 @@ public class RecordQSAR_ToolBox {
 			er.keep = false;
 			er.updateReason("No chemical identifiers");
 		}
-		
 
 	}
+	
+	private static final Pattern DTXSID_PATTERN = Pattern.compile("DTXSID\\s*: ?\\s*(DTXSID\\d+)", Pattern.CASE_INSENSITIVE);
+
+    public static String parseDtxsid(String input) {
+        if (input == null || input.isBlank()) {
+            return null;
+        }
+
+        Matcher matcher = DTXSID_PATTERN.matcher(input);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
+    }
 
 	/**
 	 * For skin sensitization and acute toxicity
@@ -608,26 +632,39 @@ public class RecordQSAR_ToolBox {
 	 * @param originalSourceName
 	 * @return
 	 */
-	public ExperimentalRecord toExperimentalRecord(String originalSourceName) {
+	public ExperimentalRecord toExperimentalRecord(ParseQSAR_ToolBox pqt) {
+		
+//		System.out.println(this.CAS_Number);
+		
+		
 		ExperimentalRecord er = new ExperimentalRecord();
-
 		er.experimental_parameters = new Hashtable<>();
 		er.parameter_values = new ArrayList<>();
-
+		
 		setSourceInformation(er);
 		setIdentifiers(er);
 		setGuidelines(er);
 		setMeasurementMethod(er);
+		
+//		System.out.println(er.measurement_method);
+		
 		if (Test_organisms_species != null)
 			er.experimental_parameters.put("species", this.Test_organisms_species);
 		if (this.Strain != null)
 			er.experimental_parameters.put("Strain", this.Strain);
+
 		if (this.GLP_compliance != null)
 			er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
-		if (this.Details_on_results != null)
+
+		if (this.Details_on_results != null) {
 			er.experimental_parameters.put("Biodegradation records", this.Details_on_results);
+//			System.out.println(er.casrn+"\t"+Details_on_results);
+		}
+		
+
 		if (this.Endpoint != null)
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(this.Endpoint));
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+					WordUtils.capitalizeFully(this.Endpoint));
 
 		addNewExperimentalParameters(er);
 
@@ -662,19 +699,22 @@ public class RecordQSAR_ToolBox {
 
 				}
 
+			} else if (EndpointPath
+					.equals("Environmental Fate and Transport#Biodegradation#in water: screening tests")) {
+				handleBiodegWaterScreening(er,pqt);
 			} else if (EndpointPath.equals("Human Health Hazards#Acute Toxicity")) {
 				setUnitsAcute(er);
-				setPropertyValues(er);
+				setPropertyValues(er,true);
 				setPropertyNameAcuteToxicity(er);
 				unitConverter.convertRecord(er);
 			} else if (EndpointPath.equals("Physical Chemical Properties#Partition Coefficient:#N-Octanol/Water")) {
 				er.property_name = ExperimentalConstants.strLogKOW;
-				setPropertyValues(er);
+				setPropertyValues(er,true);
 				setPropertyValueLogKow(er);
 				setExperimentalParameters(er);
 			} else if (EndpointPath.equals("Physical Chemical Properties#Water solubility")) {
 				er.property_name = ExperimentalConstants.strWaterSolubility;
-				setPropertyValues(er);
+				setPropertyValues(er, true);
 				setPropertyValueWS(er);
 				setExperimentalParameters(er);
 
@@ -683,12 +723,11 @@ public class RecordQSAR_ToolBox {
 
 				handleKoc(er);
 
-			} else if (EndpointPath
-					.equals("Environmental Fate and Transport#Biodegradation#in water: screening tests")) {
-				handleBiodegWaterScreening(er);
-
 			} else if (EndpointPath.equals("Environmental Fate and Transport#Bioaccumulation#aquatic / sediment")) {
-				
+
+				System.out.println("Need to handle EndpointPath=" + EndpointPath);
+				return null;
+
 			} else {
 				System.out.println("Need to handle EndpointPath=" + EndpointPath);
 				return null;
@@ -711,7 +750,9 @@ public class RecordQSAR_ToolBox {
 			}
 		}
 
+
 		er.date_accessed = lastUpdated;
+				
 		return er;
 	}
 
@@ -748,7 +789,7 @@ public class RecordQSAR_ToolBox {
 	private void handleKoc(ExperimentalRecord er) {
 
 		setExperimentalParameters(er);
-		setPropertyValues(er);
+		setPropertyValues(er, true);
 
 		final double cutoff = 8.0;
 		final boolean exceedsCutoff = haveValueExceedingLogKocCutoff(er, cutoff);
@@ -917,16 +958,76 @@ public class RecordQSAR_ToolBox {
 		return false;
 	}
 
-	private void handleBiodegWaterScreening(ExperimentalRecord er) {
 
-		er.property_name = ExperimentalConstants.strRBIODEG;
+	private void handleBiodegWaterScreening(ExperimentalRecord er,ParseQSAR_ToolBox pqt) {
+
+		er.property_name = pqt.propertyName;
+//		er.source_name=pqt.sourceName+"_"+pqt.fileDate;
+		er.source_name=pqt.sourceName;
+		lastUpdated=pqt.fileDate;
+		
+		if(this.Details_on_results!=null) {
+			if(Details_on_results.toLowerCase().contains("biowin")) {
+				er.keep=false;
+				er.updateReason("possible BIOWIN estimation");
+			}
+		}
+		
+		
+//		er.experimental_parameters.put("Biodegradation records", this.convertRecordsDegradationToString());
+		
+		if(Reliability!=null)
+			er.experimental_parameters.put("Reliability", this.Reliability);
+
+		if (GLP_compliance != null) {
+			er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
+		
+			if (omitBasedOnGLPCompliance) {
+//				if (!this.GLP_compliance.startsWith("yes")) {
+				if (this.GLP_compliance.equals("no")) {	
+					// if(!BiodegradationPropertyValues.isValidGuidelineCompliance(GLP_compliance))
+					// {
+					er.keep = false;
+					er.updateReason("GLP compliance = " + this.GLP_compliance);
+//					System.out.println(er.casrn+"\tGLP compliance = " + this.GLP_compliance);
+				}
+			}
+		}
+		
+		if(!er.original_source_name.equals("Biodegradation NITE")) {
+			if (this.Oxygen_conditions != null) {
+				er.experimental_parameters.put("Oxygen conditions", this.Oxygen_conditions);
+				if (!this.Oxygen_conditions.startsWith("aerobic")) {
+					er.keep = false;
+					er.updateReason("Oxygen conditions = " + this.Oxygen_conditions);
+				}
+			} else {
+				er.keep = false;
+				er.updateReason("Oxygen conditions is N/A");
+			}
+		}
+		
+		
+//		System.out.println(this.Interpretation_Of_Results);
+
+		if (this.Interpretation_of_results != null) {
+			
+			if(this.Interpretation_of_results.equals("Other Interpretation of results")) {
+				this.Interpretation_of_results = Interpretation_of_results_other;
+			}
+					
+			er.experimental_parameters.put("Interpretation of results", this.Interpretation_of_results);
+		}
+		
 		er.property_value_units_original = ExperimentalConstants.str_dimensionless;
 
-		setPropertyValues(er);
+		setPropertyValues(er,false);
 
-		if (this.Oxygen_conditions != null)
-			er.experimental_parameters.put("Oxygen conditions", this.Oxygen_conditions);
-
+		if(er.measurement_method==null) {
+			er.keep = false;
+			er.updateReason("measurement method is missing");
+		}
+				
 		Double duration = getDuration();
 
 		if (duration == null) {
@@ -946,30 +1047,65 @@ public class RecordQSAR_ToolBox {
 			er.property_value_string = er.property_value_string.replace("Dimensionless", "% degradation");
 			// TODO add duration and the interpretation of results
 		}
+			
+		er.experimental_parameters.remove(ExperimentalConstants.expParamGuideline);
+		er.experimental_parameters.remove(ExperimentalConstants.expParamMeasurementMethod);
+		
+		if (this.Test_guideline != null) {
 
-		if (er.experimental_parameters.containsKey(ExperimentalConstants.expParamGuideline)) {
-			String strGuidelines = (String) er.experimental_parameters.get(ExperimentalConstants.expParamGuideline);
-			if (!strGuidelines.contains("301 F")) {
+			er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline);
+
+			if (!this.Test_guideline.contains(pqt.outputTestGuideline)) {
 				er.keep = false;
 				er.updateReason("wrong guideline");
+//				System.out.println(this.Test_guideline+"\t"+outputTestGuideline);
+			} else {
+				
+				BiodegradationPropertyValues.methods.add(er.measurement_method);
+
+				
+				if (pqt.outputTestGuideline.equals(ExperimentalConstants.str301F)
+						&& !BiodegradationPropertyValues.OECD301Classifier.isValidFor301F(er.measurement_method)) {
+					er.keep = false;
+					er.updateReason(er.measurement_method + " is not valid for " + pqt.outputTestGuideline);
+				} else if (pqt.outputTestGuideline.equals(ExperimentalConstants.str301C)
+						&& !BiodegradationPropertyValues.OECD301Classifier.isValidFor301C(er.measurement_method)) {
+					er.keep = false;
+					er.updateReason(er.measurement_method + " is not valid for " + pqt.outputTestGuideline);
+				}
 			}
 		} else {
 			er.keep = false;
 			er.updateReason("guideline unavailable");
 		}
+		
+//		System.out.println(er.casrn +"\t"+er.experimental_parameters.get(ExperimentalConstants.expParamGuideline));
 
-		if (Endpoint == null || (!Endpoint.contains("% degradation (O2 consumption)")
-				&& !Endpoint.contains("% degradation (ThOD)"))) {
-			er.keep = false;
-			er.updateReason("Endpoint=" + Endpoint + " (not O2 consumption or ThOD");
+		
+		if (Title != null) {
+			er.document_name = Title;
+			if (Year != null) {
+				try {
+					er.document_name += " " + df.format(Double.parseDouble(Year));
+				} catch (Exception ex) {
+					er.document_name += " " + Year;
+					System.out.println(er.document_name);
+				}
+			}
 		}
-
+				
+		if(!this.Value_Unit.equals("%")) {
+			System.out.println(this.Endpoint+"\t"+Value_Unit+"\tNot % units!");
+			er.keep=false;
+			er.reason="Units = "+Value_Unit;
+		}
+		
 		if (er.keep) {
 			Estimate estimate = getDegradationEstimate();
-			String outputMode = ExperimentalConstants.str_binary;// TODO pass as parameter
-			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
-			addMetadata(er);
+			BiodegradationPropertyValues.setPropertyValues(er, estimate, duration, this.Interpretation_of_results);
 		}
+		
+
 	}
 
 	private Double getDuration() {
@@ -1009,42 +1145,79 @@ public class RecordQSAR_ToolBox {
 		return duration;
 	}
 
+//	private Estimate getDegradationEstimate() {
+//
+//		Estimate estimate = new Estimate();
+//		
+//		if (Value_MeanValue != null) {
+//			if (Value_Qualifier == null || Value_Qualifier.equals("ca.")) {
+//				estimate.point = Double.parseDouble(Value_MeanValue);
+//			} else if (Value_Qualifier.equals("<") || Value_Qualifier.equals("\u2264")) { // ≤
+//				estimate.max = Double.parseDouble(Value_MeanValue);
+//			} else if (Value_Qualifier.equals(">") || Value_Qualifier.equals("\u2265")) { // ≥
+//				estimate.min = Double.parseDouble(Value_MeanValue);
+//			} else {
+//				System.out.println(
+//						this.CAS_Number + "\t" + Value_Qualifier + "\t" + Value_MinValue + "\t" + Value_MaxValue);
+//			}
+//		}
+//
+//		if (Value_MinValue != null) {
+//			estimate.min = Double.parseDouble(Value_MinValue);
+//		}
+//
+//		if (Value_MaxValue != null) {
+//			estimate.max = Double.parseDouble(Value_MaxValue);
+//		}
+//		return estimate;
+//	}
+	
+	
 	private Estimate getDegradationEstimate() {
-
 		Estimate estimate = new Estimate();
 
-		if (Value_MeanValue != null) {
-			if (Value_Qualifier == null || Value_Qualifier.equals("ca.")) {
-				estimate.point = Double.parseDouble(Value_MeanValue);
-			} else if (Value_Qualifier.equals("<") || Value_Qualifier.equals("\u2264")) { // ≤
-				estimate.max = Double.parseDouble(Value_MeanValue);
-			} else if (Value_Qualifier.equals(">") || Value_Qualifier.equals("\u2265")) { // ≥
-				estimate.min = Double.parseDouble(Value_MeanValue);
+		// 1. Guard against null or non-percentage units (prevents mg O2/L from being treated as %)
+		if (this.Value_Unit == null || !this.Value_Unit.trim().equals("%")) {
+			System.out.println(this.Endpoint + "\t" + Value_Unit + "\tNot % units!");
+			return estimate; // Returns empty estimate so record is rejected cleanly
+		}
+
+		if (Value_MeanValue != null && !Value_MeanValue.trim().isEmpty()) {
+			double meanVal = Double.parseDouble(Value_MeanValue.trim());
+			String qual = (Value_Qualifier == null) ? "" : Value_Qualifier.trim();
+
+			if (qual.isEmpty() || qual.equals("ca.") || qual.equals("ca") || qual.equals("~") || qual.equals("approx.")) {
+				estimate.point = meanVal;
+			} else if (qual.equals("<") || qual.equals("\u2264")) { // < or ≤
+				estimate.max = meanVal;
+			} else if (qual.equals(">") || qual.equals("\u2265")) { // > or ≥
+				estimate.min = meanVal;
 			} else {
 				System.out.println(
-						this.CAS_Number + "\t" + Value_Qualifier + "\t" + Value_MinValue + "\t" + Value_MaxValue);
+						this.CAS_Number + "\tUnhandled qualifier: " + Value_Qualifier + "\t" + Value_MinValue + "\t" + Value_MaxValue);
 			}
 		}
 
-		if (Value_MinValue != null) {
-			estimate.min = Double.parseDouble(Value_MinValue);
+		if (Value_MinValue != null && !Value_MinValue.trim().isEmpty() && estimate.min == null) {
+			estimate.min = Double.parseDouble(Value_MinValue.trim());
 		}
 
-		if (Value_MaxValue != null) {
-			estimate.max = Double.parseDouble(Value_MaxValue);
+		if (Value_MaxValue != null && !Value_MaxValue.trim().isEmpty() && estimate.max == null) {
+			estimate.max = Double.parseDouble(Value_MaxValue.trim());
 		}
+
 		return estimate;
 	}
 
 	private Integer setBinaryScoreFromInterpretationOfResults(ExperimentalRecord er) {
 
-		if (Interpretation_Of_Results == null) {
+		if (Interpretation_of_results == null) {
 			return null;
 		}
 
-		if (this.Interpretation_Of_Results.equals("Other Interpretation of results")) {
+		if (this.Interpretation_of_results.equals("Other Interpretation of results")) {
 
-			String interpretationOther = this.Interpretation_Of_Results_other.toLowerCase();
+			String interpretationOther = this.Interpretation_of_results_other.toLowerCase();
 
 			if (interpretationOther.equals("does not meet the criteria for ready biodegradability")
 					|| interpretationOther.contains("not readily biodegradable")
@@ -1055,13 +1228,13 @@ public class RecordQSAR_ToolBox {
 				return null;
 			}
 
-		} else if (this.Interpretation_Of_Results.equals("readily biodegradable")
-				|| this.Interpretation_Of_Results.equals("readily biodegradable, but failing 10-day window")) {
+		} else if (this.Interpretation_of_results.equals("readily biodegradable")
+				|| this.Interpretation_of_results.equals("readily biodegradable, but failing 10-day window")) {
 			return 1;
 
-		} else if (this.Interpretation_Of_Results.equals("not readily biodegradable")
-				|| this.Interpretation_Of_Results.equals("under test conditions no biodegradation observed")
-				|| this.Interpretation_Of_Results.equals("not inherently biodegradable")) {
+		} else if (this.Interpretation_of_results.equals("not readily biodegradable")
+				|| this.Interpretation_of_results.equals("under test conditions no biodegradation observed")
+				|| this.Interpretation_of_results.equals("not inherently biodegradable")) {
 			return 0;
 		} else {
 			// System.out.println(er.chemical_name+"\t"+
@@ -1139,6 +1312,15 @@ public class RecordQSAR_ToolBox {
 			}
 		} else if (this.Endpoint != null) {
 			er.measurement_method = this.Endpoint;
+			
+			
+			if(this.Endpoint.equals("Other Endpoint")) {
+				er.measurement_method=this.Endpoint_other;
+			}
+			
+//			System.out.println(Endpoint+"\t"+Endpoint_other+"\t"+er.measurement_method);
+
+			
 		} else {
 //					System.out.println("here4\t"+er.casrn+"\t"+Type_of_method+"\t"+Type_of_method_other);
 		}
@@ -1561,6 +1743,7 @@ public class RecordQSAR_ToolBox {
 
 		if (strGuidelinesQualifiers != null && strGuidelinesQualifiers.length() > 0) {
 			String guideline = BCFUtilities.TestGuidelineFormatter.normalizeTestGuideline(strGuidelinesQualifiers);
+
 			if (guideline != null && guideline.length() > 0) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, guideline);
 			}
@@ -1596,38 +1779,39 @@ public class RecordQSAR_ToolBox {
 		return false;
 	}
 
-	private void setPropertyValues(ExperimentalRecord er) {
-		
-		//2026-06-26, for some reason the character encoding is now causing problems so quick fix:
+	private void setPropertyValues(ExperimentalRecord er,boolean checkQualifier) {
+
+		// 2026-06-26, for some reason the character encoding is now causing problems so
+		// quick fix:
 		Value_MeanValue = TextUtilities.fixMojibake(Value_MeanValue);
 		Value_MinValue = TextUtilities.fixMojibake(Value_MinValue);
 		Value_MaxValue = TextUtilities.fixMojibake(Value_MaxValue);
 		Qualifier = TextUtilities.fixMojibake(Qualifier);
 
-		String infStr = "\u221E";  
-		
+		String infStr = "\u221E";
+
 		if (this.Value_MinValue != null && this.Original_value_MaxValue != null) {
-			
-			if(Value_MinValue.contains(infStr) || Value_MaxValue.contains(infStr)) {
-				er.keep=false;
+
+			if (Value_MinValue.contains(infStr) || Value_MaxValue.contains(infStr)) {
+				er.keep = false;
 				er.updateReason("Property value is infinite");
 				return;
 			}
-			
+
 			try {
 				er.property_value_min_original = Double.parseDouble(this.Value_MinValue);
 			} catch (Exception ex) {
-				System.out.println("Row "+Row+", error parsing min value: "+Value_MinValue);
-				er.keep=false;
-				er.reason="Could not parse min value";
+				System.out.println("Row " + Row + ", error parsing min value: " + Value_MinValue);
+				er.keep = false;
+				er.reason = "Could not parse min value";
 				return;
 			}
 			try {
 				er.property_value_max_original = Double.parseDouble(this.Value_MaxValue);
 			} catch (Exception ex) {
-				System.out.println("Row "+Row+", error parsing max value: "+Value_MaxValue);
-				er.keep=false;
-				er.reason="Could not parse max value";
+				System.out.println("Row " + Row + ", error parsing max value: " + Value_MaxValue);
+				er.keep = false;
+				er.reason = "Could not parse max value";
 				return;
 			}
 
@@ -1637,9 +1821,9 @@ public class RecordQSAR_ToolBox {
 			// System.out.println(er.property_value_min_original+"\t"+er.property_value_max_original);
 
 		} else if (this.Value_MinValue != null) {
-			
-			if(Value_MinValue.contains(infStr)) {
-				er.keep=false;
+
+			if (Value_MinValue.contains(infStr)) {
+				er.keep = false;
 				er.updateReason("Property value is infinite");
 				return;
 			}
@@ -1649,20 +1833,19 @@ public class RecordQSAR_ToolBox {
 			// System.out.println(er.property_value_min_original);
 
 		} else if (this.Value_MaxValue != null) {
-			
-			if(Value_MaxValue.contains(infStr)) {
-				er.keep=false;
+
+			if (Value_MaxValue.contains(infStr)) {
+				er.keep = false;
 				er.updateReason("Property value is infinite");
 				return;
 			}
-			
+
 			er.property_value_max_original = Double.parseDouble(this.Value_MaxValue);
 			// System.out.println(er.property_value_max_original);
 			er.property_value_string = "< " + Parse.formatValue(er.property_value_max_original);
 
 		} else if (this.Value_MeanValue != null) {
 
-			
 			if (Value_MeanValue.contains(infStr)) {
 				er.keep = false;
 				er.reason = "Infinite property value";
@@ -1681,21 +1864,19 @@ public class RecordQSAR_ToolBox {
 				return;
 			}
 
-			
 			try {
 				er.property_value_point_estimate_original = Double.parseDouble(this.Value_MeanValue);
 			} catch (Exception ex) {
-				System.out.println("Row "+Row+", error parsing Value_MeanValue: "+Value_MeanValue);
-				er.keep=false;
-				er.reason="Could not parse Value_MeanValue";
+				System.out.println("Row " + Row + ", error parsing Value_MeanValue: " + Value_MeanValue);
+				er.keep = false;
+				er.reason = "Could not parse Value_MeanValue";
 				return;
 			}
-			
+
 			er.property_value_string = "";
 
 			
-
-			if (this.Qualifier != null) {
+			if (this.Qualifier != null && checkQualifier) {
 
 				if (Qualifier.contentEquals("No qualifier")) {
 					er.property_value_numeric_qualifier = null;
@@ -1718,16 +1899,13 @@ public class RecordQSAR_ToolBox {
 					er.property_value_numeric_qualifier = "\u2264"; // ≤
 				} else if (Qualifier.contentEquals("\u2265")) { // ≥
 					er.property_value_numeric_qualifier = "\u2265"; // ≥
-
 				} else {
-					System.out.println("Row "+this.Row+", Unhandled qualifier:\t" + this.Qualifier);
-					
+					System.out.println("Row " + this.Row + ", Unhandled qualifier:\t" + this.Qualifier);
+
 					System.out.println("Qualifier = [" + Qualifier + "]");
-					Qualifier.codePoints().forEach(cp ->
-					    System.out.printf("U+%04X ", cp)
-					);
+					Qualifier.codePoints().forEach(cp -> System.out.printf("U+%04X ", cp));
 					System.out.println();
-					
+
 				}
 
 				// System.out.println("here:"+er.property_value_numeric_qualifier);
@@ -2108,12 +2286,12 @@ public class RecordQSAR_ToolBox {
 
 			double conversionNumerator = 1.0;
 			if (unitStrings[0].contains("mg")) {
-				conversionNumerator = 1/1000.0;
+				conversionNumerator = 1 / 1000.0;
 			} else if (unitStrings[0].contains("µg")) {
-				conversionNumerator = 1/1000000.0;
+				conversionNumerator = 1 / 1000000.0;
 			}
 
-			double conversionDenominator = (unitStrings[1].contains("kg")) ? 1/1000.0 : 1.0;
+			double conversionDenominator = (unitStrings[1].contains("kg")) ? 1 / 1000.0 : 1.0;
 
 			double valueDouble = Double.parseDouble(value);
 			valueDouble = valueDouble * conversionNumerator * conversionDenominator * 100.0;
@@ -2126,7 +2304,8 @@ public class RecordQSAR_ToolBox {
 
 	private void addNewExperimentalParameters(ExperimentalRecord er) {
 		// Water type (freshwater vs saltwater)
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()
+				&& !this.Water_media_type.equalsIgnoreCase("not specified")) {
 			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
 				this.Water_media_type = "freshwater";
 			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
@@ -2135,7 +2314,8 @@ public class RecordQSAR_ToolBox {
 				this.Water_media_type = "marine";
 			}
 
-			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type.toLowerCase().trim());
+			er.experimental_parameters.put(ExperimentalConstants.expParamMediaType,
+					this.Water_media_type.toLowerCase().trim());
 		}
 
 		// Test location (lab vs field)
@@ -2147,19 +2327,24 @@ public class RecordQSAR_ToolBox {
 				if (Test_type.toLowerCase().contains("semi")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, "Renewal");
 				} else {
-					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, WordUtils.capitalizeFully(Test_type));
+					er.experimental_parameters.put(ExperimentalConstants.expParamExposureType,
+							WordUtils.capitalizeFully(Test_type));
 				}
 			}
 		}
 
 		// Wet/Dry measurement (Wet vs Dry)
-		if (this.Database != null && List.of(ExperimentalConstants.sourceNite, ExperimentalConstants.sourceCefic, ExperimentalConstants.sourceCanada).contains(this.Database)) {
+		if (this.Database != null && List.of(ExperimentalConstants.sourceNite, ExperimentalConstants.sourceCefic,
+				ExperimentalConstants.sourceCanada).contains(this.Database)) {
 			if (this.Test_specificity != null && !this.Test_specificity.isEmpty()) {
-				if (this.Test_specificity.toLowerCase().contains("wet") && !this.Test_specificity.toLowerCase().contains("dry")) {
+				if (this.Test_specificity.toLowerCase().contains("wet")
+						&& !this.Test_specificity.toLowerCase().contains("dry")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-				} else if (this.Test_specificity.toLowerCase().contains("dry") && !this.Test_specificity.toLowerCase().contains("wet")) {
+				} else if (this.Test_specificity.toLowerCase().contains("dry")
+						&& !this.Test_specificity.toLowerCase().contains("wet")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-				} else if (this.Test_specificity.toLowerCase().contains("wet") && this.Test_specificity.toLowerCase().contains("dry")) {
+				} else if (this.Test_specificity.toLowerCase().contains("wet")
+						&& this.Test_specificity.toLowerCase().contains("dry")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
 				}
 			}
@@ -2167,30 +2352,13 @@ public class RecordQSAR_ToolBox {
 			Boolean dryBoolean = false;
 			Boolean wetBoolean = false;
 
-			List<String> fields = new ArrayList<>(Arrays.asList(
-				this.Basis_for_the_BCF,
-				this.Basis_for_the_BCF_other,
-				this.Details_on_results,
-				this.Conclusions
-			));
+			List<String> fields = new ArrayList<>(Arrays.asList(this.Basis_for_the_BCF, this.Basis_for_the_BCF_other,
+					this.Details_on_results, this.Conclusions));
 			fields.removeIf(Objects::isNull);
 
-			List<String> dryTerms = List.of(
-				"d.w",
-				"dry weight",
-				"dry wt",
-				"dried seaweed",
-				"dw",
-				"dry"
-			);
+			List<String> dryTerms = List.of("d.w", "dry weight", "dry wt", "dried seaweed", "dw", "dry");
 
-			List<String> wetTerms = List.of(
-				"w.w",
-				"wet weight",
-				"wet wt",
-				"ww",
-				"wet"
-			);
+			List<String> wetTerms = List.of("w.w", "wet weight", "wet wt", "ww", "wet");
 
 			for (String field : fields) {
 				if (field != null && !field.isEmpty()) {
@@ -2213,72 +2381,83 @@ public class RecordQSAR_ToolBox {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
 			} else if (dryBoolean && wetBoolean) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet and Dry");
-				er.updateNote("Might need to check if the original record is specified properly as wet weight or dry weight");
+				er.updateNote(
+						"Might need to check if the original record is specified properly as wet weight or dry weight");
 			}
 
 			// if (this.Basis_for_the_BCF != null) {
-			// 	if (this.Basis_for_the_BCF.toLowerCase().contains("w.w")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-			// 		// dryWetBoolean = true;
-			// 		wetBoolean = true;
-			// 	}
-			// 	if (this.Basis_for_the_BCF.toLowerCase().contains("d.w")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-			// 		// dryWetBoolean = true;
-			// 		dryBoolean = true;
-			// 	}
+			// if (this.Basis_for_the_BCF.toLowerCase().contains("w.w")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Wet");
+			// // dryWetBoolean = true;
+			// wetBoolean = true;
+			// }
+			// if (this.Basis_for_the_BCF.toLowerCase().contains("d.w")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Dry");
+			// // dryWetBoolean = true;
+			// dryBoolean = true;
+			// }
 			// }
 
 			// if (this.Basis_for_the_BCF_other != null) {
-			// 	if (this.Basis_for_the_BCF_other.toLowerCase().contains("w.w")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-			// 		// dryWetBoolean = true;
-			// 		wetBoolean = true;
-			// 	}
-			// 	if (this.Basis_for_the_BCF_other.toLowerCase().contains("d.w")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-			// 		// dryWetBoolean = true;
-			// 		dryBoolean = true;
-			// 	}
+			// if (this.Basis_for_the_BCF_other.toLowerCase().contains("w.w")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Wet");
+			// // dryWetBoolean = true;
+			// wetBoolean = true;
+			// }
+			// if (this.Basis_for_the_BCF_other.toLowerCase().contains("d.w")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Dry");
+			// // dryWetBoolean = true;
+			// dryBoolean = true;
+			// }
 			// }
 
 			// if (this.Details_on_results != null) {
-			// 	if (this.Details_on_results.toLowerCase().contains("dry")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-			// 		// dryWetBoolean = true;
-			// 		dryBoolean = true;
-			// 	}
-			// 	if (this.Details_on_results.toLowerCase().contains("wet")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-			// 		// dryWetBoolean = true;
-			// 		wetBoolean = true;
-			// 	}
+			// if (this.Details_on_results.toLowerCase().contains("dry")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Dry");
+			// // dryWetBoolean = true;
+			// dryBoolean = true;
+			// }
+			// if (this.Details_on_results.toLowerCase().contains("wet")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Wet");
+			// // dryWetBoolean = true;
+			// wetBoolean = true;
+			// }
 			// }
 
 			// if (this.Conclusions != null) {
-			// 	if (this.Conclusions.toLowerCase().contains("dry")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Dry");
-			// 		// dryWetBoolean = true;
-			// 		dryBoolean = true;
-			// 	}
-			// 	if (this.Conclusions.toLowerCase().contains("wet")) {
-			// 		// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Wet");
-			// 		// dryWetBoolean = true;
-			// 		wetBoolean = true;
-			// 	}
+			// if (this.Conclusions.toLowerCase().contains("dry")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Dry");
+			// // dryWetBoolean = true;
+			// dryBoolean = true;
+			// }
+			// if (this.Conclusions.toLowerCase().contains("wet")) {
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamWetDry,
+			// "Wet");
+			// // dryWetBoolean = true;
+			// wetBoolean = true;
+			// }
 			// }
 
 			// if (!dryWetBoolean) {
-			// 	er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not Specified");
+			// er.experimental_parameters.put(ExperimentalConstants.expParamWetDry, "Not
+			// Specified");
 			// }
 		}
-		
+
 		// Lipid concentration (% lipid)
 		String lipidContentMax = null;
 		String lipidContentMin = null;
 		String lipidContentMean = null;
 		String lipidContentUnit = null;
-		if (this.Lipid_content_Unit != null && !this.Lipid_content_Unit.isEmpty() && !this.Lipid_content_Unit.equalsIgnoreCase("Published Data")) {
+		if (this.Lipid_content_Unit != null && !this.Lipid_content_Unit.isEmpty()
+				&& !this.Lipid_content_Unit.equalsIgnoreCase("Published Data")) {
 			lipidContentMax = this.Lipid_content_MaxValue;
 			lipidContentMin = this.Lipid_content_MinValue;
 			lipidContentMean = this.Lipid_content_MeanValue;
@@ -2297,7 +2476,8 @@ public class RecordQSAR_ToolBox {
 				if (lipidMatcher.find()) {
 					lipidContentMean = lipidMatcher.group(1);
 					lipidContentUnit = "%";
-					// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent, lipidString);
+					// er.experimental_parameters.put(ExperimentalConstants.expParamLipidPercent,
+					// lipidString);
 				}
 			}
 		}
@@ -2322,30 +2502,38 @@ public class RecordQSAR_ToolBox {
 
 			er.parameter_values.add(pv);
 		}
-		
+
 		// Method (SS vs kinetic)
 		if (this.Calculation_basis != null && !this.Calculation_basis.isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(this.Calculation_basis));
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+					WordUtils.capitalizeFully(this.Calculation_basis));
 		}
-		
+
 		// Exposure duration (Quantiative exposure duration)
 		if (this.Duration_Unit != null && !this.Duration_Unit.isEmpty()) {
-			if (this.Duration_MaxValue != null && !this.Duration_MaxValue.isEmpty() && this.Duration_MinValue != null && !this.Duration_MinValue.isEmpty()) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration, this.Duration_MinValue + " - " + this.Duration_MaxValue + " " + this.Duration_Unit);
+			if (this.Duration_MaxValue != null && !this.Duration_MaxValue.isEmpty() && this.Duration_MinValue != null
+					&& !this.Duration_MinValue.isEmpty()) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration,
+						this.Duration_MinValue + " - " + this.Duration_MaxValue + " " + this.Duration_Unit);
 			} else if (this.Duration_MeanValue != null && !this.Duration_MeanValue.isEmpty()) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration, this.Duration_MeanValue + " " + this.Duration_Unit);
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration,
+						this.Duration_MeanValue + " " + this.Duration_Unit);
 			} else if (this.Duration_MinValue != null && !this.Duration_MinValue.isEmpty()) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration, "> " + this.Duration_MinValue + " " + this.Duration_Unit);
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration,
+						"> " + this.Duration_MinValue + " " + this.Duration_Unit);
 			} else if (this.Duration_MaxValue != null && !this.Duration_MaxValue.isEmpty()) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration, "< " + this.Duration_MaxValue + " " + this.Duration_Unit);
+				er.experimental_parameters.put(ExperimentalConstants.expParamExposureDuration,
+						"< " + this.Duration_MaxValue + " " + this.Duration_Unit);
 			}
 		}
-		
+
 		// Tissue type (whole body, organ, lipid)
 		String tissueType = null;
-		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty() && !this.Basis_for_the_BCF.toLowerCase().contains("other")) {
+		if (this.Basis_for_the_BCF != null && !this.Basis_for_the_BCF.isEmpty()
+				&& !this.Basis_for_the_BCF.toLowerCase().contains("other")) {
 			tissueType = this.Basis_for_the_BCF;
-		} else if (this.Basis_for_the_BCF_other != null && !this.Basis_for_the_BCF_other.isEmpty() && !this.Basis_for_the_BCF_other.toLowerCase().contains("other")) {
+		} else if (this.Basis_for_the_BCF_other != null && !this.Basis_for_the_BCF_other.isEmpty()
+				&& !this.Basis_for_the_BCF_other.toLowerCase().contains("other")) {
 			tissueType = this.Basis_for_the_BCF_other;
 		} else if (this.Tissue_analyzed != null && !this.Tissue_analyzed.isEmpty()) {
 			tissueType = this.Tissue_analyzed;
@@ -2356,10 +2544,7 @@ public class RecordQSAR_ToolBox {
 		String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(tissueType, er);
 		if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
 			// Only put in the properly cleaned and formatted response site values
-			er.experimental_parameters.put(
-				ExperimentalConstants.expParamResponseSite,
-				responseSiteFinal
-			);
+			er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, responseSiteFinal);
 		}
 
 		// Temperature and pH
@@ -2367,9 +2552,11 @@ public class RecordQSAR_ToolBox {
 
 		// Handle propagation of assumed guideline information
 		if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline) != null) {
-			if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).equals(ExperimentalConstants.guidelineOecd305)) {
+			if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline)
+					.equals(ExperimentalConstants.guidelineOecd305)) {
 				BCFUtilities.setOecd305Parameters(er);
-			} else if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).toString().contains("850.1730")) {
+			} else if (er.experimental_parameters.get(ExperimentalConstants.expParamGuideline).toString()
+					.contains("850.1730")) {
 				BCFUtilities.setOecd305Parameters(er);
 				er.updateNote("OPPTS 850.1730 guideline assumed to be similar enough to OECD 305 to update parameters");
 			}
@@ -2384,8 +2571,7 @@ public class RecordQSAR_ToolBox {
 		} else if (Database.equals("Bioaccumulation fish CEFIC LRI")) {
 			setObservationDuration(er);
 
-			if (this.Reliability_score.contains("3")
-					|| this.Reliability_score.contains("4")) {
+			if (this.Reliability_score.contains("3") || this.Reliability_score.contains("4")) {
 				er.keep = false;
 				er.reason = "Insufficient reliability";
 			} else {
@@ -2395,9 +2581,10 @@ public class RecordQSAR_ToolBox {
 				er.note = Comments;
 			}
 			er.reference = Reference_source;
-			
-			if (Water_type!=null && !Water_type.isEmpty() && !Water_type.equalsIgnoreCase("not specified")) {
-				Water_type=Water_type.toLowerCase().replace("fresh water", "freshwater").replace("salt water", "saltwater").trim();
+
+			if (Water_type != null && !Water_type.isEmpty() && !Water_type.equalsIgnoreCase("not specified")) {
+				Water_type = Water_type.toLowerCase().replace("fresh water", "freshwater")
+						.replace("salt water", "saltwater").trim();
 				if (Water_type.equalsIgnoreCase("fresh water")) {
 					Water_type = "freshwater";
 				} else if (Water_type.equalsIgnoreCase("natural water: freshwater")) {
@@ -2408,14 +2595,14 @@ public class RecordQSAR_ToolBox {
 
 				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type);
 			}
-			
+
 			// er.experimental_parameters.put("Tissue", Organ);
 			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, Test_organisms_species);
 			er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, Species_common_name);
 
 //			setTemperature(er);
 			// TemperatureCondition.getTemperatureCondition(er, Temperature);
-			
+
 			// setpH(er);
 			if (Statistics != null) {
 				er.note = Statistics;
@@ -2438,7 +2625,8 @@ public class RecordQSAR_ToolBox {
 			setObservationDuration(er);
 
 			// Water concentration (Quantitative water concentration)
-			if (this.Exposure_concentration_MeanValue != null && !this.Exposure_concentration_MeanValue.isEmpty() && this.Exposure_concentration_Unit != null && !this.Exposure_concentration_Unit.isEmpty()) {
+			if (this.Exposure_concentration_MeanValue != null && !this.Exposure_concentration_MeanValue.isEmpty()
+					&& this.Exposure_concentration_Unit != null && !this.Exposure_concentration_Unit.isEmpty()) {
 				ParameterValue pv = new ParameterValue();
 				pv.parameter.name = ExperimentalConstants.expParamWaterConcentration;
 				pv.unit.abbreviation = ExperimentalConstants.str_g_L;
@@ -2453,6 +2641,25 @@ public class RecordQSAR_ToolBox {
 					System.out.println("Unhandled water concentration unit: " + this.Exposure_concentration_Unit);
 				}
 				er.parameter_values.add(pv);
+			}
+
+			if (Water_type != null && !Water_type.isEmpty() && !Water_type.equalsIgnoreCase("not specified")) {
+//				System.out.println(Water_type);
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type);
+			}
+
+			if (this.Water_media_type != null && !this.Water_media_type.isEmpty()
+					&& !this.Water_media_type.equalsIgnoreCase("not specified")) {
+				if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
+					this.Water_media_type = "freshwater";
+				} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
+					this.Water_media_type = "freshwater";
+				} else if (this.Water_media_type.equalsIgnoreCase("natural water: marine")) {
+					this.Water_media_type = "marine";
+				}
+				System.out.println(this.Water_media_type);
+
+				er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, this.Water_media_type);
 			}
 
 			if (Test_guideline != null) {
@@ -2474,15 +2681,18 @@ public class RecordQSAR_ToolBox {
 			er.publicSourceOriginal.description = "National Institute of Technology and Evaluation (Japan)";
 
 			// if (Tissue_analyzed != null) {
-			// 	er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Water_type.toLowerCase().trim());
-			// 	// er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, Tissue_analyzed.toLowerCase().trim());
-			// 	String responseSiteFinal = BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(Tissue_analyzed);
-			// 	if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
-			// 		er.experimental_parameters.put(
-			// 			ExperimentalConstants.expParamResponseSite,
-			// 			responseSiteFinal
-			// 		);
-			// 	}
+			// er.experimental_parameters.put(ExperimentalConstants.expParamMediaType,
+			// Water_type.toLowerCase().trim());
+			// // er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite,
+			// Tissue_analyzed.toLowerCase().trim());
+			// String responseSiteFinal =
+			// BCFUtilities.ResponseSiteFormatter.normalizeResponseSite(Tissue_analyzed);
+			// if (responseSiteFinal != null && !responseSiteFinal.isEmpty()) {
+			// er.experimental_parameters.put(
+			// ExperimentalConstants.expParamResponseSite,
+			// responseSiteFinal
+			// );
+			// }
 			er.updateNote(Statistics);
 			// }
 		} else if (Database.equals("ECHA REACH")) {
@@ -2534,7 +2744,8 @@ public class RecordQSAR_ToolBox {
 		} else {
 			if (Test_guideline_0 != null) {
 				if (Test_guideline_0.toLowerCase().contains("other test guideline")) {
-					String guideline = BCFUtilities.TestGuidelineFormatter.normalizeTestGuideline(Test_guideline_other_0);
+					String guideline = BCFUtilities.TestGuidelineFormatter
+							.normalizeTestGuideline(Test_guideline_other_0);
 					if (guideline != null && !guideline.isEmpty()) {
 						er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, guideline);
 					}
@@ -2660,15 +2871,16 @@ public class RecordQSAR_ToolBox {
 
 //		er.property_name=propertyName;
 		er.experimental_parameters = new Hashtable<>();
-				
-		if (Endpoint==null) {
-			er.keep=false;
+
+		if (Endpoint == null) {
+			er.keep = false;
 			er.updateReason("Endpoint is null");
 		} else if (Endpoint.equals("BCF")) {
-			er.property_name = ExperimentalConstants.strBCF;	
+			er.property_name = ExperimentalConstants.strBCF;
 		} else if (Endpoint.equals("BCFss")) {
 			er.property_name = ExperimentalConstants.strBCF;
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(ExperimentalConstants.strMethodSteadyState));
+			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+					WordUtils.capitalizeFully(ExperimentalConstants.strMethodSteadyState));
 		} else if (Endpoint.equals("BAF")) {
 			er.property_name = ExperimentalConstants.strBAF;
 		} else {
@@ -2684,60 +2896,68 @@ public class RecordQSAR_ToolBox {
 		} else {
 			// Do all QSAR Toolbox records utilize this field?
 			// Shouldn't notate records that don't have this field to begin with
-			// er.updateNote("No value for predefined substance type, chemical could be a polymer or UVCB");
+			// er.updateNote("No value for predefined substance type, chemical could be a
+			// polymer or UVCB");
 		}
 
 		if (Calculation_basis != null) {
-			// System.out.println(this.Row+"\t"+this.CAS_Number+"\t"+Endpoint + "\t" + this.Calculation_basis);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\t"+Endpoint + "\t" +
+			// this.Calculation_basis);
 			if (Calculation_basis.toLowerCase().contains("kinetic")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, ExperimentalConstants.strMethodKinetic);
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+						ExperimentalConstants.strMethodKinetic);
 			} else if (Calculation_basis.toLowerCase().contains("steady state")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, ExperimentalConstants.strMethodSteadyState);
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+						ExperimentalConstants.strMethodSteadyState);
 			} else if (Calculation_basis.toLowerCase().contains("other")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, ExperimentalConstants.strMethodOther);
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+						ExperimentalConstants.strMethodOther);
 			}
 		}
-		
+
 		if (Calculation_basis_other != null) {
-			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tCalculation_basis_other:"+Endpoint + "\t" + this.Calculation_basis_other);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tCalculation_basis_other:"+Endpoint
+			// + "\t" + this.Calculation_basis_other);
 		}
-		
+
 		if (Basis_for_the_BCF != null) {
-			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF:"+Endpoint + "\t" + this.Basis_for_the_BCF);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF:"+Endpoint
+			// + "\t" + this.Basis_for_the_BCF);
 		}
 
 		if (Basis_for_the_BCF_other != null) {
-			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF_other:"+Endpoint + "\t" + this.Basis_for_the_BCF_other);
+			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF_other:"+Endpoint
+			// + "\t" + this.Basis_for_the_BCF_other);
 		}
-
 
 		setSpeciesParameters(htSpeciesByBinomialName, er);
 
 		er.property_category = "bioconcentration";
 		addMetadata(er);
 
-		setPropertyValues(er);
+		setPropertyValues(er, true);
 
 		addNewExperimentalParameters(er);
-		
-			
-		if(Value_Unit==null) {
-			er.keep=false;
+
+		if (Value_Unit == null) {
+			er.keep = false;
 			er.updateReason("Units are null");
 			return er;
-		} else if(Value_Unit.equals("log(L/kg)")) {
-			er.property_value_units_original=ExperimentalConstants.str_LOG_L_KG;
-		} else if(Value_Unit.equals("dimensionless") || Value_Unit.equals("whole body w.w.") || Value_Unit.equals("%") || Value_Unit.equals("BCF: bioconcentration factor") || Value_Unit.equals("L/Kg ww")) {
-			er.property_value_units_original=ExperimentalConstants.str_L_KG;
-		} else if (Value_Unit.toLowerCase().equals("folds") || Value_Unit.toLowerCase().equals("x") || Value_Unit.toLowerCase().equals("kg/d") || Value_Unit.toLowerCase().contains("conc.")) {
+		} else if (Value_Unit.equals("log(L/kg)")) {
+			er.property_value_units_original = ExperimentalConstants.str_LOG_L_KG;
+		} else if (Value_Unit.equals("dimensionless") || Value_Unit.equals("whole body w.w.") || Value_Unit.equals("%")
+				|| Value_Unit.equals("BCF: bioconcentration factor") || Value_Unit.equals("L/Kg ww")) {
+			er.property_value_units_original = ExperimentalConstants.str_L_KG;
+		} else if (Value_Unit.toLowerCase().equals("folds") || Value_Unit.toLowerCase().equals("x")
+				|| Value_Unit.toLowerCase().equals("kg/d") || Value_Unit.toLowerCase().contains("conc.")) {
 			er.keep = false;
 			er.updateReason("Units are invalid");
 			return er;
 		} else {
 			logUniqueHandle("Handle Value_Unit=" + Value_Unit);
 		}
-		
-		if (er.property_name!=null)
+
+		if (er.property_name != null)
 			unitConverter.convertRecord(er);
 
 		if (!er.hasNumericFinalValue()) {
@@ -2792,8 +3012,9 @@ public class RecordQSAR_ToolBox {
 				er.reason = "Not a fish species";
 			}
 		}
-		
-		if (this.Water_media_type != null && !this.Water_media_type.isEmpty() && !this.Water_media_type.equalsIgnoreCase("not specified")) {
+
+		if (this.Water_media_type != null && !this.Water_media_type.isEmpty()
+				&& !this.Water_media_type.equalsIgnoreCase("not specified")) {
 			if (this.Water_media_type.equalsIgnoreCase("fresh water")) {
 				this.Water_media_type = "freshwater";
 			} else if (this.Water_media_type.equalsIgnoreCase("natural water: freshwater")) {
@@ -2818,7 +3039,8 @@ public class RecordQSAR_ToolBox {
 			} else {
 				er.experimental_parameters.put(ExperimentalConstants.expParamExposureType, Test_type);
 			}
-			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static") && !Test_type.equals("Renewal")) {
+			if (!Test_type.equals("Static") && !Test_type.equals("Flow-through") && !Test_type.equals("Semi-static")
+					&& !Test_type.equals("Renewal")) {
 				er.keep = false;
 				er.reason = "Invalid exposure type";
 			}
@@ -2928,53 +3150,54 @@ public class RecordQSAR_ToolBox {
 
 	private void setSpeciesParameters(Hashtable<String, Species> htSpeciesByBinomialName, ExperimentalRecord er) {
 		if (Test_organisms_species != null) {
-			
+
 			if (Test_organisms_species.equalsIgnoreCase("Other Test Organisms (species)")) {
-				er.keep=false;
+				er.keep = false;
 				er.updateReason("Test_organisms_species is missing");
-			} else if(htSpeciesByBinomialName.containsKey(Test_organisms_species.toLowerCase())) {
-				Species species=htSpeciesByBinomialName.get(Test_organisms_species.toLowerCase());
-				
-				if (species.species_common!=null) {
+			} else if (htSpeciesByBinomialName.containsKey(Test_organisms_species.toLowerCase())) {
+				Species species = htSpeciesByBinomialName.get(Test_organisms_species.toLowerCase());
+
+				if (species.species_common != null) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesCommon, species.species_common);
 				}
 
-				if (species.species_scientific!=null) {
-					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin, species.species_scientific);
+				if (species.species_scientific != null) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesLatin,
+							species.species_scientific);
 				}
-				
-				if(species.species_supercategory!=null) {
-					String supercategory=standardizeSupercategory(species);
-					if (supercategory==null || supercategory.equals("not specified")) {
-						er.keep=false;
+
+				if (species.species_supercategory != null) {
+					String supercategory = standardizeSupercategory(species);
+					if (supercategory == null || supercategory.equals("not specified")) {
+						er.keep = false;
 						er.updateReason("unspecified supercategory");
-					} 
+					}
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, supercategory);
 				} else {
-					System.out.println("Couldnt set supercategory for "+Test_organisms_species);
-					er.keep=false;
+					System.out.println("Couldnt set supercategory for " + Test_organisms_species);
+					er.keep = false;
 					er.updateReason("Couldn't set species supercategory");
 				}
 			} else {
-				
-				if (Test_organisms_species.equals("Gnathopogon Coerulescens")||
-						Test_organisms_species.equals("Ictalurus Nebulosus") ||
-						Test_organisms_species.equals("Chasmichthys Gulosus")) {
+
+				if (Test_organisms_species.equals("Gnathopogon Coerulescens")
+						|| Test_organisms_species.equals("Ictalurus Nebulosus")
+						|| Test_organisms_species.equals("Chasmichthys Gulosus")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, "Fish");
-				
-				} else if (Test_organisms_species.equals("Asellus Brevicaudus") || 
-						Test_organisms_species.equals("Porcellus Scaber") ||
-						Test_organisms_species.equals("Paratya Compressa Compressa")) {
+
+				} else if (Test_organisms_species.equals("Asellus Brevicaudus")
+						|| Test_organisms_species.equals("Porcellus Scaber")
+						|| Test_organisms_species.equals("Paratya Compressa Compressa")) {
 					er.experimental_parameters.put(ExperimentalConstants.expParamSpeciesSupercategory, "Crustaceans");
 				} else {
 					// System.out.println(Test_organisms_species+" not in species ht");
-					er.keep=false;
+					er.keep = false;
 					er.updateReason("Test_organisms_species not in species ht");
-					System.out.println(Test_organisms_species+" not in species ht");
+					System.out.println(Test_organisms_species + " not in species ht");
 				}
 			}
 		} else {
-			er.keep=false;
+			er.keep = false;
 			er.updateReason("Test_organisms_species is missing");
 		}
 	}

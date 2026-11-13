@@ -524,8 +524,7 @@ public class Parse {
 			break;
 		case ExperimentalConstants.strSourceEChemPortal:
 			System.out.println("Warning: Parsing eChemPortal Excel download results. Did you want eChemPortal API results instead?");
-			p = new ParseEChemPortal(null);
-			break;
+			p = new ParseEChemPortal(null,null,null, null,true);
 		case ExperimentalConstants.strSourceEChemPortalAPI:
 			if (recordTypeToParse.toLowerCase().contains("tox")) {
 				p = new ToxParseEChemPortalAPI(false);

@@ -88,7 +88,7 @@ public class RecordRIFM_2026_01 {
 		er.experimental_parameters=new Hashtable<>();
 		er.parameter_values=new ArrayList<>();
 				
-		if (!Test_guideline.contains("301F")) {
+		if (!Test_guideline.contains("301F") && !Test_guideline.contains("301 F")) {
 			er.keep=false;
 			er.reason="Wrong guideline";
 			er.experimental_parameters.put("Test guideline", Test_guideline);

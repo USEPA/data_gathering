@@ -2,9 +2,12 @@ package gov.epa.exp_data_gathering.parse.EChemPortal;
 
 import java.io.File;
 import java.io.FileReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +17,7 @@ import org.apache.poi.util.IOUtils;
 
 import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.Parse;
@@ -21,6 +25,7 @@ import gov.epa.exp_data_gathering.parse.ParseUtilities;
 import gov.epa.exp_data_gathering.parse.PressureCondition;
 import gov.epa.exp_data_gathering.parse.TemperatureCondition;
 import gov.epa.exp_data_gathering.parse.TextUtilities;
+import gov.epa.exp_data_gathering.parse.EChemPortal.RecordEChemPortal.RecordDegradation;
 
 /**
  * Parses data from echemportal.org
@@ -39,19 +44,69 @@ public class ParseEChemPortal extends Parse {
 	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "eChemPortal";
 	
 	String fileName="todo";
-	static final String filename301F = "biodegradation in water screening tests 2026-05-21.xlsx";
+//	static final String filename301F = "biodegradation in water screening tests 2026-05-21.xlsx";
+	static final String filename301F = "biodegradation in water screening tests 2026-10-30.xlsx";
+	static final String filename301C = "biodegradation in water screening tests 301C 2026-11-06.xlsx";
+
 	static final String filenameKoc = "Koc 2026-04-16.xls";
 
+	boolean separateRecords=false;
+//	String fileDate;
+	
 
-	public ParseEChemPortal(String fileName) {
+	public ParseEChemPortal(String property, String outputGuideline, 
+			String fileName,String fileDate, boolean separateRecords) {
 		sourceName = ExperimentalConstants.strSourceEChemPortal;
-		this.fileName = fileName;
 		
-		if(fileName.equals(filename301F)) {
-			init("RBiodeg 301 F ECHA Reach");
-		} else if(fileName.equals(filenameKoc)) {
-			init("Koc ECHA Reach");
+		this.fileName = fileName;
+		this.separateRecords=separateRecords;
+		
+		RecordEChemPortal.sourceName +="_"+fileDate;
+		RecordEChemPortal.outputTestGuideline = outputGuideline;
+		RecordEChemPortal.outputProperty = property;
+		
+//		if(fileName.equals(filename301F)) {
+//			init("RBiodeg 301 F ECHA Reach");
+//		} else if (fileName.equals(filename301C)) {
+//			init("RBiodeg 301 C ECHA Reach");
+//		} else if(fileName.equals(filenameKoc)) {
+//			init("Koc ECHA Reach");
+//		}
+		
+		// Update mainFolder and jsonFolder based on mode
+		String subfolder;
+		
+	
+		if (ExperimentalConstants.strPercentageBiodegradation.equalsIgnoreCase(property)) {
+			subfolder = "Percent Biodegradation "+RecordEChemPortal.outputTestGuideline+" ECHA REACH "+fileDate;
+		} else if (ExperimentalConstants.strRBIODEG.equalsIgnoreCase(property)) {
+//			subfolder = "RBiodeg 301 F ECHA Reach";
+			subfolder = "RBiodeg "+RecordEChemPortal.outputTestGuideline+" ECHA REACH "+fileDate;;
+		} else if (ExperimentalConstants.strRBIODEG_multiclass.equalsIgnoreCase(property)) {
+			subfolder = "RBiodeg multiclass "+RecordEChemPortal.outputTestGuideline+" ECHA REACH "+fileDate;;
+		} else if (ExperimentalConstants.strRBIODEG_10_day.equalsIgnoreCase(property)) {
+			subfolder = "RBiodeg 10 day "+RecordEChemPortal.outputTestGuideline+" ECHA REACH "+fileDate;;
+		} else if (ExperimentalConstants.strKOC.equalsIgnoreCase(property)) {
+			subfolder = "Koc ECHA Reach";
+		} else {
+			throw new IllegalArgumentException("Invalid output mode. Use 'BINARY' or 'CONTINUOUS'.");
 		}
+		
+		subfolder+=" separate records="+separateRecords;
+		
+		init(subfolder);
+//		System.out.println(subfolder);
+		
+//		this.mainFolder = baseFolderPath + java.io.File.separator + subfolder;
+//		this.jsonFolder = this.mainFolder;
+		
+		
+//		System.out.println(jsonFolder);
+//		System.out.println(mainFolder);
+				
+		// Ensure the folder exists
+		new java.io.File(this.mainFolder).mkdirs();
+		
 		
 	}
 	
@@ -71,7 +126,7 @@ public class ParseEChemPortal extends Parse {
 			
 			Vector<RecordEChemPortal> records=null;
 			
-			if (fileName.equals(filename301F)) {
+			if (fileName.equals(filename301F) || fileName.equals(filename301C)) {
 				records = createBiodegradationRecords();
 			} else if (fileName.equals(filenameKoc)) {
 				records = createKocRecords();
@@ -147,21 +202,38 @@ public class ParseEChemPortal extends Parse {
 		
 		Vector<RecordEChemPortal> records = RecordEChemPortal.parseEChemPortalExcelFile301F(fileName);
 
+//		Set<String>methods=new HashSet<>();
+//		for (RecordEChemPortal record:records) {
+//			for(RecordDegradation rd:record.recordsDegradation) {
+//				methods.add(rd.parameter);
+//			}
+//		}
+//		for(String method:methods) {
+//			System.out.println(method);
+//		}
+		
+		
+		
 //		Hashtable<String,Integer>htScoresByCAS=flattenBiodegRecords(records);
-//		// Start from default columns, then remove any you don’t want:
-//        List<EChemPortalExcelExporter.ColumnSpec> cols = EChemPortalExcelExporter.defaultColumns();
-//
-//        // Drop pH and Values, for example:
-//        cols.removeIf(c ->  c.header.equals("Values") 
-//        		|| c.header.equals("Participant") || c.header.equals("Section")
-//        		|| c.header.equals("Method") || c.header.equals("Pressure")
-//        		|| c.header.equals("Temperature") || c.header.equals("pH"));
-//                
-//        try {
-//        	EChemPortalExcelExporter.writeExcel(records, Path.of(jsonFolder+File.separator+"eChemPortal Original Records.xlsx"), cols,htScoresByCAS);
-//        } catch (Exception ex) {
-//        	ex.printStackTrace();
-//        }
+		Hashtable<String,Integer>htScoresByCAS=new Hashtable<>();
+		
+		// Start from default columns, then remove any you don’t want:
+        List<EChemPortalExcelExporter.ColumnSpec> cols = EChemPortalExcelExporter.defaultColumns();
+
+        // Drop pH and Values, for example:
+        cols.removeIf(c ->  c.header.equals("Values") 
+        		|| c.header.equals("Participant") || c.header.equals("Section")
+        		|| c.header.equals("Method") || c.header.equals("Pressure")
+        		|| c.header.equals("Temperature") || c.header.equals("pH"));
+                
+        try {
+        	String filepath =jsonFolder+File.separator+"eChemPortal Original Records.xlsx"; 
+        	EChemPortalExcelExporter.writeExcel(records, Path.of(jsonFolder+File.separator+"eChemPortal Original Records.xlsx"), cols,htScoresByCAS);
+        	
+        	System.out.println(filepath);
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        }
 		
 		
 		return records;
@@ -220,8 +292,8 @@ public class ParseEChemPortal extends Parse {
 			
 			for (RecordEChemPortal r:recordsEChemPortal) {
 				
-				if (fileName.equals(filename301F)) {
-					ExperimentalRecords ers=r.toExperimentalRecordsWaterBiodegration();
+				if (fileName.equals(filename301F) || fileName.equals(filename301C)) {
+					ExperimentalRecords ers=r.toExperimentalRecordsWaterBiodegration(separateRecords);
 					recordsExperimental.addAll(ers);
 
 //					for (ExperimentalRecord er:ers) {
@@ -385,29 +457,70 @@ public class ParseEChemPortal extends Parse {
 	
 
 	static void runBiodegWaterScreening() {
-		ParseEChemPortal p=new ParseEChemPortal(filename301F);
+		
+		
+		boolean separateRecords=true;
+//		boolean separateRecords=false;
+		
+		ParseEChemPortal p=new ParseEChemPortal(ExperimentalConstants.strRBIODEG,
+				ExperimentalConstants.str301F, filename301F, "2026-10-30", separateRecords);
+
+		
+//		ParseEChemPortal p=new ParseEChemPortal(ExperimentalConstants.strRBIODEG,
+//				ExperimentalConstants.str301C, filename301C, "2026-11-06", separateRecords);
+
+		
 		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;
-		p.writeExcelFileByProperty=true;		
+		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 
 		// Set output mode - options are "BINARY" or "CONTINUOUS"
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
 		
-		p.setOutputMode(ExperimentalConstants.str_binary);
-		p.createFiles();
-		
-		p.setOutputMode(ExperimentalConstants.str_continuous);
 		p.createFiles();
 
+//		System.out.println(BiodegradationPropertyValues.isValidFor301C("% degradation (DOC removal)"));
+		
+		
+//		System.out.println("\n");
+//		for(String method:BiodegradationPropertyValues.methods) {
+//			System.out.println(method);
+//		}
+		
+//		p.setOutputMode(ExperimentalConstants.strRBIODEG_10_day);
+//		p.createFiles();
+//		
+//		p.setOutputMode(ExperimentalConstants.strRBIODEG_multiclass);
+//		p.createFiles();
+
+		
+//		p.setOutputMode(ExperimentalConstants.strPercentageBiodegradation);
+//		p.createFiles();
+
+
+	}
+	
+	
+	static void flattenRecords(String source, String subfolder, String column) {
+
+		
+		String filePath = "data\\experimental\\eChemPortal\\" + subfolder + "\\"
+				+ "eChemPortal Experimental Records.json";
+
+		ExperimentalRecords records = ExperimentalRecords.getExperimentalRecords(source, subfolder);
+
+		System.out.println(records.size());
+		
 	}
 	
 
 	static void runKoc() {
-		ParseEChemPortal p=new ParseEChemPortal(filenameKoc);
+		ParseEChemPortal p=new ParseEChemPortal(ExperimentalConstants.strKOC,
+				null, filenameKoc, null, false);
 		p.generateOriginalJSONRecords=true;		
 		p.removeDuplicates=false;
 		p.writeJsonExperimentalRecordsFile=true;
@@ -415,7 +528,7 @@ public class ParseEChemPortal extends Parse {
 		p.writeExcelFileByProperty=false;		
 		p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 
-		p.setOutputMode(ExperimentalConstants.strKOC);
+		
 		p.createFiles();
 	}
 
@@ -426,35 +539,17 @@ public class ParseEChemPortal extends Parse {
 	 * 
 	 * @param mode "BINARY" for binary biodegradable classification, "CONTINUOUS" for percentage values
 	 * 
-	 * TODO send the propertyName instead of mode
 	 * 
 	 */
-	public void setOutputMode(String mode) {
-		RecordEChemPortal.outputMode = mode;
-		
-		// Update mainFolder and jsonFolder based on mode
-		String subfolder;
-		if (ExperimentalConstants.str_continuous.equalsIgnoreCase(mode)) {
-			subfolder = "Percent Biodegradation 301 F ECHA Reach";
-		} else if (ExperimentalConstants.str_binary.equalsIgnoreCase(mode)) {
-			subfolder = "RBiodeg 301 F ECHA Reach";
-		} else if (ExperimentalConstants.strKOC.equalsIgnoreCase(mode)) {
-			subfolder = "Koc ECHA Reach";
-		} else {
-			throw new IllegalArgumentException("Invalid output mode. Use 'BINARY' or 'CONTINUOUS'.");
-		}
-		
-		this.mainFolder = baseFolderPath + java.io.File.separator + subfolder;
-		this.jsonFolder = this.mainFolder;
-		
-		// Ensure the folder exists
-		new java.io.File(this.mainFolder).mkdirs();
-	}
 	
 	public static void main(String[] args) {
 		
 		IOUtils.setByteArrayMaxOverride(200000000);
-
+//		flattenRecords("eChemPortal", "RBiodeg 301 C ECHA REACH 2026-11-06 separate records=true", "casrn");
+		
+		
+//		System.out.println(BiodegradationPropertyValues.isValidFor301C("% degradation (TOC removal)"));
+		
 		runBiodegWaterScreening();
 //		runKoc();
 	}

@@ -1,5 +1,7 @@
 package gov.epa.exp_data_gathering.parse.RIFM_2026_01;
 
+import java.io.File;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -22,7 +24,7 @@ public class ParseRIFM_2026_01 extends Parse {
 
 	public ParseRIFM_2026_01() {
 		sourceName = "RIFM_2026_01"; // TODO Consider creating ExperimentalConstants.strSourceRIFM_2026_01 instead.
-		this.init("RBiodeg 301F RIFM");
+//		this.init("RBiodeg 301F RIFM");
 
 		// TODO Is this a toxicity source? If so, rename original and experimental
 		// records files here.
@@ -54,7 +56,7 @@ public class ParseRIFM_2026_01 extends Parse {
 			DsstoxMapperFromChemRegExcelExport dm=null;
 			
 			if (useExcelMapping) {
-				String filepathChemreg = strFolder + "excel files" + java.io.File.separator + "RIFM ChemReg curation.xlsx";
+				String filepathChemreg = "data"+File.separator+"experimental"+File.separator+sourceName+File.separator + "excel files" + java.io.File.separator + "RIFM ChemReg curation.xlsx";
 				dm = new DsstoxMapperFromChemRegExcelExport(filepathChemreg);
 			}
 			
@@ -83,6 +85,8 @@ public class ParseRIFM_2026_01 extends Parse {
 
 				recordsExperimental.add(er);
 			}
+			
+			lookatRecords(recordsExperimental);
 
 		if (useExcelMapping) {
 			dm.saveMissingChemregToTextFiles(RecordRIFM_2026_01.sourceName);
@@ -95,6 +99,75 @@ public class ParseRIFM_2026_01 extends Parse {
 		return null;
 	}
 	}
+	
+	void lookatRecords(ExperimentalRecords ers) {
+		
+		Hashtable<String,ExperimentalRecords>ht=new Hashtable<>();
+		
+		for (ExperimentalRecord er:ers) {
+			
+			if(ht.containsKey(er.casrn)) {
+				ExperimentalRecords recs=ht.get(er.casrn);
+				recs.add(er);
+			} else {
+				ExperimentalRecords recs=new ExperimentalRecords();
+				recs.add(er);
+				ht.put(er.casrn, recs);
+			}
+			
+		}
+		
+		
+		for (String cas:ht.keySet()) {
+			ExperimentalRecords recs=ht.get(cas);
+			
+			boolean have28days=false;
+			boolean haveLessThan28days=false;
+			boolean haveGreaterThan28days=false;
+			
+			boolean haveGreaterThan28daysAndLessThan60percentDegradation=false;
+			boolean haveLessthan28daysAndGreaterThan60percentDegradation=false;
+			
+			for (ExperimentalRecord er:recs) {
+				
+				double duration=er.parameter_values.get(0).value_point_estimate;
+				
+				if(duration<28) {
+//					haveLessThan28days=true;
+					
+					if (er.property_value_point_estimate_original>60) {
+						haveLessthan28daysAndGreaterThan60percentDegradation=true;
+					}
+					
+				} else if (duration>28) {
+					haveGreaterThan28days=true;
+					
+					if (er.property_value_point_estimate_original!=null && er.property_value_point_estimate_original<60) {
+						haveGreaterThan28daysAndLessThan60percentDegradation=true;
+					}
+					
+				} else {
+					have28days=true;
+				}
+				
+//				System.out.println(er.casrn+"\t"+duration);
+				
+			}
+			
+			if(!have28days)	{
+				if(haveLessthan28daysAndGreaterThan60percentDegradation) {
+					System.out.println(cas+"\thave < 28days and >60% degradation");	
+				} else if (haveGreaterThan28daysAndLessThan60percentDegradation) {
+					System.out.println(cas+"\thave > 28days and <60% degradation");
+				}
+			}
+//				System.out.println(cas+"\t"+have28days+"\t"+haveLessThan28days+"\t"+haveGreaterThan28days);
+			
+		}
+		
+		
+	}
+	
 
 	/**
 	 * Sets the output mode for property value transformation and updates output folder accordingly.
@@ -131,15 +204,15 @@ public class ParseRIFM_2026_01 extends Parse {
 
 		p.writeJsonExperimentalRecordsFile = true;
 		p.writeExcelExperimentalRecordsFile = true;
-		p.writeExcelFileByProperty = true;
+		p.writeExcelFileByProperty = false;
 		p.writeCheckingExcelFile = false;// creates random sample spreadsheet
 
 		// Set output mode:
 		// BINARY: classifies as biodegradable (1.0) if oxygen consumption > 60%, else not biodegradable (0.0)
 		// CONTINUOUS: preserves actual oxygen consumption percentages from the source data
 
-		p.setOutputMode(ExperimentalConstants.str_continuous);
-		p.createFiles();
+//		p.setOutputMode(ExperimentalConstants.str_continuous);
+//		p.createFiles();
 
 		p.setOutputMode(ExperimentalConstants.str_binary);
 		p.createFiles();

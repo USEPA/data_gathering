@@ -79,9 +79,15 @@ public class ExperimentalConstants {
 	public static final String strFUB = "Fraction unbound in human plasma";//OPERA
 	public static final String strTTR_ANSA = "Binding to TTR (replacement of ANSA)";//OPERA
 	public static final String strCACO2 = "Caco-2 permeability (Papp)";//OPERA
-	public static final String strRBIODEG = "Ready biodegradability";//OPERA
 	
-	public static final String strRBIODEG_10_day = "Ready biodegradability within 10 day window";
+	public static final String strRBIODEG = "Ready biodegradability";//OPERA
+	public static final String strRBIODEG_10_day = "Ready biodegradability within 10 day window";//0 = doesnt 60% biodeg within 10 days of reaching 10%, 1=achieves it
+	public static final String strRBIODEG_multiclass = "Ready biodegradability multiclass";//0 = doesnt reach 60% biodeg, 1=reaches 60% but not within 10 days of 10%, 2= reaches 60% within 10 days of reaching 10%
+	public static final String strRBIODEG_10_day2 = "Whether or not 60% biodegradation happens within 10 day window";//0 = achieves >=60% biodeg but not within the window, 1 = achieves it within the window
+	
+	public static final String str301F ="301 F";
+	public static final String str301C ="301 C";
+
 	
 	public static final String strOXYGENCONSUMPTION = "Percent O2 consumption";
 	public static final String strPercentageBiodegradation = "Percentage biodegradation";
@@ -168,6 +174,7 @@ public class ExperimentalConstants {
 	public static final String str_dimensionless="Dimensionless";
 	public static final String str_binary = "Binary";
 	public static final String str_continuous = "Continuous";
+	public static final String str_multiclass = "Multiclass";
 
 	public static final String str_LOG_UNITS = "Log units";
 	
