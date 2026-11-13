@@ -1049,7 +1049,12 @@ public class RecordQSAR_ToolBox {
 		}
 			
 		er.experimental_parameters.remove(ExperimentalConstants.expParamGuideline);
-		er.experimental_parameters.remove(ExperimentalConstants.expParamMeasurementMethod);
+		er.experimental_parameters.remove(ExperimentalConstants.expParamMeasurementMethod);		
+		er.experimental_parameters.remove(ExperimentalConstants.expParamExposureType);		
+		er.experimental_parameters.remove(ExperimentalConstants.expParamTestLocation);
+		er.experimental_parameters.remove(ExperimentalConstants.expParamExposureDuration);
+		setObservationDuration(er);
+		
 		
 		if (this.Test_guideline != null) {
 
@@ -2771,6 +2776,7 @@ public class RecordQSAR_ToolBox {
 			return;
 		}
 
+//		System.out.println(Duration_Qualifier);
 		Double mean = getValueInDays(Duration_MeanValue, Duration_Unit);
 		Double min = getValueInDays(Duration_MinValue, Duration_Unit);
 		Double max = getValueInDays(Duration_MaxValue, Duration_Unit);
