@@ -639,7 +639,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	private static void runParse(String endpoint, String guideline, String fileName, String date) {
 	    ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(endpoint, guideline, fileName, date);
 	    p.maxExcelRows = 100000;
-	    p.generateOriginalJSONRecords = false;
+	    p.generateOriginalJSONRecords = true;
 	    p.removeDuplicates = false;
 	    p.writeJsonExperimentalRecordsFile = true;
 	    p.writeExcelExperimentalRecordsFile = true;
@@ -659,28 +659,34 @@ public class ParseQSAR_ToolBox extends Parse {
 		IOUtils.setByteArrayMaxOverride(200000000);
 		
 		RecordQSAR_ToolBox.omitBasedOnGLPCompliance=true;
-		
-		runParse(ExperimentalConstants.strRBIODEG,
-		         ExperimentalConstants.str301C,
-		         fileNameBiodegWaterScreeningECHA_REACHNew,
-		         "2026-08-04");
-		
-		runParse(ExperimentalConstants.strRBIODEG,
-		         ExperimentalConstants.str301C,
-		         fileNameBiodegNITENew,
-		         "2026-11-06");
 
-
-		runParse(ExperimentalConstants.strRBIODEG,
-		         ExperimentalConstants.str301F,
-		         fileNameBiodegWaterScreeningECHA_REACHNew,
-		         "2026-08-04");
-
+//		runParse(ExperimentalConstants.strRBIODEG,
+//		         ExperimentalConstants.str301F,
+//		         fileNameBiodegWaterScreeningECHA_REACHNew,
+//		         "2026-08-04");
+//
 		runParse(ExperimentalConstants.strRBIODEG_10_day,
 		         ExperimentalConstants.str301F,
 		         fileNameBiodegWaterScreeningECHA_REACHNew,
 		         "2026-08-04");
 		
+		runParse(ExperimentalConstants.strRBIODEG_multiclass,
+        ExperimentalConstants.str301F,
+        fileNameBiodegWaterScreeningECHA_REACHNew,
+        "2026-08-04");
+
+		
+//
+//		runParse(ExperimentalConstants.strRBIODEG,
+//		         ExperimentalConstants.str301C,
+//		         fileNameBiodegWaterScreeningECHA_REACHNew,
+//		         "2026-08-04");
+//		
+//		runParse(ExperimentalConstants.strRBIODEG,
+//		         ExperimentalConstants.str301C,
+//		         fileNameBiodegNITENew,
+//		         "2026-11-06");
+
 	}
 	
 	static void run96hrAcuteFishTox() {

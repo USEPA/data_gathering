@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
+import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
@@ -983,8 +984,8 @@ public class RecordQSAR_ToolBox {
 			er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
 		
 			if (omitBasedOnGLPCompliance) {
-//				if (!this.GLP_compliance.startsWith("yes")) {
-				if (this.GLP_compliance.equals("no")) {	
+				if (!this.GLP_compliance.startsWith("yes")) {
+//				if (this.GLP_compliance.equals("no")) {	
 					// if(!BiodegradationPropertyValues.isValidGuidelineCompliance(GLP_compliance))
 					// {
 					er.keep = false;
@@ -993,6 +994,12 @@ public class RecordQSAR_ToolBox {
 				}
 			}
 		}
+		
+		if (GLP_compliance == null && omitBasedOnGLPCompliance) {
+			er.keep = false;
+			er.updateReason("GLP compliance is missing");
+		}
+		
 		
 		if(!er.original_source_name.equals("Biodegradation NITE")) {
 			if (this.Oxygen_conditions != null) {
@@ -1048,19 +1055,56 @@ public class RecordQSAR_ToolBox {
 			// TODO add duration and the interpretation of results
 		}
 			
+
 		er.experimental_parameters.remove(ExperimentalConstants.expParamGuideline);
-		er.experimental_parameters.remove(ExperimentalConstants.expParamMeasurementMethod);		
 		er.experimental_parameters.remove(ExperimentalConstants.expParamExposureType);		
 		er.experimental_parameters.remove(ExperimentalConstants.expParamTestLocation);
 		er.experimental_parameters.remove(ExperimentalConstants.expParamExposureDuration);
+		er.experimental_parameters.remove(ExperimentalConstants.expParamWetDry);
+
+		
+		
+		
+//		er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,
+//				WordUtils.capitalizeFully(this.Endpoint));
+
+		er.experimental_parameters.remove(ExperimentalConstants.expParamMeasurementMethod);		
+		if(this.Endpoint!=null) {
+			if(Endpoint.equals("Other Endpoint")) {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod,this.Endpoint_other);		
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, this.Endpoint);		
+			}
+		}
+
+		
 		setObservationDuration(er);
 		
 		
 		if (this.Test_guideline != null) {
+			
+			if(Test_guideline.equals("Other Test Guideline")) {
+				
+//	   			if (Principles_of_method_if_other_than_guideline!=null) {
+//	   				
+////	   				if(Principles_of_method_if_other_than_guideline.contains("301")) {
+////	   					System.out.println(Principles_of_method_if_other_than_guideline+"\t"+pqt.outputTestGuideline);
+////	   				}
+//	   				
+//					er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Principles_of_method_if_other_than_guideline);
+	
+	   			if (Test_guideline_other!=null) {
+					er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline_other);	
+	//					System.out.println(Principles_of_method_if_other_than_guideline);
+				} 
+				
+			} else {
+				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline);
+			}
 
-			er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, Test_guideline);
-
-			if (!this.Test_guideline.contains(pqt.outputTestGuideline)) {
+			String tg = (String)er.experimental_parameters.get(ExperimentalConstants.expParamGuideline);
+						
+			if (!tg.contains(pqt.outputTestGuideline) && !tg.contains(pqt.outputTestGuideline.replace(" ", ""))) {
 				er.keep = false;
 				er.updateReason("wrong guideline");
 //				System.out.println(this.Test_guideline+"\t"+outputTestGuideline);
@@ -1109,6 +1153,8 @@ public class RecordQSAR_ToolBox {
 			Estimate estimate = getDegradationEstimate();
 			BiodegradationPropertyValues.setPropertyValues(er, estimate, duration, this.Interpretation_of_results);
 		}
+		
+		er.measurement_method=null;//already have in experimental_parameters
 		
 
 	}

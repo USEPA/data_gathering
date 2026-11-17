@@ -975,11 +975,14 @@ public class BiodegradationPropertyValues {
 
 		} else if (er.property_name.equals(ExperimentalConstants.strRBIODEG_10_day)) {
 			convertToBinarywith10day(er, estimate, duration, interpretation);
+		} else if (er.property_name.equals(ExperimentalConstants.strRBIODEG_multiclass)) {
+			convertToMulticlass(er, estimate, duration, interpretation);
 
 		} else if (er.property_name.equalsIgnoreCase(ExperimentalConstants.strPercentageBiodegradation)) {
 			convertToContinuous(er, estimate, duration);
 		}
 	}
+
 
 //	public class OECD301Classifier {
 //
@@ -1466,7 +1469,7 @@ public class BiodegradationPropertyValues {
 		er.property_value_units_final = ExperimentalConstants.str_binary;
 
 		if (rbs.score != null) {
-			er.property_value_point_estimate_final = (double) rbs.score;
+			er.property_value_point_estimate_final = rbs.score.doubleValue();
 			er.property_value_units_final = ExperimentalConstants.str_binary;
 		} else {
 //			System.out.println(er.casrn+"\t"+er.reason);
@@ -1502,23 +1505,96 @@ public class BiodegradationPropertyValues {
 		boolean interpretationPositive = BiodegradationPropertyValues.OECD301Classifier
 				.isReadilyBiodegradable(interpretation);
 
-		if (!interpretationPositive) {
-			er.property_value_string = "Interpretation (" + interpretation
-					+ ") does not indicate ready biodegradability";
-			er.property_value_point_estimate_final = 0.0;
-		} else if (rbs.score != null) {
-			setPropertyValueString(er, estimate, duration);
-			er.property_value_point_estimate_final = (double) rbs.score;
-			er.property_value_units_final = ExperimentalConstants.str_binary;
-		} else {
-//			System.out.println(er.casrn+"\t"+er.reason);
+//		if (!interpretationPositive) {
+//			er.property_value_string = "Interpretation (" + interpretation
+//					+ ") does not indicate ready biodegradability";
+//			er.property_value_point_estimate_final = 0.0;
+//		} else if (rbs.score != null) {
+//			setPropertyValueString(er, estimate, duration);
+//			er.property_value_point_estimate_final = (double) rbs.score;
+//			er.property_value_units_final = ExperimentalConstants.str_binary;
+//		} else {
+////			System.out.println(er.casrn+"\t"+er.reason);
+//			er.updateReason(rbs.reason);
+//			er.keep = false;
+//		}
+
+		
+		if(rbs.score==null) {
 			er.updateReason(rbs.reason);
 			er.keep = false;
+		} else if (interpretationPositive && rbs.score==0) {
+			er.keep=false;
+			er.reason="Interpretation and biodegradation records conflict";
+		} else if(interpretationPositive && rbs.score==1) {
+			er.property_value_point_estimate_final = 1.0;
+			er.property_value_string+=" and \""+interpretation + "\"";
+		} else if (!interpretationPositive && rbs.score==1) {
+			er.property_value_point_estimate_final = 0.0;
+			er.property_value_string += " and \""+interpretation + "\" does not indicate 10 day window is met";
+		} else if (!interpretationPositive && rbs.score==0) {
+			er.property_value_point_estimate_final = 0.0;
+			er.property_value_string += " and \""+interpretation+"\"";
+		} else {
+			System.out.println("shouldnt happen");
 		}
-
+		
 //		System.out.println(recBio.degradationValue+"\n"+JsonUtilities.gsonPretty.toJson(estimate)+"\n");
 
 	}
+	
+	
+	private static void convertToMulticlass(ExperimentalRecord er, Estimate estimate, Double duration,
+			String interpretation) {
+		
+		ResultBinaryScore rbs = determineResultBinaryScore60PercentWithin28days(estimate, duration);
+
+		er.property_value_point_estimate_original = estimate.point;
+		er.property_value_min_original = estimate.min;
+		er.property_value_max_original = estimate.max;
+
+		er.property_value_units_original = ExperimentalConstants.str_dimensionless;
+
+		if (interpretation == null) {
+			er.keep = false;
+			er.updateReason("Interpretation of results is missing");
+			return;
+		}
+
+		er.property_value_units_final = ExperimentalConstants.str_multiclass;
+		
+//		boolean interpretationPositive = isPositiveReadyBiodegradableInterpretation(interpretation);
+		boolean interpretationPositive = BiodegradationPropertyValues.OECD301Classifier
+				.isReadilyBiodegradable(interpretation);
+
+		
+		setPropertyValueString(er, estimate, duration);
+		
+		if(rbs.score==null) {
+			er.updateReason(rbs.reason);
+			er.keep = false;
+		
+		} else if (interpretationPositive && rbs.score==0) {
+			er.keep=false;
+			er.reason="Interpretation and biodegradation records conflict";
+
+		} else if(interpretationPositive && rbs.score==1) {
+			er.property_value_point_estimate_final = 2.0;
+			er.property_value_string+=" and \""+interpretation + "\"";
+		
+		} else if (!interpretationPositive && rbs.score==1) {
+			er.property_value_point_estimate_final = 1.0;
+			er.property_value_string += " and \""+interpretation + "\" does not indicate 10 day window is met";
+		} else if (!interpretationPositive && rbs.score==0) {
+			er.property_value_point_estimate_final = 0.0;
+			er.property_value_string += " and \""+interpretation+"\"";
+		} else {
+			System.out.println("shouldnt happen");
+		}
+
+		
+	}
+
 
 	public static ResultBinaryScore determineResultBinaryScore60PercentWithin28days(Estimate estimate,
 			Double duration) {

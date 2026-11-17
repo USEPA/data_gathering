@@ -119,7 +119,8 @@ public class RecordRIFM_2026_08_12 {
 			} else if (ParseRIFM_2026_08_12.property.equals(ExperimentalConstants.strPercentageBiodegradation)) {
 				outputMode=ExperimentalConstants.str_continuous;
 			}
-			BiodegradationPropertyValues.setPropertyValues(er, outputMode, estimate, duration);
+			BiodegradationPropertyValues.setPropertyValues(er, estimate, duration, null);			
+			
 			
 		} else if(ParseRIFM_2026_08_12.property.equals(ExperimentalConstants.strRBIODEG_10_day)) {
 			
