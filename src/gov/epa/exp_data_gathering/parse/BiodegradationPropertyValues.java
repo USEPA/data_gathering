@@ -34,24 +34,24 @@ public class BiodegradationPropertyValues {
 //			put301F("degradation percentage was obtained from BOD/ThOD as per guidelines described in OECD 301 F",
 //					true);
 //			put301F("ThOD NH4", true);
-//			put301F("% biodegradation: BOD / ThOD NH3 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NH3 ï¿½ 100", true);
 //			put301F("% biodegradation based on ThOD NHO3", true); // IUCLID typo for NO3
 //			put301F("BOD: ThOD ratio", true);
 //			put301F("oxygen consumption", true); // Ensure parser filters for unit == "%"
-//			put301F("% biodegradation = 100 × BOD / ThODNO3", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNO3", true);
 //			put301F("% biodegradation based on ThOD NH4", true);
 //			put301F("% biodegradation (ThODNO3)", true);
 //			put301F("ThOD (NH4)", true);
 //			put301F("ThOD-NO3", true);
 //			put301F("Theoretical Oxygen Demand (ThOD)NH4", true);
-//			put301F("% biodegradation: BOD / ThOD NH4 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NH4 ï¿½ 100", true);
 //			put301F("BOD & ThOD", true);
 //			put301F("Percentage of Theoretical Oxygen Demand", true);
 //			put301F("on the basis of values of BOD and ThOD", true);
-//			put301F("% biodegradation: BOD / ThOD NO3 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NO3 ï¿½ 100", true);
 //			put301F("ThODN03", true); // IUCLID typo (zero instead of O)
 //			put301F("BOD of ThOD", true);
-//			put301F("% biodegradation: 100 × BOD / ThODNO3", true);
+//			put301F("% biodegradation: 100 ï¿½ BOD / ThODNO3", true);
 //			put301F("% degradation (based on ThOD_NH4 and ThOD_NO3)", true);
 //			put301F("Biochemical oxygen demand", true);
 //			put301F("O2 uptake in the test solutions", true); // Verify unit == "%"
@@ -73,8 +73,8 @@ public class BiodegradationPropertyValues {
 //			put301F("Theoretical oxygen demand", true); // Verify unit == "%"
 //			put301F("% ThOD NO3 and ThOD NH4", true);
 //			put301F("O2 consumption, TOC removal", true); // Ensure parser extracts O2 consumption (%)
-//			put301F("% biodegradation: 100 × BOD / ThODNH4", true);
-//			put301F("% biodegradation = 100 × BOD / ThODNH4", true);
+//			put301F("% biodegradation: 100 ï¿½ BOD / ThODNH4", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNH4", true);
 //			put301F("ThODNO3", true);
 //			put301F("ThOD (NO3)", true);
 //			put301F("Percentage of biodegradation (Based on ThOD NH4)", true);
@@ -98,8 +98,8 @@ public class BiodegradationPropertyValues {
 //			put301F("Theoretical Oxygen Demand (ThOD) [%]", true);
 //			put301F("ThOD [%]", true);
 //			put301F("Biochemical Oxygen Demand (BOD)", true);
-//			put301F("% biodegradation = 100 × BOD / ThODNH4 Without nitrification", true);
-//			put301F("% biodegradation = 100 × BOD / ThODNO3 With nitrification", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNH4 Without nitrification", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNO3 With nitrification", true);
 //			put301F("% degradation (BOD/ThODNH4)", true);
 //			put301F("BOD (Biochemical Oxygen Demand)", true);
 //			put301F("% degradation by BOD", true);
@@ -405,7 +405,7 @@ public class BiodegradationPropertyValues {
 //				return "";
 //			}
 //			String norm = s.toLowerCase(Locale.ROOT)
-//					.replace("×", "x")
+//					.replace("ï¿½", "x")
 //					.replaceAll("[\\p{Z}\\p{Cf}\\s\\-_()/.,:;]+", " ")
 //					.trim();
 //
@@ -445,24 +445,24 @@ public class BiodegradationPropertyValues {
 			put301F("degradation percentage was obtained from BOD/ThOD as per guidelines described in OECD 301 F",
 					true);
 			put301F("ThOD NH4", true);
-			put301F("% biodegradation: BOD / ThOD NH3 × 100", true);
+			put301F("% biodegradation: BOD / ThOD NH3 ï¿½ 100", true);
 			put301F("% biodegradation based on ThOD NHO3", true); // IUCLID typo for NO3
 			put301F("BOD: ThOD ratio", true);
 			put301F("oxygen consumption", true); // Ensure parser filters for unit == "%"
-			put301F("% biodegradation = 100 × BOD / ThODNO3", true);
+			put301F("% biodegradation = 100 ï¿½ BOD / ThODNO3", true);
 			put301F("% biodegradation based on ThOD NH4", true);
 			put301F("% biodegradation (ThODNO3)", true);
 			put301F("ThOD (NH4)", true);
 			put301F("ThOD-NO3", true);
 			put301F("Theoretical Oxygen Demand (ThOD)NH4", true);
-			put301F("% biodegradation: BOD / ThOD NH4 × 100", true);
+			put301F("% biodegradation: BOD / ThOD NH4 ï¿½ 100", true);
 			put301F("BOD & ThOD", true);
 			put301F("Percentage of Theoretical Oxygen Demand", true);
 			put301F("on the basis of values of BOD and ThOD", true);
-			put301F("% biodegradation: BOD / ThOD NO3 × 100", true);
+			put301F("% biodegradation: BOD / ThOD NO3 ï¿½ 100", true);
 			put301F("ThODN03", true); // IUCLID typo (zero instead of O)
 			put301F("BOD of ThOD", true);
-			put301F("% biodegradation: 100 × BOD / ThODNO3", true);
+			put301F("% biodegradation: 100 ï¿½ BOD / ThODNO3", true);
 			put301F("% degradation (based on ThOD_NH4 and ThOD_NO3)", true);
 			put301F("Biochemical oxygen demand", true);
 			put301F("O2 uptake in the test solutions", true); // Verify unit == "%"
@@ -484,8 +484,8 @@ public class BiodegradationPropertyValues {
 			put301F("Theoretical oxygen demand", true); // Verify unit == "%"
 			put301F("% ThOD NO3 and ThOD NH4", true);
 			put301F("O2 consumption, TOC removal", true); // Ensure parser extracts O2 consumption (%)
-			put301F("% biodegradation: 100 × BOD / ThODNH4", true);
-			put301F("% biodegradation = 100 × BOD / ThODNH4", true);
+			put301F("% biodegradation: 100 ï¿½ BOD / ThODNH4", true);
+			put301F("% biodegradation = 100 ï¿½ BOD / ThODNH4", true);
 			put301F("ThODNO3", true);
 			put301F("ThOD (NO3)", true);
 			put301F("Percentage of biodegradation (Based on ThOD NH4)", true);
@@ -509,13 +509,24 @@ public class BiodegradationPropertyValues {
 			put301F("Theoretical Oxygen Demand (ThOD) [%]", true);
 			put301F("ThOD [%]", true);
 			put301F("Biochemical Oxygen Demand (BOD)", true);
-			put301F("% biodegradation = 100 × BOD / ThODNH4 Without nitrification", true);
-			put301F("% biodegradation = 100 × BOD / ThODNO3 With nitrification", true);
+			put301F("% biodegradation = 100 ï¿½ BOD / ThODNH4 Without nitrification", true);
+			put301F("% biodegradation = 100 ï¿½ BOD / ThODNO3 With nitrification", true);
 			put301F("% degradation (BOD/ThODNH4)", true);
 			put301F("BOD (Biochemical Oxygen Demand)", true);
 			put301F("% degradation by BOD", true);
 			put301F("O2 consumption, DOC removal, CO2 formation", true); // Ensure parser extracts O2 consumption (%)
 
+			// =========================
+			// 301F - TRUE: Manually swapped from False to True after manual review (COD)
+			// =========================
+			put301F("% degradation BOD/COD", true); // COD used for mixtures/UVCBs
+			put301F("BOD/COD", true);
+			put301F("BOD28/COD", true);
+			put301F("CSB", true); // German for COD
+			put301F("COD", true);
+			put301F("dissolved oxygen %", true);
+			put301F("manometric respiration test", true);
+			
 			// =========================
 			// 301F - FALSE: Controls, 10-day window, BOD5, COD, Non-301F, and Unspecified
 			// =========================
@@ -527,16 +538,10 @@ public class BiodegradationPropertyValues {
 			put301F("% degradation (test mat. analysis) THOD NH4", false); // Primary parent analysis
 			put301F("% degradation (test mat. analysis) ThOD NO3", false); // Primary parent analysis
 			put301F("BOD5*100/ThOD", false); // 5-day window, not 28-day
-			put301F("% degradation BOD/COD", false); // COD used for mixtures/UVCBs
-			put301F("BOD/COD", false);
-			put301F("BOD28/COD", false);
 			put301F("% of COD/ThOD NH4", false); // Chemical oxidation ratio, not biodegradation
 			put301F("BOD5*100/COD", false);
 			put301F("BSB5/CSB", false); // German for BOD5/COD
-			put301F("CSB", false); // German for COD
-			put301F("COD", false);
 			put301F("O2/C", false);
-			put301F("dissolved oxygen %", false);
 			put301F("BOD & residual amount", false);
 			put301F("residue analysis", false);
 			put301F("% degradation (test mat. analysis)", false);
@@ -546,7 +551,6 @@ public class BiodegradationPropertyValues {
 			put301F("% degradation (CO2 evolution)", false);
 			put301F("% degradation (DNPOC)", false);
 			put301F("abiotic degradation", false);
-			put301F("manometric respiration test", false);
 			put301F("not specified", false);
 			put301F("% degradation", false);
 			put301F("biodegradation", false);
@@ -638,6 +642,7 @@ public class BiodegradationPropertyValues {
 			put301C("Percentage biodegradation of test item (HPLC)", false);
 			put301C("residual ammoun of test substance (HPLC analysis)", false); // IUCLID typo
 			put301C("% degradation by HPLC", false);
+
 			// =========================
 			// 301C - FALSE: Non-301C Endpoints (DOC, TOC, CO2) & Unspecified/Invalid
 			// Strings
@@ -814,7 +819,7 @@ public class BiodegradationPropertyValues {
 				return "";
 			}
 			String norm = s.toLowerCase(Locale.ROOT)
-					.replace("×", "x")
+					.replace("ï¿½", "x")
 					.replaceAll("[\\p{Z}\\p{Cf}\\s\\-_()/.,:;]+", " ")
 					.trim();
 
@@ -998,24 +1003,24 @@ public class BiodegradationPropertyValues {
 //			put301F("degradation percentage was obtained from BOD/ThOD as per guidelines described in OECD 301 F",
 //					true); // Added missing entry
 //			put301F("ThOD NH4", true);
-//			put301F("% biodegradation: BOD / ThOD NH3 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NH3 ï¿½ 100", true);
 //			put301F("% biodegradation based on ThOD NHO3", true); // IUCLID typo for NO3
 //			put301F("BOD: ThOD ratio", true);
 //			put301F("oxygen consumption", true); // Ensure parser filters for unit == "%"
-//			put301F("% biodegradation = 100 × BOD / ThODNO3", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNO3", true);
 //			put301F("% biodegradation based on ThOD NH4", true);
 //			put301F("% biodegradation (ThODNO3)", true);
 //			put301F("ThOD (NH4)", true);
 //			put301F("ThOD-NO3", true);
 //			put301F("Theoretical Oxygen Demand (ThOD)NH4", true);
-//			put301F("% biodegradation: BOD / ThOD NH4 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NH4 ï¿½ 100", true);
 //			put301F("BOD & ThOD", true);
 //			put301F("Percentage of Theoretical Oxygen Demand", true);
 //			put301F("on the basis of values of BOD and ThOD", true);
-//			put301F("% biodegradation: BOD / ThOD NO3 × 100", true);
+//			put301F("% biodegradation: BOD / ThOD NO3 ï¿½ 100", true);
 //			put301F("ThODN03", true); // IUCLID typo (zero instead of O)
 //			put301F("BOD of ThOD", true);
-//			put301F("% biodegradation: 100 × BOD / ThODNO3", true);
+//			put301F("% biodegradation: 100 ï¿½ BOD / ThODNO3", true);
 //			put301F("% degradation (based on ThOD_NH4 and ThOD_NO3)", true);
 //			put301F("Biochemical oxygen demand", true);
 //			put301F("O2 uptake in the test solutions", true); // Changed from false -> true (verify unit == "%")
@@ -1037,8 +1042,8 @@ public class BiodegradationPropertyValues {
 //			put301F("Theoretical oxygen demand", true); // Changed from false -> true (verify unit == "%")
 //			put301F("% ThOD NO3 and ThOD NH4", true);
 //			put301F("O2 consumption, TOC removal", true); // Ensure parser extracts O2 consumption (%)
-//			put301F("% biodegradation: 100 × BOD / ThODNH4", true);
-//			put301F("% biodegradation = 100 × BOD / ThODNH4", true);
+//			put301F("% biodegradation: 100 ï¿½ BOD / ThODNH4", true);
+//			put301F("% biodegradation = 100 ï¿½ BOD / ThODNH4", true);
 //			put301F("ThODNO3", true);
 //			put301F("ThOD (NO3)", true);
 //			put301F("Percentage of biodegradation (Based on ThOD NH4)", true);
@@ -1175,7 +1180,7 @@ public class BiodegradationPropertyValues {
 //			if (s == null) {
 //				return "";
 //			}
-//			return s.toLowerCase(Locale.ROOT).replace("×", "x")
+//			return s.toLowerCase(Locale.ROOT).replace("ï¿½", "x")
 //					// Handles Unicode whitespace (\p{Z}), invisible format chars (\p{Cf}), and
 //					// punctuation
 //					.replaceAll("[\\p{Z}\\p{Cf}\\s\\-_()/.,:;]+", " ").trim();
