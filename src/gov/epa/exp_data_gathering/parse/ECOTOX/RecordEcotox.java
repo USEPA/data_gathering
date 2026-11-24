@@ -1,6 +1,8 @@
 package gov.epa.exp_data_gathering.parse.ECOTOX;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -667,51 +669,56 @@ public class RecordEcotox {
 	 * @param endpoint
 	 * @return
 	 */
+
 	public static List<RecordEcotox> get_BCF_Records_From_DB(String endpointAbbrev) {
 
 	    List<RecordEcotox> records = new ArrayList<>();
 
 	    String sql =
-	        "select " +
-	        "  t.*, " +
-	        "  r.*, " +
-	        "  c.*, " +
-	        "  r2.*, " +
-	        "  s.*, " +
-	        "  rsc.description as response_site, " +
-	        "  mc.media_temperature_mean_op, " +
-	        "  mc.media_temperature_mean, " +
-	        "  mc.media_temperature_min, " +
-	        "  mc.media_temperature_max, " +
-	        "  mc.media_temperature_unit, " +
-	        "  coalesce(rsc.description, 'Not reported') as response_site, " +
-	        "  coalesce(et.description, 'Not reported') as exposure_type, " +
-	        "  coalesce(ca.description, 'Not reported') as chem_analysis_method, " +
-	        "  coalesce(mt.description, 'Not reported') as media_type, " +
-	        "  coalesce(tl.description, 'Not reported') as test_location " +
-	        "from tests t " +
-	        "join results r on t.test_id = r.test_id " +
-	        "join chemicals c on c.cas_number = t.test_cas " +
-	        "left join references_ r2 on r2.reference_number = t.reference_number " +
-	        "left join species s on t.species_number = s.species_number " +
-	        "left join response_site_codes rsc on rsc.code = r.response_site " +
-	        "left join media_characteristics mc on mc.result_id = r.result_id " +
-	        "left join exposure_type_codes et on replace(t.exposure_type, '/', '') = et.code " +
-	        "left join chemical_analysis_codes ca on replace(r.chem_analysis_method, '/', '') = ca.code " +
-	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code " +
-	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code " +
-	        "where r.bcf1_mean is not null and r.endpoint = '" + endpointAbbrev + "';";
+	        "select \n" +
+	        "  t.*, \n" +
+	        "  r.*, \n" +
+	        "  c.*, \n" +
+	        "  r2.*, \n" +
+	        "  s.*, \n" +
+	        "  mc.media_temperature_mean_op, \n" +
+	        "  mc.media_temperature_mean, \n" +
+	        "  mc.media_temperature_min, \n" +
+	        "  mc.media_temperature_max, \n" +
+	        "  mc.media_temperature_unit, \n" +
+	        "  coalesce(rsc.description, 'Not reported') as response_site, \n" +
+	        "  coalesce(et.description, 'Not reported') as exposure_type, \n" +
+	        "  coalesce(ca.description, 'Not reported') as chem_analysis_method, \n" +
+	        "  coalesce(mt.description, 'Not reported') as media_type, \n" +
+	        "  coalesce(tl.description, 'Not reported') as test_location, \n" +
+	        "  coalesce(tm.description, 'Not reported') as test_method \n" +
+	        "from tests t \n" +
+	        "join results r on t.test_id = r.test_id \n" +
+	        "join chemicals c on c.cas_number = t.test_cas \n" +
+	        "left join references_ r2 on r2.reference_number = t.reference_number \n" +
+	        "left join species s on t.species_number = s.species_number \n" +
+	        "left join response_site_codes rsc on rsc.code = r.response_site \n" +
+	        "left join media_characteristics mc on mc.result_id = r.result_id \n" +
+	        "left join exposure_type_codes et on replace(t.exposure_type, '/', '') = et.code \n" +
+	        "left join chemical_analysis_codes ca on replace(r.chem_analysis_method, '/', '') = ca.code \n" +
+	        "left join media_type_codes mt on replace(t.media_type, '/', '') = mt.code \n" +
+	        "left join test_location_codes tl on replace(t.test_location, '/', '') = tl.code \n" +
+	        "left join test_method_codes tm on replace(t.test_method, '/', '') = tm.code \n" +
+	        "where r.bcf1_mean is not null and r.endpoint = ?";
 
 	    System.out.println(sql);
 
-	    try {
-	        Statement stat = SQLite_Utilities.getStatement(databasePath);
-	        ResultSet rs = stat.executeQuery(sql);
+	    try (Connection conn = SQLite_Utilities.getConnection(databasePath);
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-	        while (rs.next()) {
-	            RecordEcotox rec = new RecordEcotox();
-	            SqlUtilities.createRecord(rs, rec);
-	            records.add(rec);
+	        ps.setString(1, endpointAbbrev);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+	            while (rs.next()) {
+	                RecordEcotox rec = new RecordEcotox();
+	                SqlUtilities.createRecord(rs, rec);
+	                records.add(rec);
+	            }
 	        }
 
 	    } catch (Exception ex) {
@@ -720,7 +727,6 @@ public class RecordEcotox {
 
 	    return records;
 	}
-	
 	 
 //	/**
 //	 * @deprecated should just get all records and filter later
@@ -1263,17 +1269,50 @@ public class RecordEcotox {
 		
 		// Test Guideline (test_method and test_method_comments)
 		if (test_method != null && !test_method.trim().isEmpty()) {
-			String guideline;
-			if (test_method.equals("NR")) {
-				guideline = "Not reported";
-			} else {
+			
+			String guideline="";
+			
+			if(test_method!=null) {
 				guideline = test_method;
 			}
+			
+			if(guideline.equals("Not coded") || guideline.equals("Not reported")) {
+				return;
+			}
+			
 
 			if (test_method_comments != null && !test_method_comments.trim().isEmpty()) {
 				guideline += " - " + test_method_comments;
 			}
 
+//TODO clean up entries:
+//			ASTM (unspecified)
+//			American Society for Testing and Materials- 1978 TEST 1022-84
+//			Environment Canada- 1990 REPORT EPS/1/RM/9
+//			Environment Canada- EPS1/RM/9
+//			OECD Guideline 305
+//			OECD Guideline 305-II
+//			Organization for Economic Cooperation and Development
+//			Organization for Economic Cooperation and Development- 2012 TEST 305
+//			Organization for Economic Cooperation and Development- 2019 TEST 203
+//			Organization for Economic Cooperation and Development- OECD 305
+//			Organization for Economic Cooperation and Development- OECD 305, 2004
+//			Organization for Economic Cooperation and Development- OECD GUIDELINES TEST NO. 210, 1992
+//			Organization for Economic Cooperation and Development- OECD NO. 305, 1996
+//			Organization for Economic Cooperation and Development- OECD NO. 305, 2012
+//			Organization for Economic Cooperation and Development- OECD TEST 305
+//			Organization for Economic Cooperation and Development- OECD TEST GUIDELINE NO. 305
+//			Organization for Economic Cooperation and Development- OECD TEST GUIDELINE NO. 305, 2012
+//			Organization for Economic Cooperation and Development- OECD, 2012
+//			Other Method- ANKLEY ET AL. (2001)
+//			Other Method- ANKLEY, G. T., JENSEN, K. M., KAHL, M. D, KORTE, J. J., AND MAKYNEN, E. A. (2001). DESCRIPTION AND EVALUATION OF A SHORT-TERM REPRODUCTION TEST WITH THE FATHEAD MINNOW (PIMEPHALES PROMELAS). ENVIRON. TOXICOL. CHEM. 20, 1276-1290
+//			Other Method- LIAO ET AL (2003) AND TSAI AND LIAO (2006)
+//			Other Method- SUHENDRAYATNA ET AL. 2001, 2002
+//			USEPA and OECD methods
+//			USEPA and OECD methods- OECD TEST NO. 305 (2012),US EPA EPA 712-C-16-003 (2016)
+//			USEPA and Other Methods- US EPA (2002) EPA/600/R-01/067; ANKLEY, G.T., JENSEN, K.M., KAHL, M.D., KORTE, J.J., MAKYNEN, E.A. 2001. DESCRIPTION AND EVALUATION OF A SHORT-TERM REPRODUCTION TEST WITH THE FATHEAD MINNOW (PIMEPHALES PROMELAS). ENVIRON. TOXICOL. CHEM. 20, 1276-1290
+//			USEPA and STDMETH methods
+			
 			if (ExperimentalConstants.guidelineHashMap.containsKey(guideline)) {
 				guideline = ExperimentalConstants.guidelineHashMap.get(guideline);
 			}
@@ -1282,6 +1321,8 @@ public class RecordEcotox {
 			if (normalizedGuideline != null && !normalizedGuideline.isEmpty()) {
 				er.experimental_parameters.put(ExperimentalConstants.expParamGuideline, normalizedGuideline);
 			}
+			
+//			System.out.println(guideline+"\t"+normalizedGuideline);
 			
 			if (guideline.equals(ExperimentalConstants.guidelineOecd305)) {
 				BCFUtilities.setOecd305Parameters(er);

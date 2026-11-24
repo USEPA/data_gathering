@@ -840,7 +840,7 @@ public class ParseEcotox extends Parse {
 //		SetVars.setRainbowTrout();
 		
 		ParseEcotox p = new ParseEcotox();
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;//cant delete duplicates because experimental params might be different but still have same number value
 		p.writeJsonExperimentalRecordsFile=true;
 		p.writeExcelExperimentalRecordsFile=true;
