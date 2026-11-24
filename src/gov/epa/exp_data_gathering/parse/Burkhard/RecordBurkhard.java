@@ -366,8 +366,10 @@ public class RecordBurkhard {
 		ExperimentalRecord er=new ExperimentalRecord();
 		er.experimental_parameters=new Hashtable<>();
 		er.experimental_parameters.put(ExperimentalConstants.expParamReliability, Study_Quality_BCF);
+		
 		if (method != null && !method.trim().isEmpty()) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, WordUtils.capitalizeFully(method));
+			String paramName=ExperimentalConstants.expParamCalculationMethod;
+			er.experimental_parameters.put(paramName, WordUtils.capitalizeFully(method));
 		}
 		er.property_name = propertyName;
 		er.parameter_values=new ArrayList<>();
@@ -676,14 +678,53 @@ public class RecordBurkhard {
 				er.experimental_parameters.put(ExperimentalConstants.expParamTissueType, Tissue.toLowerCase());
 			}
 		}
-		er.experimental_parameters.put(ExperimentalConstants.expParamMediaType, Marine_Brackish_Freshwater.toLowerCase().trim());
-		if (Location != null && Location.toLowerCase().contains("lab")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Lab");
-		} else if (Location != null && Location.toLowerCase().contains("field")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Field");
-		} else if (Location != null && Location.toLowerCase().contains("mesocosm")) {
-			er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, "Mesocosm");
-		}
+		er.experimental_parameters.put(ExperimentalConstants.expParamMediaType,
+				Marine_Brackish_Freshwater.toLowerCase().trim());
+
+		String[][] locationMap = { { "lake superior", "Great Lake" }, { "superior", "Great Lake" },
+				{ "lake huron", "Great Lake" }, { "huron", "Great Lake" }, { "lake erie", "Great Lake" },
+				{ "erie", "Great Lake" }, { "lake ontario", "Great Lake" }, { "ontario", "Great Lake" },
+				{ "umvoti gledhow", "River / Estuary" },
+
+				{ "lab", "Lab" }, { "mesocosm", "Mesocosm" }, { "river", "River" }, { "lake", "Lake" },
+				{ "estuary", "Estuary" }, { "sea", "Sea" }, { "ocean", "Ocean" },
+
+				// BCF / site-specific mappings
+				{ "marsh", "Wetland / Marsh" }, { "coast", "Coastal Marine" }, { "creek", "Urban Creek / River" },
+				{ "bay", "Bay / Estuary" }, { "harbor", "Harbor / Estuary" }, { "harbour", "Harbor / Estuary" },
+				{ "lagoon", "Lagoon" }, { "reservoir", "Reservoir" }, { "pond", "Pond" }, { "airport", "Airport" },
+				{ "air force base", "Military / Airbase" }, { "base", "Military / Airbase" },
+				{ "industrial", "Industrial Area" }, { "wwtp", "River / WWTP Downstream" },
+				{ "downstream", "River / WWTP Downstream" }, { "bridge", "River / Bridge Site" },
+				{ "great lake", "Great Lake" }, { "multiple", "Multiple Sites" },
+				{ "seven locations", "Multiple Sites" }, { "site ", "Site Code / Locality" },
+				{ "china", "Country / National" }, { "netherlands", "Country / National" },
+				{ "japan", "Country / National" }, { "korea", "Country / National" }, { "spain", "Country / National" },
+				{ "italy", "Country / National" }, { "brazil", "Country / National" },
+				{ "australia", "Country / National" }, { "new jersey", "State / Region" },
+				{ "new york state", "State / Region" }, { "upper franconia", "Region" } };
+
+			if (Location != null) {
+			    String loc = Location.toLowerCase();
+
+			    boolean match = false;
+			    for (String[] entry : locationMap) {
+			        if (loc.contains(entry[0])) {
+			            er.experimental_parameters.put(ExperimentalConstants.expParamTestLocation, entry[1]);
+			            match = true;
+			            break;
+			        }
+			    }
+
+			    if (!match) {
+			        if (!loc.contains("frogs")) {
+			            System.out.println(Location + "\tunassigned");
+			        }
+			    } else {
+			    	 System.out.println(Location+"\t"+ er.experimental_parameters.get(ExperimentalConstants.expParamTestLocation));
+			    }
+			}
+			
 
 		if(days_of_uptake!=null) {
 			days_of_uptake=days_of_uptake.replace("24 hr", "1");

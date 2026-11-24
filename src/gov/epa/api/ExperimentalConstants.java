@@ -377,6 +377,7 @@ public class ExperimentalConstants {
 	public static final String expParamSpeciesCommon = "Species common";
 	public static final String expParamSpeciesSupercategory = "Species supercategory";
 	public static final String expParamMeasurementMethod = "Measurement method";
+	public static final String expParamCalculationMethod = "Calculation method";
 	public static final String expParamExposureDuration = "Exposure duration";
 	public static final String expParamTissueType = "Response site";
 	public static final String expParamResponseSite = expParamTissueType;

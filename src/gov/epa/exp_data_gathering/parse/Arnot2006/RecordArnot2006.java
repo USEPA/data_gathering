@@ -8,9 +8,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.checkerframework.checker.units.qual.s;
@@ -284,6 +286,7 @@ public class RecordArnot2006 {
 		setExposureType(er);
 		setExposureMedia(er);
 		setCriteria(er);
+		setCalculationMethod(er);
 		
 		if (lipid_content_percentage != null && !lipid_content_percentage.equals("N/A")) {
 			ParameterValue pv = new ParameterValue();
@@ -366,7 +369,30 @@ public class RecordArnot2006 {
 		return er;	
 	}
 	
-	
+	public static Set<String>calc_methods=new HashSet<>();
+
+	private void setCalculationMethod(ExperimentalRecord er) {
+
+		if(this.calculation_method==null)
+			return;
+		
+		calc_methods.add(calculation_method);
+		
+		String paramName=ExperimentalConstants.expParamCalculationMethod;
+		
+		if(this.calculation_method.equals("Cb/Cw")) {
+			er.experimental_parameters.put(paramName,"Steady State");
+		} else if(this.calculation_method.equals("K1/K2")) {
+			er.experimental_parameters.put(paramName,"Kinetic");
+		} else if(this.calculation_method.contains("BIOFAC") || this.calculation_method.contains("BIOCON")) {
+			er.experimental_parameters.put(paramName,"Kinetic");
+			er.updateNote("Kinetic method from "+calculation_method);
+		} else {
+			er.experimental_parameters.put(paramName,calculation_method);
+		}
+		
+	}
+
 
 	private void setExposureDuration(ExperimentalRecord er) {
 		if(exposure_duration_days.equals("N/A")) {

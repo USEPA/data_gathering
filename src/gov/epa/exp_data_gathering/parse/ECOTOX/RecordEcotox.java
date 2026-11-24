@@ -1230,29 +1230,30 @@ public class RecordEcotox {
 	private void setParameterMeasurementMethod(ExperimentalRecord er) {
 		
 		//TODO also look at additional_comments field
+
+		String paramName=ExperimentalConstants.expParamCalculationMethod;
+//		String paramName=ExperimentalConstants.expParamMeasurementMethod;
 		
 		if (measurement_comments != null && !measurement_comments.trim().isEmpty()) {
 			if (measurement_comments.toLowerCase().contains("steady state")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Steady State");
+				er.experimental_parameters.put(paramName, "Steady State");
 			} else if (measurement_comments.toLowerCase().contains("kinetic")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Kinetic");
+				er.experimental_parameters.put(paramName, "Kinetic");
 			} else if (measurement_comments.toLowerCase().contains("dynamic")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Dynamic");
+				er.experimental_parameters.put(paramName, "Dynamic");
 			} else if (measurement_comments.toLowerCase().contains("non-equilibrium")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Equilibrium");
+				er.experimental_parameters.put(paramName, "Non-Equilibrium");
 			} else if (measurement_comments.toLowerCase().contains("equilib")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
+				er.experimental_parameters.put(paramName, "Equilibrium");
 			} else if (measurement_comments.toLowerCase().contains("equlibrium")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Equilibrium");
+				er.experimental_parameters.put(paramName, "Equilibrium");
 			} else if (measurement_comments.toLowerCase().contains("non-steady state")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Non-Steady State");
+				er.experimental_parameters.put(paramName, "Non-Steady State");
 			} else if (measurement_comments.toLowerCase().contains("other")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Other");
+				er.experimental_parameters.put(paramName, "Other");
 			} else if (measurement_comments.toLowerCase().contains("unknown")) {
-				er.experimental_parameters.put(ExperimentalConstants.expParamMeasurementMethod, "Unknown");
+				er.experimental_parameters.put(paramName, "Unknown");
 			}
-
-			
 		}
 	}
 

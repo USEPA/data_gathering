@@ -1,16 +1,13 @@
 package gov.epa.exp_data_gathering.parse.ITRC;
 
 
+import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.Type;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.commons.math3.analysis.function.Exp;
-
 import com.google.gson.reflect.TypeToken;
-
 import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
 import gov.epa.exp_data_gathering.parse.ExperimentalRecord;
@@ -27,7 +24,7 @@ public class ParseITRC extends Parse {
 	 * Base folder for output (before mode-specific subfolder is appended)
 	 * Used to switch between mode-specific output folders
 	 */
-	private String baseFolderPath = "data" + java.io.File.separator + "experimental" + java.io.File.separator + "ITRC";
+	private String baseFolderPath = "data" + File.separator + "experimental" + File.separator + "ITRC";
 	
 	String fileName="todo";
 	static final String filenameKoc = "PhysChemProp_Table_July2023-FINAL.xlsx";
@@ -131,7 +128,7 @@ public class ParseITRC extends Parse {
 		ParseITRC p = new ParseITRC(ExperimentalConstants.strBCF);
 		
 		String specialCharString = "Character with code 177: \u00B1";
-		p.generateOriginalJSONRecords=false;
+		p.generateOriginalJSONRecords=true;
 		p.removeDuplicates=false;//dont know which one is right
 		p.writeCheckingExcelFile=false;
 		p.createFiles();
@@ -140,7 +137,7 @@ public class ParseITRC extends Parse {
 	
 	public static void main(String[] args) {
 		// runKoc();
-		runBAF();
+//		runBAF();
 		runBCF();
 	}
 }
