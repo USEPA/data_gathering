@@ -21,6 +21,7 @@ import com.google.gson.reflect.TypeToken;
 
 import gov.epa.QSAR.utilities.JsonUtilities;
 import gov.epa.api.ExperimentalConstants;
+import gov.epa.exp_data_gathering.parse.BCFUtilities;
 import gov.epa.exp_data_gathering.parse.BiodegradationPropertyValues;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords;
 import gov.epa.exp_data_gathering.parse.CompareExperimentalRecords.ExperimentalRecordManipulator;
@@ -87,6 +88,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	String sourceNameWithDate;
 	String fileName;
 	String fileDate;
+	private String charset;
 	
 	
 	public ParseQSAR_ToolBox(String fileName) {
@@ -255,12 +257,24 @@ public class ParseQSAR_ToolBox extends Parse {
 				return null;
 			}
 			
-			List<RecordQSAR_ToolBox>tempRecords=getOriginalRecordsFromJsonFiles(jsonFolder, RecordQSAR_ToolBox[].class);
+//			System.out.println(this.charset);
+			
+			List<RecordQSAR_ToolBox>tempRecords=getOriginalRecordsFromJsonFiles(jsonFolder, RecordQSAR_ToolBox[].class,this.charset);
+			
+			
+
 			
 			System.out.println("RecordQSAR_ToolBox.outputProperty: "+this.outputProperty);
 			System.out.println("jsonFolder:"+jsonFolder);
 			
 			for (RecordQSAR_ToolBox recordQSAR_ToolBox:tempRecords) {
+
+				if(recordQSAR_ToolBox.Value_MinValue!=null) {
+					if (recordQSAR_ToolBox.Value_MinValue.equals("-∞"))
+						recordQSAR_ToolBox.Value_MinValue=null;
+//					System.out.println(recordQSAR_ToolBox.Row+"\t"+recordQSAR_ToolBox.Value_MinValue+"\t"+recordQSAR_ToolBox.Value_MaxValue);
+				}
+					
 				
 				if(recordQSAR_ToolBox.Database==null) {//just skip, no usable data
 					continue;
@@ -381,6 +395,7 @@ public class ParseQSAR_ToolBox extends Parse {
 			
 //			System.out.println(JsonUtilities.gsonPretty.toJson(recordsExperimental));
 			
+			String propertyName=recordsExperimental.get(0).property_name;
 			TreeMap<String, ExperimentalRecords> tm = cer.rm.getTreeMapByCAS(propertyName, ExperimentalConstants.str_binary, recordsExperimental);			
 			System.out.println("Number of unique casrns:"+tm.size());
 			
@@ -556,11 +571,20 @@ public class ParseQSAR_ToolBox extends Parse {
 		// String [] filenames= {fileNameBCF_CEFIC};
 		// String [] filenames= {fileNameBCF_NITE};
 //		String [] filenames = {fileNameBCF_ECHA_REACHNew, fileNameBCF_CanadaNew, fileNameBCF_CEFICNew, fileNameBCF_NITENew, fileNameBCF_ECHA_REACHNew2};
-		String [] filenames = {fileNameBCF_NITENew};
+//		
+//		String [] filenames = {fileNameBCF_NITENew};//TODO get from "NITE BCF 000064113.xlsx" instead? compare CAS numbers
+//		TODO assign flow-through for NITE records with guideline not set to flow-through since most of records in that spreadsheet are flow-through and Japanese are consistent in the method they use
+				
+		String [] filenames = {fileNameBCF_ECHA_REACHNew};
+				
+		RecordQSAR_ToolBox.omitBasedOnGLPCompliance=false;
 		
 		for (String filename:filenames) {
 			ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(filename);
-			p.generateOriginalJSONRecords=true;//*** set to true on first run
+			
+			p.charset="UTF-8";
+			
+			p.generateOriginalJSONRecords=false;//*** set to true on first run
 			p.removeDuplicates=false;
 			p.writeJsonExperimentalRecordsFile=true;
 			p.writeExcelExperimentalRecordsFile=true;
@@ -568,6 +592,10 @@ public class ParseQSAR_ToolBox extends Parse {
 			p.writeCheckingExcelFile=false;//creates random sample spreadsheet
 			p.createFiles();
 			System.out.println("********************************************\n");
+			
+			System.out.println("Bad response sites:"+JsonUtilities.gsonPretty.toJson(BCFUtilities.ResponseSiteFormatter.badSites));
+			System.out.println("Unhandled response sites:"+JsonUtilities.gsonPretty.toJson(BCFUtilities.ResponseSiteFormatter.unhandledSites));
+			
 		}
 		
 	}
@@ -639,7 +667,7 @@ public class ParseQSAR_ToolBox extends Parse {
 	private static void runParse(String endpoint, String guideline, String fileName, String date) {
 	    ParseQSAR_ToolBox p = new ParseQSAR_ToolBox(endpoint, guideline, fileName, date);
 	    p.maxExcelRows = 100000;
-	    p.generateOriginalJSONRecords = true;
+	    p.generateOriginalJSONRecords = false;
 	    p.removeDuplicates = false;
 	    p.writeJsonExperimentalRecordsFile = true;
 	    p.writeExcelExperimentalRecordsFile = true;
@@ -660,11 +688,11 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 		RecordQSAR_ToolBox.omitBasedOnGLPCompliance=true;
 
-//		runParse(ExperimentalConstants.strRBIODEG,
-//		         ExperimentalConstants.str301F,
-//		         fileNameBiodegWaterScreeningECHA_REACHNew,
-//		         "2026-08-04");
-//
+		runParse(ExperimentalConstants.strRBIODEG,
+		         ExperimentalConstants.str301F,
+		         fileNameBiodegWaterScreeningECHA_REACHNew,
+		         "2026-08-04");
+
 		runParse(ExperimentalConstants.strRBIODEG_10_day,
 		         ExperimentalConstants.str301F,
 		         fileNameBiodegWaterScreeningECHA_REACHNew,
@@ -675,17 +703,15 @@ public class ParseQSAR_ToolBox extends Parse {
         fileNameBiodegWaterScreeningECHA_REACHNew,
         "2026-08-04");
 
+		runParse(ExperimentalConstants.strRBIODEG,
+		         ExperimentalConstants.str301C,
+		         fileNameBiodegWaterScreeningECHA_REACHNew,
+		         "2026-08-04");
 		
-//
-//		runParse(ExperimentalConstants.strRBIODEG,
-//		         ExperimentalConstants.str301C,
-//		         fileNameBiodegWaterScreeningECHA_REACHNew,
-//		         "2026-08-04");
-//		
-//		runParse(ExperimentalConstants.strRBIODEG,
-//		         ExperimentalConstants.str301C,
-//		         fileNameBiodegNITENew,
-//		         "2026-11-06");
+		runParse(ExperimentalConstants.strRBIODEG,
+		         ExperimentalConstants.str301C,
+		         fileNameBiodegNITENew,
+		         "2026-11-06");
 
 	}
 	
@@ -722,7 +748,9 @@ public class ParseQSAR_ToolBox extends Parse {
 		
 //		String [] filenames= {"biodegradation in water screening tests v.4.9 2026-08-04.tsv"};
 //		String []filenames = {"Bioconcentration and LogKow NITE 4.9 2026-11-04.csv"};
-		String []filenames = {"biodegradation NITE 4.9 2026-11-06.csv"};
+//		String []filenames = {"biodegradation NITE 4.9 2026-11-06.csv"};
+		String []filenames = {"bcfbaf echa reach v.4.9 2026-11-20.tsv"};
+		
 		boolean stopAtFirstBlankRow=true;
 		boolean detectNumerics=false;//keep as strings in excel
 		
@@ -735,19 +763,29 @@ public class ParseQSAR_ToolBox extends Parse {
 		}
 	}
 	
-	
+	static void testLoadOriginalRecords() {
+
+		String jsonFolder="C:\\Users\\tmarti02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\data\\experimental\\QSAR_Toolbox\\BCFBAF ECHA REACH v.4.9";
+		List<RecordQSAR_ToolBox>tempRecords=getOriginalRecordsFromJsonFiles(jsonFolder, RecordQSAR_ToolBox[].class,"UTF-8");
+		
+		for(RecordQSAR_ToolBox rec:tempRecords) {
+			System.out.println(rec.Row+"\t"+rec.Value_MinValue);
+		}
+		
+
+	}
 	
 	public static void main(String[] args) {
 
 //		UnitConverter.printMissingDensityCas=true;
 		
-//		 convertTsvFilesToExcel();
-		
+		 convertTsvFilesToExcel();
+//		testLoadOriginalRecords();
 //		runBCF();
 //		run96hrAcuteFishTox();
 //		runPhyschem();
 //		runKoc();
-		runBiodegWaterScreening();
+//		runBiodegWaterScreening();
 
 //******************************************************************************
 //		fileName=fileNameAcuteToxicityDB;

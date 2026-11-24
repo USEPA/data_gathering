@@ -1919,6 +1919,9 @@ public class RecordQSAR_ToolBox {
 				er.property_value_point_estimate_original = Double.parseDouble(this.Value_MeanValue);
 			} catch (Exception ex) {
 				System.out.println("Row " + Row + ", error parsing Value_MeanValue: " + Value_MeanValue);
+				
+				System.out.println(JsonUtilities.gsonPretty.toJson(this));
+				
 				er.keep = false;
 				er.reason = "Could not parse Value_MeanValue";
 				return;
@@ -2598,6 +2601,9 @@ public class RecordQSAR_ToolBox {
 			er.experimental_parameters.put(ExperimentalConstants.expParamResponseSite, responseSiteFinal);
 		}
 
+		if(Basis_for_the_BCF!=null)
+			er.experimental_parameters.put("Basis_for_the_BCF",Basis_for_the_BCF);
+		
 		// Temperature and pH
 		setExperimentalParameters(er);
 
@@ -2937,6 +2943,9 @@ public class RecordQSAR_ToolBox {
 			er.property_name = ExperimentalConstants.strBAF;
 		} else {
 			logUniqueHandle("Handle Endpoint=" + Endpoint);
+			er.keep=false;
+			er.updateReason("Unknown endpoint:"+Endpoint);
+			return er;
 		}
 
 		if (Predefined_substance_type != null) {
@@ -2981,6 +2990,22 @@ public class RecordQSAR_ToolBox {
 			// System.out.println(this.Row+"\t"+this.CAS_Number+"\tBasis_for_the_BCF_other:"+Endpoint
 			// + "\t" + this.Basis_for_the_BCF_other);
 		}
+		
+		if (GLP_compliance != null) {
+			er.experimental_parameters.put("Test guideline compliance", this.GLP_compliance);
+		
+			if (omitBasedOnGLPCompliance) {
+				if (!this.GLP_compliance.startsWith("yes")) {
+//				if (this.GLP_compliance.equals("no")) {	
+					// if(!BiodegradationPropertyValues.isValidGuidelineCompliance(GLP_compliance))
+					// {
+					er.keep = false;
+					er.updateReason("GLP compliance = " + this.GLP_compliance);
+//					System.out.println(er.casrn+"\tGLP compliance = " + this.GLP_compliance);
+				}
+			}
+		}
+
 
 		setSpeciesParameters(htSpeciesByBinomialName, er);
 
@@ -3453,10 +3478,10 @@ public class RecordQSAR_ToolBox {
 
 	}
 
-	public ExperimentalRecord toExperimentalRecordBAFNITE(String propertyName,
-			Hashtable<String, List<Species>> htSpecies) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	public ExperimentalRecord toExperimentalRecordBAFNITE(String propertyName,
+//			Hashtable<String, List<Species>> htSpecies) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 }
